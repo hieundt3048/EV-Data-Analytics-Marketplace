@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý nguồn dữ liệu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Quản lý nguồn dữ liệu</h1>
+  </header>
+
+  <main class="form-container">
+    <form>
+      <label>Tên dữ liệu:</label>
+      <input type="text" placeholder="Nhập tên dữ liệu...">
+
+      <label>Mô tả:</label>
+      <textarea placeholder="Nhập mô tả ngắn..."></textarea>
+
+      <label>Loại dữ liệu:</label>
+      <select>
+        <option>Pin</option>
+        <option>Hành trình</option>
+        <option>Sạc</option>
+        <option>Giao dịch điện</option>
+      </select>
+
+      <label>Chế độ chia sẻ:</label>
+      <select>
+        <option>Raw (dữ liệu gốc)</option>
+        <option>Đã phân tích</option>
+      </select>
+
+      <label>Tệp dữ liệu:</label>
+      <input type="file" accept=".csv,.json,.xlsx">
+
+      <button type="submit">📤 Tải lên</button>
+      <button type="button" onclick="history.back()">⬅ Quay lại</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,6 +1,5 @@
+Utils.class
 com\evmarketplace\consumers\DataConsumer.class
 com\evmarketplace\admin\AdminManager.class
-Utils.class
-com\evmarketplace\utils\Utils.class
-com\evmarketplace\Main.class
 com\evmarketplace\providers\DataProvider.class
+com\evmarketplace\Main.class
