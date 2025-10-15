@@ -85,7 +85,7 @@ section h2 {
 
 .btn-primary { background: #007bff; }
 .btn-success { background: #28a745; }
-.btn-warning { background: #ffc107; color: #333; }
+.btn-warning { background: #ffc107; }
 .btn-privacy { background: #dc3545; }
 
 .btn:hover {
