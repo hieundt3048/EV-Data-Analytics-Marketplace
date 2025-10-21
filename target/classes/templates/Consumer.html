@@ -1,318 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
-
-  <head>
-
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Mexant Template - Services page</title>
-
+    <title>Data Consumer - EV Data Analytics Marketplace</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/index.css">
-  </head>
+    <link rel="stylesheet" href="../static/css/consumer.css">
+</head>
 
 <body>
-
-
+  <!-- Header -->
   <header class="header-area header-sticky">
-      <div class="container">
-          <div class="row">
-              <div class="col-12">
-                  <nav class="main-nav">
-                      <a href="index.html" class="logo">
-                          <img src="assets/images/logo.png" alt="">
-                      </a>
-                      <ul class="nav">
-                          <li class="scroll-to-section"><a href="index.html" class="active">Home</a></li>
-                          <li><a href="Admin.html">ADMIN</a></li>
-                          <li><a href="Consumer.html">Consumer</a></li>
-                          <li><a href="Provider.html">Provider</a></li>
-
-                          <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
-                          <li><a href="contact-us.html">Contact Support</a></li>
-                      </ul>
-                  </nav>
-              </div>
-          </div>
+      <img class="logo" src="../static/images/LogoEV.png">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search EV data, models, analytics...">
+        <img class="search-icon" src="../static/images/search.png">
       </div>
+      <nav class="main-nav">
+          <ul class="nav">
+              <li class="scroll-to-section"><a href="index.html">Home</a></li>
+              <li><a href="Admin.html">ADMIN</a></li>
+              <li><a href="Consumer.html" class="active">Consumer</a></li>
+              <li><a href="Provider.html">Provider</a></li>
+              <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
+              <li><a href="contact-us.html">Contact Support</a></li>
+          </ul>
+      </nav>
   </header>
 
-  <div class="page-heading">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="header-text">
-            <h2>Our Services</h2>
-            <div class="div-dec"></div>
+  <!-- ***** Main Banner Area Start ***** -->
+  <section class="page-heading">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-12">
+                  <div class="header-text">
+                      <h2>Data Consumer Portal</h2>
+                      <div class="div-dec"></div>
+                  </div>
+              </div>
           </div>
-        </div>
       </div>
-    </div>
-  </div>
-
+  </section>
   <!-- ***** Main Banner Area End ***** -->
 
-  <section class="main-services">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="service-item">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="left-image">
-                  <img src="assets/images/service-image-01.jpg" alt="">
+  <main class="consumer-container">
+    <!-- Search & Discovery Section -->
+    <section class="consumer-section">
+        <h2>1. Search & Discover Data</h2>
+        <div class="consumer-card">
+            <div class="card-body">
+                <h5>Find the EV Data You Need</h5>
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label for="data-category">Data Category</label>
+                        <select id="data-category">
+                            <option value="">All Categories</option>
+                            <option value="driving-behavior">Driving Behavior</option>
+                            <option value="battery-performance">Battery Performance</option>
+                            <option value="charging-usage">Charging Station Usage</option>
+                            <option value="v2g-transactions">V2G Transactions</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="time-range">Time Range</label>
+                        <select id="time-range">
+                            <option value="">Any Time</option>
+                            <option value="last-7-days">Last 7 Days</option>
+                            <option value="last-30-days">Last 30 Days</option>
+                            <option value="last-6-months">Last 6 Months</option>
+                            <option value="last-year">Last Year</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="region">Region</label>
+                        <select id="region">
+                            <option value="">All Regions</option>
+                            <option value="north-america">North America</option>
+                            <option value="europe">Europe</option>
+                            <option value="asia">Asia</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="data-format">Data Format</label>
+                        <select id="data-format">
+                            <option value="">All Formats</option>
+                            <option value="raw">Raw Data</option>
+                            <option value="analyzed">Analyzed Data</option>
+                            <option value="api">API Access</option>
+                        </select>
+                    </div>
                 </div>
-              </div>
-              <div class="col-lg-6 align-self-center">
-                <div class="right-text-content">
-                  <i class="fas fa-archive"></i>
-                  <h4>Digital Currencies</h4>
-                  <p>You will see a bunch of free CSS templates when you search on Google. TemplateMo is the best one because it is 100% free for anyone. We do not ask you anything in return. You are free to use our templates for any purpose.</p>
-                </div>
-              </div>
+                <button class="btn btn-primary" onclick="searchDatasets()">Search Datasets</button>
             </div>
+        </div>
+    </section>
+
+    <!-- Data Purchase Section -->
+    <section class="consumer-section">
+        <h2>2. Purchase & Subscription Plans</h2>
+        <div class="consumer-card">
+            <div class="card-body">
+                <h5>Flexible Data Access Options</h5>
+                <div class="pricing-options">
+                    <div class="pricing-card">
+                        <h4>Pay-per-Download</h4>
+                        <div class="price">$50 - $500</div>
+                        <p>One-time purchase of specific datasets</p>
+                        <ul>
+                            <li>Immediate access to selected data</li>
+                            <li>CSV, JSON, or XML formats</li>
+                            <li>Full ownership rights</li>
+                        </ul>
+                        <button class="btn btn-outline">Select Plan</button>
+                    </div>
+                    <div class="pricing-card featured">
+                        <h4>Subscription</h4>
+                        <div class="price">$199<span>/month</span></div>
+                        <p>Unlimited access to all standard datasets</p>
+                        <ul>
+                            <li>Monthly data updates</li>
+                            <li>Dashboard access included</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <button class="btn btn-primary">Select Plan</button>
+                    </div>
+                    <div class="pricing-card">
+                        <h4>API Access</h4>
+                        <div class="price">Custom</div>
+                        <p>Real-time data integration</p>
+                        <ul>
+                            <li>REST API endpoints</li>
+                            <li>Real-time data streams</li>
+                            <li>Custom integration support</li>
+                        </ul>
+                        <button class="btn btn-outline">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Tools Section -->
+    <section class="consumer-section">
+        <h2>3. Integrated Analytics Tools</h2>
+        <div class="consumer-card">
+            <div class="card-body">
+                <h5>Visualize & Analyze EV Data</h5>
+                <div class="analytics-features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm2 4H3v-2h2v2zm12 0h-2v-2h2v2zm2-16H5v14h14V5zm-2 12H7V7h10v10zm-8-6h6v-2h-6v2z"/>
+                            </svg>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Interactive Dashboards</h4>
+                            <p>Visualize SoC/SoH battery metrics, charging frequency, distance traveled, and CO₂ savings</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <div class="feature-content">
+                            <h4>AI-Powered Insights</h4>
+                            <p>Get trend analysis, consumption patterns, and infrastructure demand forecasts</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="goTo('consumer/analytics_dashboard.html')">Access Analytics Dashboard</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Integration Section -->
+    <section class="consumer-section">
+        <h2>4. API Integration</h2>
+        <div class="consumer-card">
+            <div class="card-body">
+                <h5>Integrate EV Data into Your Systems</h5>
+                <ul>
+                    <li>RESTful API for seamless integration with insurance, smart city, and fleet management systems</li>
+                    <li>Comprehensive documentation and SDKs</li>
+                    <li>Real-time data streaming capabilities</li>
+                    <li>OAuth 2.0 authentication for secure access</li>
+                </ul>
+                <div class="api-example">
+                    <h6>Example API Request:</h6>
+                    <pre><code>GET /api/v1/ev-data/battery-health?region=europe&timeframe=last-30-days
+Headers: 
+  Authorization: Bearer {your-api-key}
+  Content-Type: application/json</code></pre>
+                </div>
+                <button class="btn btn-info" onclick="goTo('consumer/api_documentation.html')">View API Documentation</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Datasets -->
+    <section class="consumer-section">
+        <h2>Popular Datasets</h2>
+        <div class="datasets-grid">
+            <div class="dataset-card">
+                <div class="dataset-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                    </svg>
+                </div>
+                <h4>Battery Health (SOH)</h4>
+                <p>State of Health metrics from 5,000+ EVs across multiple manufacturers</p>
+                <div class="dataset-meta">
+                    <span class="size">2.4 GB</span>
+                    <span class="records">250K records</span>
+                </div>
+                <div class="dataset-price">$299</div>
+                <button class="btn btn-outline">View Details</button>
+            </div>
+            <div class="dataset-card">
+                <div class="dataset-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h4>Charging Behavior</h4>
+                <p>Charging session data including duration, energy consumed, and charger types</p>
+                <div class="dataset-meta">
+                    <span class="size">1.8 GB</span>
+                    <span class="records">180K records</span>
+                </div>
+                <div class="dataset-price">$249</div>
+                <button class="btn btn-outline">View Details</button>
+            </div>
+            <div class="dataset-card">
+                <div class="dataset-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+                <h4>Driving Patterns</h4>
+                <p>Daily mileage, speed profiles, and regenerative braking usage analytics</p>
+                <div class="dataset-meta">
+                    <span class="size">3.2 GB</span>
+                    <span class="records">320K records</span>
+                </div>
+                <div class="dataset-price">$349</div>
+                <button class="btn btn-outline">View Details</button>
+            </div>
+        </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <!-- Column 1 -->
+        <div class="footer-about">
+          <h3 class="footer-title">EV-DataHub</h3>
+          <p class="footer-desc">
+            Empowering the future of mobility through secure, anonymized electric vehicle data analytics and insights.
+          </p>
+          <div class="footer-socials">
+            <div class="footer-icon">youtube</div>
+            <div class="footer-icon">Twitter</div>
+            <div class="footer-icon">GitHub</div>
           </div>
         </div>
-        <div class="col-lg-12">
-          <div class="service-item">
-            <div class="row">
-              <div class="col-lg-6 align-self-center">
-                <div class="left-text-content">
-                  <i class="fas fa-archive"></i>
-                  <h4>Financial Solutions</h4>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi et ex massa. In ac laoreet urna. Curabitur eu enim nibh. Phasellus sodales nisi vel leo aliquam, ut tempus augue hendrerit. Pellentesque eu risus tincidunt, condimentum eros in, auctor augue. Vivamus et urna blandit, varius sapien sed.</p>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="right-image">
-                  <img src="assets/images/service-image-02.jpg" alt="">
-                </div>
-              </div>
-            </div>
-          </div>
+
+        <!-- Column 2 -->
+        <div>
+          <h4 class="footer-heading">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#">Data Catalog</a></li>
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
         </div>
-        <div class="col-lg-12">
-          <div class="service-item last-service">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="left-image">
-                  <img src="assets/images/service-image-03.jpg" alt="">
-                </div>
-              </div>
-              <div class="col-lg-6 align-self-center">
-                <div class="right-text-content">
-                  <i class="fas fa-archive"></i>
-                  <h4>Cryptocurrency Exchanges</h4>
-                  <p>Mauris id efficitur ante, vitae ultrices metus. Donec et nunc massa. Nullam non felis dignissim, dapibus turpis semper, vulputate lorem. Nam volutpat posuere tellus, in porttitor justo interdum nec. Aenean in dapibus risus, in euismod ligula. Aliquam vel scelerisque elit.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+
+        <!-- Column 3 -->
+        <div>
+          <h4 class="footer-heading">Company</h4>
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="simple-cta">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-5">
-          <h4>Business <em>Solutions</em> and <strong>Crypto</strong> Investments</h4>
-        </div>
-        <div class="col-lg-7">
-          <div class="buttons">
-            <div class="green-button">
-              <a href="#">Discover More</a>
-            </div>
-            <div class="orange-button">
-              <a href="#">Contact Us</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="service-details">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 offset-lg-3">
-          <div class="section-heading">
-            <h6>Investment in Details</h6>
-            <h4>Upgrade your knowledge</h4>
-          </div>
-        </div>
-        <div class="col-lg-10 offset-lg-1">
-          <div class="naccs">
-            <div class="tabs">
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="menu">
-                    <div class="active gradient-border"><span>Crypto Investments</span></div>
-                    <div class="gradient-border"><span>Cryptocurrency Market</span></div>
-                    <div class="gradient-border"><span>Financial Planning</span></div>
-                  </div>
-                </div>
-                <div class="col-lg-12">
-                  <ul class="nacc">
-                    <li class="active">
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/service-details-01.jpg" alt="">
-                        </div>
-                        <div class="right-content">
-                          <h4>Learn more about cryptocurrency investments</h4>
-                          <p>Etiam id ligula risus. Fusce fringilla nisl nunc, nec rutrum lectus cursus nec. In blandit nibh dolor, at rutrum leo accumsan porta. Nullam pulvinar eros porttitor risus condimentum tempus.</p>
-                          <span>- Top Crypto prices and charts</span>
-                          <span>- Is Cryptocurrency a good investment?</span>
-                          <span class="last-span">- Crypto Market Insiders and News</span>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/service-details-02.jpg" alt="">
-                        </div>
-                        <div class="right-content">
-                          <h4>Read more on Cryptocurrency Market</h4>
-                          <p>Fusce fringilla nisl nunc, nec rutrum lectus cursus nec. In blandit nibh dolor, at rutrum leo accumsan porta. Nullam pulvinar eros porttitor risus condimentum tempus.</p>
-                          <span>- Digital Currency Exchange</span>
-                          <span>- Trading Cryptocurrencies Online</span>
-                          <span class="last-span">- Different Categories of Digital Currencies</span>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/service-details-03.jpg" alt="">
-                        </div>
-                        <div class="right-content">
-                          <h4>How to carefully plan on your online financials</h4>
-                          <p>Pellentesque ipsum elit, congue a sapien laoreet, pellentesque ultricies risus. Nulla facilisi. Mauris vitae lacinia magna. Nam euismod sapien sit amet elementum blandit. Nulla non placerat neque.</p>
-                          <span>- Financial Planning and Investments</span>
-                          <span>- Business Networking</span>
-                          <span class="last-span">- Managing Digital Assets</span>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="partners">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <p>Copyright © 2022 Mexant Co., Ltd. All Rights Reserved. 
-          
-          <br>Designed by <a title="CSS Templates" rel="sponsored" href="https://templatemo.com" target="_blank">TemplateMo</a></p>
-        </div>
+      <div class="footer-bottom">
+        <p>© 2024 EV-DataHub. All rights reserved. | Chợ dữ liệu phân tích xe điện</p>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <script src="assets/js/isotope.min.js"></script>
-    <script src="assets/js/owl-carousel.js"></script>
-
-    <script src="assets/js/tabs.js"></script>
-    <script src="assets/js/swiper.js"></script>
-    <script src="assets/js/custom.js"></script>
-    <script>
-        var interleaveOffset = 0.5;
-
-      var swiperOptions = {
-        loop: true,
-        speed: 1000,
-        grabCursor: true,
-        watchSlidesProgress: true,
-        mousewheelControl: true,
-        keyboardControl: true,
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
-        },
-        on: {
-          progress: function() {
-            var swiper = this;
-            for (var i = 0; i < swiper.slides.length; i++) {
-              var slideProgress = swiper.slides[i].progress;
-              var innerOffset = swiper.width * interleaveOffset;
-              var innerTranslate = slideProgress * innerOffset;
-              swiper.slides[i].querySelector(".slide-inner").style.transform =
-                "translate3d(" + innerTranslate + "px, 0, 0)";
-            }      
-          },
-          touchStart: function() {
-            var swiper = this;
-            for (var i = 0; i < swiper.slides.length; i++) {
-              swiper.slides[i].style.transition = "";
-            }
-          },
-          setTransition: function(speed) {
-            var swiper = this;
-            for (var i = 0; i < swiper.slides.length; i++) {
-              swiper.slides[i].style.transition = speed + "ms";
-              swiper.slides[i].querySelector(".slide-inner").style.transition =
-                speed + "ms";
-            }
-          }
-        }
-      };
-
-      var swiper = new Swiper(".swiper-container", swiperOptions);
-    </script>
-
-  </body>
+  <script>
+      function goTo(page) {
+          window.location.href = page;
+      }
+      
+      function searchDatasets() {
+          // Implementation for dataset search
+          alert('Search functionality would be implemented here');
+      }
+  </script>
+</body>
 </html>

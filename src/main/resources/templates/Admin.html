@@ -1,294 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
-
-  <head>
-
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Mexant HTML5 Template - About page</title>
-
-    
+    <title>Admin Dashboard - EV Data Analytics Marketplace</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/index.css">
-
-  </head>
+    <link rel="stylesheet" href="../static/css/admin.css">
+</head>
 
 <body>
-
-
-  <!-- ***** Header Area Start ***** -->
+  <!-- Header -->
   <header class="header-area header-sticky">
+      <img class="logo" src="../static/images/LogoEV.png">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search EV data, models, analytics...">
+        <img class="search-icon" src="../static/images/search.png">
+      </div>
+      <nav class="main-nav">
+          <ul class="nav">
+              <li class="scroll-to-section"><a href="index.html">Home</a></li>
+              <li><a href="Admin.html" class="active">ADMIN</a></li>
+              <li><a href="Consumer.html">Consumer</a></li>
+              <li><a href="Provider.html">Provider</a></li>
+              <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
+              <li><a href="contact-us.html">Contact Support</a></li>
+          </ul>
+      </nav>
+  </header>
+
+  <!-- ***** Main Banner Area Start ***** -->
+  <section class="page-heading">
       <div class="container">
           <div class="row">
-              <div class="col-12">
-                  <nav class="main-nav">
-                      <a href="index.html" class="logo">
-                          <img src="assets/images/logo.png" alt="">
-                      </a>
-                      <ul class="nav">
-                          <li class="scroll-to-section"><a href="index.html" class="active">Home</a></li>
-                          <li><a href="Admin.html">ADMIN</a></li>
-                          <li><a href="Consumer.html">Consumer</a></li>
-                          <li><a href="Provider.html">Provider</a></li>
-
-                          <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
-                          <li><a href="contact-us.html">Contact Support</a></li>
-                      </ul>
-                  </nav>
-              </div>
-          </div>
-      </div>
-  </header>
-  <!-- ***** Header Area End ***** -->
-
-  <div class="page-heading">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="header-text">
-            <h2>About Us</h2>
-            <div class="div-dec"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ***** Main Banner Area End ***** -->
-
-  <section class="top-section">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6">
-          <div class="left-image">
-            <img src="assets/images/about-left-image.jpg" alt="">
-          </div>
-        </div>
-        <div class="col-lg-6 align-self-center">
-          <div class="accordions is-first-expanded">
-            <article class="accordion">
-              <div class="accordion-head">
-                  <span>Mexant Financial Planning</span>
-                  <span class="icon">
-                      <i class="icon fa fa-chevron-right"></i>
-                  </span>
-              </div>
-              <div class="accordion-body">
-                  <div class="content">
-                      <p>You will see a bunch of free CSS templates when you search on Google. TemplateMo website is probably the best one because it is 100% free. 
-                      <br><br>We do not ask you anything in return. You are free to use our templates for any purpose.</p>
+              <div class="col-lg-12">
+                  <div class="header-text">
+                      <h2>Admin Dashboard</h2>
+                      <div class="div-dec"></div>
                   </div>
               </div>
-          </article>
-          <article class="accordion">
-            <div class="accordion-head">
-                <span>Mexant Crypto Investing</span>
-                <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                </span>
-            </div>
-            <div class="accordion-body">
-                <div class="content">
-                    <p>Mexant HTML5 Template is available to download 100% free of charge. This CSS layout is based on Boostrap 5 framework. 
-                    <br><br>Anyone can edit and use this layout for all professional websites. Thank you for visiting TemplateMo website.</p>
-                </div>
-            </div>
-          </article>
-          <article class="accordion">
-            <div class="accordion-head">
-                <span>Cryptocurrency Investments</span>
-                <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                </span>
-            </div>
-            <div class="accordion-body">
-                <div class="content">
-                    <p>Ut dictum vehicula massa, ac pharetra leo tincidunt eu. Phasellus in tristique magna, ac gravida leo.<br><br>
-                    Integer sed lorem sapien. Ut viverra mauris sed lobortis commodo. Mauris scelerisque venenatis justo, sed interdum sem.</p>
-                </div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </div>
-  </section>  
-
-  <section class="simple-cta">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-5">
-          <h4>Business <em>Solutions</em> and <strong>Crypto</strong> Investments</h4>
-        </div>
-        <div class="col-lg-7">
-          <div class="buttons">
-            <div class="green-button">
-              <a href="#">Discover More</a>
-            </div>
-            <div class="orange-button">
-              <a href="#">Contact Us</a>
-            </div>
           </div>
-        </div>
       </div>
-    </div>
   </section>
+  <!-- ***** Main Banner Area End ***** -->
 
-  <section class="what-we-do">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-5">
-          <div class="left-content">
-            <h4>Please tell us about your idea and how you want it to be</h4>
-            <p>If you need more HTML templates, you can try visiting TooCSS blog and Tooplate websites. You can get many good templates on those websites.<br><br>Nulla non placerat neque, a gravida elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi sed dolor condimentum tellus commodo volutpat non malesuada turpis.</p>
-            <div class="green-button">
-              <a href="contact-us.html">Discover More</a>
+  <main class="admin-container">
+    <!-- User Management Section -->
+    <section class="admin-section">
+        <h2>1. User Management & Permissions</h2>
+        <div class="admin-card">
+            <div class="card-body">
+                <h5>Manage Data Providers, Consumers & Partners</h5>
+                <ul>
+                    <li>View and manage all registered users</li>
+                    <li>Assign roles and permissions</li>
+                    <li>Approve or reject data submissions</li>
+                    <li>Monitor user activity and compliance</li>
+                </ul>
+                <button class="btn btn-primary" onclick="goTo('admin/user_management.html')">Manage Users</button>
             </div>
+        </div>
+    </section>
+
+    <!-- Payment & Revenue Sharing Section -->
+    <section class="admin-section">
+        <h2>2. Payment & Revenue Sharing</h2>
+        <div class="admin-card">
+            <div class="card-body">
+                <h5>Transaction Processing & Profit Distribution</h5>
+                <ul>
+                    <li>Monitor all payment transactions</li>
+                    <li>Distribute revenue to data providers</li>
+                    <li>Generate financial reports</li>
+                    <li>Manage subscription billing</li>
+                </ul>
+                <button class="btn btn-success" onclick="goTo('admin/payment_dashboard.html')">Payment Dashboard</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security & Privacy Section -->
+    <section class="admin-section">
+        <h2>3. Security & Privacy Compliance</h2>
+        <div class="admin-card">
+            <div class="card-body">
+                <h5>Data Protection & Regulatory Compliance</h5>
+                <ul>
+                    <li>Monitor data encryption and security protocols</li>
+                    <li>Manage API access controls</li>
+                    <li>Ensure GDPR, CCPA compliance</li>
+                    <li>Audit data access logs</li>
+                </ul>
+                <button class="btn btn-warning" onclick="goTo('admin/security_dashboard.html')">Security Center</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics & Reporting Section -->
+    <section class="admin-section">
+        <h2>4. Analytics & Market Insights</h2>
+        <div class="admin-card">
+            <div class="card-body">
+                <h5>Market Data Statistics & Trend Analysis</h5>
+                <ul>
+                    <li>View most popular datasets and trends</li>
+                    <li>AI-powered EV market development insights</li>
+                    <li>Generate comprehensive market reports</li>
+                    <li>Monitor platform performance metrics</li>
+                </ul>
+                <button class="btn btn-info" onclick="goTo('admin/analytics_dashboard.html')">View Analytics</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Stats Dashboard -->
+    <section class="stats-section">
+        <h2>Platform Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 7c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3>1,247</h3>
+                    <p>Active Users</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3>568</h3>
+                    <p>Datasets Available</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3>$42.8K</h3>
+                    <p>Monthly Revenue</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3>98.2%</h3>
+                    <p>Platform Uptime</p>
+                </div>
+            </div>
+        </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <!-- Column 1 -->
+        <div class="footer-about">
+          <h3 class="footer-title">EV-DataHub</h3>
+          <p class="footer-desc">
+            Empowering the future of mobility through secure, anonymized electric vehicle data analytics and insights.
+          </p>
+          <div class="footer-socials">
+            <div class="footer-icon">youtube</div>
+            <div class="footer-icon">Twitter</div>
+            <div class="footer-icon">GitHub</div>
           </div>
         </div>
-        <div class="col-lg-6">
-          <div class="right-items">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="item">
-                  <em>01</em>
-                  <h4>First Step</h4>
-                  <p>Pellentesque ipsum elit, congue a sapien laoreet, pellentesque ultricies risus.</p>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="item">
-                  <em>02</em>
-                  <h4>Second Step</h4>
-                  <p>Pellentesque ipsum elit, congue a sapien laoreet, pellentesque ultricies risus.</p>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="item">
-                  <em>03</em>
-                  <h4>Third Step</h4>
-                  <p>Pellentesque ipsum elit, congue a sapien laoreet, pellentesque ultricies risus.</p>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="item">
-                  <em>04</em>
-                  <h4>Fourth Step</h4>
-                  <p>Pellentesque ipsum elit, congue a sapien laoreet, pellentesque ultricies risus.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+
+        <!-- Column 2 -->
+        <div>
+          <h4 class="footer-heading">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#">Data Catalog</a></li>
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3 -->
+        <div>
+          <h4 class="footer-heading">Company</h4>
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="partners">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-2 col-sm-4 col-6">
-          <div class="item">
-            <img src="assets/images/client-01.png" alt="">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <p>Copyright © 2022 Mexant Co., Ltd. All Rights Reserved. 
-          
-          <br>Designed by <a title="CSS Templates" rel="sponsored" href="https://templatemo.com" target="_blank">TemplateMo</a></p>
-        </div>
+      <div class="footer-bottom">
+        <p>© 2024 EV-DataHub. All rights reserved. | Chợ dữ liệu phân tích xe điện</p>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <script src="assets/js/isotope.min.js"></script>
-    <script src="assets/js/owl-carousel.js"></script>
-
-    <script src="assets/js/tabs.js"></script>
-    <script src="assets/js/swiper.js"></script>
-    <script src="assets/js/custom.js"></script>
-    <script>
-        var interleaveOffset = 0.5;
-
-      var swiperOptions = {
-        loop: true,
-        speed: 1000,
-        grabCursor: true,
-        watchSlidesProgress: true,
-        mousewheelControl: true,
-        keyboardControl: true,
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
-        },
-        on: {
-          progress: function() {
-            var swiper = this;
-            for (var i = 0; i < swiper.slides.length; i++) {
-              var slideProgress = swiper.slides[i].progress;
-              var innerOffset = swiper.width * interleaveOffset;
-              var innerTranslate = slideProgress * innerOffset;
-              swiper.slides[i].querySelector(".slide-inner").style.transform =
-                "translate3d(" + innerTranslate + "px, 0, 0)";
-            }      
-          },
-          touchStart: function() {
-            var swiper = this;
-            for (var i = 0; i < swiper.slides.length; i++) {
-              swiper.slides[i].style.transition = "";
-            }
-          },
-          setTransition: function(speed) {
-            var swiper = this;
-            for (var i = 0; i < swiper.slides.length; i++) {
-              swiper.slides[i].style.transition = speed + "ms";
-              swiper.slides[i].querySelector(".slide-inner").style.transition =
-                speed + "ms";
-            }
-          }
-        }
-      };
-
-      var swiper = new Swiper(".swiper-container", swiperOptions);
-    </script>
-
-  </body>
+  <script>
+      function goTo(page) {
+          window.location.href = page;
+      }
+  </script>
+</body>
 </html>
