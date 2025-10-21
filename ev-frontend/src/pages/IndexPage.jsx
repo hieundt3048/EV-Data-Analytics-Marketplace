@@ -1,25 +1,11 @@
 import React from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import '../styles/index.css';
 
 const IndexPage = () => (
   <>
-    <header className="header-area header-sticky">
-      <img className="logo" src="/static/images/LogoEV.png" alt="EV Data Analytics Marketplace logo" />
-      <div className="search-container">
-        <i className="fas fa-search" />
-        <input type="text" placeholder="Search EV data, models, analytics..." />
-        <img className="search-icon" src="/static/images/search.png" alt="Search" />
-      </div>
-      <nav className="main-nav">
-        <ul className="nav">
-          <li className="scroll-to-section"><a href="/" className="active">Home</a></li>
-          <li><a href="/Admin">ADMIN</a></li>
-          <li><a href="/Consumer">Consumer</a></li>
-          <li><a href="/Provider">Provider</a></li>
-          <li className="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
-          <li><a href="/contact-us">Contact Support</a></li>
-        </ul>
-      </nav>
-    </header>
+    <Header />
 
     <section className="hero-bg">
       <div className="data-node" style={{ top: '20%', left: '10%' }} />
@@ -226,47 +212,7 @@ const IndexPage = () => (
       </div>
     </section>
 
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-grid">
-          <div className="footer-about">
-            <h3 className="footer-title">EV-DataHub</h3>
-            <p className="footer-desc">
-              Empowering the future of mobility through secure, anonymized electric vehicle data analytics and insights.
-            </p>
-            <div className="footer-socials">
-              <div className="footer-icon">youtube</div>
-              <div className="footer-icon">Twitter</div>
-              <div className="footer-icon">GitHub</div>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="footer-heading">Platform</h4>
-            <ul className="footer-links">
-              <li><a href="/">Data Catalog</a></li>
-              <li><a href="/">API Documentation</a></li>
-              <li><a href="/">Pricing</a></li>
-              <li><a href="/">Security</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="footer-heading">Company</h4>
-            <ul className="footer-links">
-              <li><a href="/">About Us</a></li>
-              <li><a href="/">Careers</a></li>
-              <li><a href="/">Privacy Policy</a></li>
-              <li><a href="/">Terms of Service</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <p>© 2024 EV-DataHub. All rights reserved. | Chợ dữ liệu phân tích xe điện</p>
-        </div>
-      </div>
-    </footer>
+    <Footer />
   </>
 );
 
