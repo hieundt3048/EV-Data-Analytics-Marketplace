@@ -14,3 +14,2002 @@
     <link rel="stylesheet" href="../static/css/index.css">
     <link rel="stylesheet" href="../static/css/admin.css">
 </head>
+
+<body>
+  <!-- Header -->
+  <header class="header-area header-sticky">
+      <img class="logo" src="../static/images/LogoEV.png">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search EV data, models, analytics...">
+        <img class="search-icon" src="../static/images/search.png">
+      </div>
+      <nav class="main-nav">
+          <ul class="nav">
+              <li class="scroll-to-section"><a href="index.html">Home</a></li>
+              <li><a href="Admin.html" class="active">ADMIN</a></li>
+              <li><a href="Consumer.html">Consumer</a></li>
+              <li><a href="Provider.html">Provider</a></li>
+              <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
+              <li><a href="contact-us.html">Contact Support</a></li>
+          </ul>
+      </nav>
+  </header>
+
+  <!-- ***** Main Banner Area Start ***** -->
+  <section class="page-heading">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-12">
+                  <div class="header-text">
+                      <h2>Admin Dashboard</h2>
+                      <div class="div-dec"></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Main Banner Area End ***** -->
+
+  <!-- Admin Navigation Tabs -->
+  <div class="admin-tabs">
+    <div class="container">
+      <div class="tabs-container">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="users">User Management</button>
+        <button class="tab-btn" data-tab="payments">Payments</button>
+        <button class="tab-btn" data-tab="security">Security</button>
+        <button class="tab-btn" data-tab="analytics">Analytics</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="admin-container">
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+      <!-- Quick Stats Dashboard -->
+      <section class="admin-section">
+          <h2>Platform Overview</h2>
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 7c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>1,247</h3>
+                      <p>Active Users</p>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>568</h3>
+                      <p>Datasets Available</p>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>$42.8K</h3>
+                      <p>Monthly Revenue</p>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>98.2%</h3>
+                      <p>Platform Uptime</p>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Main Admin Sections -->
+      <section class="admin-section">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions-grid">
+              <!-- User Management Section -->
+              <div class="admin-card">
+                  <div class="card-body">
+                      <h5>User Management & Permissions</h5>
+                      <ul>
+                          <li>View and manage all registered users</li>
+                          <li>Assign roles and permissions</li>
+                          <li>Approve or reject data submissions</li>
+                          <li>Monitor user activity and compliance</li>
+                      </ul>
+                      <button class="admin-btn admin-btn-primary" onclick="switchTab('users')">Manage Users</button>
+                  </div>
+              </div>
+
+              <!-- Payment & Revenue Sharing Section -->
+              <div class="admin-card">
+                  <div class="card-body">
+                      <h5>Payment & Revenue Sharing</h5>
+                      <ul>
+                          <li>Monitor all payment transactions</li>
+                          <li>Distribute revenue to data providers</li>
+                          <li>Generate financial reports</li>
+                          <li>Manage subscription billing</li>
+                      </ul>
+                      <button class="admin-btn admin-btn-success" onclick="switchTab('payments')">Payment Dashboard</button>
+                  </div>
+              </div>
+
+              <!-- Security & Privacy Section -->
+              <div class="admin-card">
+                  <div class="card-body">
+                      <h5>Security & Privacy Compliance</h5>
+                      <ul>
+                          <li>Monitor data encryption and security protocols</li>
+                          <li>Manage API access controls</li>
+                          <li>Ensure GDPR, CCPA compliance</li>
+                          <li>Audit data access logs</li>
+                      </ul>
+                      <button class="admin-btn admin-btn-warning" onclick="switchTab('security')">Security Center</button>
+                  </div>
+              </div>
+
+              <!-- Analytics & Reporting Section -->
+              <div class="admin-card">
+                  <div class="card-body">
+                      <h5>Analytics & Market Insights</h5>
+                      <ul>
+                          <li>View most popular datasets and trends</li>
+                          <li>AI-powered EV market development insights</li>
+                          <li>Generate comprehensive market reports</li>
+                          <li>Monitor platform performance metrics</li>
+                      </ul>
+                      <button class="admin-btn admin-btn-info" onclick="switchTab('analytics')">View Analytics</button>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </div>
+
+    <!-- User Management Tab -->
+    <div id="users" class="tab-content">
+      <!-- User Management Dashboard -->
+      <section class="admin-section">
+          <div class="dashboard-header">
+              <h2>User Management Dashboard</h2>
+              <div class="header-actions">
+                  <button class="admin-btn admin-btn-primary" onclick="showAddUserModal()">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      </svg>
+                      Add New User
+                  </button>
+                  <button class="admin-btn admin-btn-outline">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                      </svg>
+                      Export Users
+                  </button>
+              </div>
+          </div>
+
+          <!-- User Statistics -->
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 7c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>1,247</h3>
+                      <p>Total Users</p>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>856</h3>
+                      <p>Data Consumers</p>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>324</h3>
+                      <p>Data Providers</p>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>67</h3>
+                      <p>Partners</p>
+                  </div>
+              </div>
+          </div>
+
+          <!-- User Table -->
+          <div class="table-container">
+              <div class="table-header">
+                  <h3>All Users</h3>
+                  <div class="table-filters">
+                      <select id="roleFilter">
+                          <option value="">All Roles</option>
+                          <option value="consumer">Data Consumer</option>
+                          <option value="provider">Data Provider</option>
+                          <option value="partner">Partner</option>
+                          <option value="admin">Admin</option>
+                      </select>
+                      <select id="statusFilter">
+                          <option value="">All Status</option>
+                          <option value="active">Active</option>
+                          <option value="pending">Pending</option>
+                          <option value="suspended">Suspended</option>
+                      </select>
+                  </div>
+              </div>
+              
+              <div class="table-wrapper">
+                  <table class="user-table">
+                      <thead>
+                          <tr>
+                              <th>
+                                  <input type="checkbox" id="selectAll">
+                              </th>
+                              <th>User</th>
+                              <th>Role</th>
+                              <th>Registration Date</th>
+                              <th>Status</th>
+                              <th>Data Submissions</th>
+                              <th>Actions</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td><input type="checkbox"></td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">JD</div>
+                                      <div>
+                                          <div class="user-name">John Doe</div>
+                                          <div class="user-email">john.doe@company.com</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="role-badge consumer">Data Consumer</span>
+                              </td>
+                              <td>2024-01-15</td>
+                              <td>
+                                  <span class="status-badge active">Active</span>
+                              </td>
+                              <td>0</td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="Edit" onclick="editUser(1)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="View Details" onclick="viewUserDetails(1)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon danger" title="Suspend" onclick="suspendUser(1)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td><input type="checkbox"></td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">SJ</div>
+                                      <div>
+                                          <div class="user-name">Sarah Johnson</div>
+                                          <div class="user-email">sarah@evresearch.org</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="role-badge provider">Data Provider</span>
+                              </td>
+                              <td>2024-02-03</td>
+                              <td>
+                                  <span class="status-badge active">Active</span>
+                              </td>
+                              <td>24</td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="Edit" onclick="editUser(2)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="View Details" onclick="viewUserDetails(2)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon danger" title="Suspend" onclick="suspendUser(2)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td><input type="checkbox"></td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">MR</div>
+                                      <div>
+                                          <div class="user-name">Mike Rodriguez</div>
+                                          <div class="user-email">mike@tesla.com</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="role-badge partner">Partner</span>
+                              </td>
+                              <td>2024-01-28</td>
+                              <td>
+                                  <span class="status-badge pending">Pending Approval</span>
+                              </td>
+                              <td>8</td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon success" title="Approve" onclick="approveUser(3)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="View Details" onclick="viewUserDetails(3)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon danger" title="Reject" onclick="rejectUser(3)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="pagination">
+                  <button class="pagination-btn" disabled>
+                      <svg viewBox="0 0 24 24">
+                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                      </svg>
+                  </button>
+                  <button class="pagination-btn active">1</button>
+                  <button class="pagination-btn">2</button>
+                  <button class="pagination-btn">3</button>
+                  <button class="pagination-btn">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                      </svg>
+                  </button>
+              </div>
+          </div>
+      </section>
+
+      <!-- Data Approval Section -->
+      <section class="admin-section">
+          <h2>Pending Data Approvals</h2>
+          <div class="approval-grid">
+              <div class="approval-card">
+                  <div class="approval-header">
+                      <h4>Battery Performance Dataset</h4>
+                      <span class="approval-badge pending">Pending</span>
+                  </div>
+                  <div class="approval-info">
+                      <div class="info-item">
+                          <span class="label">Provider:</span>
+                          <span class="value">Sarah Johnson</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Size:</span>
+                          <span class="value">2.4 GB</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Records:</span>
+                          <span class="value">250,000</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Submitted:</span>
+                          <span class="value">2024-03-15</span>
+                      </div>
+                  </div>
+                  <div class="approval-actions">
+                      <button class="admin-btn admin-btn-success" onclick="approveDataset(1)">Approve</button>
+                      <button class="admin-btn admin-btn-outline" onclick="reviewDataset(1)">Review</button>
+                      <button class="admin-btn admin-btn-danger" onclick="rejectDataset(1)">Reject</button>
+                  </div>
+              </div>
+              
+              <div class="approval-card">
+                  <div class="approval-header">
+                      <h4>Charging Behavior Analysis</h4>
+                      <span class="approval-badge pending">Pending</span>
+                  </div>
+                  <div class="approval-info">
+                      <div class="info-item">
+                          <span class="label">Provider:</span>
+                          <span class="value">EV Research Lab</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Size:</span>
+                          <span class="value">1.8 GB</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Records:</span>
+                          <span class="value">180,000</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Submitted:</span>
+                          <span class="value">2024-03-14</span>
+                      </div>
+                  </div>
+                  <div class="approval-actions">
+                      <button class="admin-btn admin-btn-success" onclick="approveDataset(2)">Approve</button>
+                      <button class="admin-btn admin-btn-outline" onclick="reviewDataset(2)">Review</button>
+                      <button class="admin-btn admin-btn-danger" onclick="rejectDataset(2)">Reject</button>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </div>
+
+    <!-- Payments Tab -->
+    <div id="payments" class="tab-content">
+      <!-- Revenue Overview -->
+      <section class="admin-section">
+          <div class="dashboard-header">
+              <h2>Revenue Overview</h2>
+              <div class="header-actions">
+                  <select id="timePeriod">
+                      <option value="today">Today</option>
+                      <option value="week" selected>This Week</option>
+                      <option value="month">This Month</option>
+                      <option value="quarter">This Quarter</option>
+                      <option value="year">This Year</option>
+                  </select>
+                  <button class="admin-btn admin-btn-outline">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                      </svg>
+                      Export Report
+                  </button>
+              </div>
+          </div>
+
+          <!-- Revenue Stats -->
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>$42,850</h3>
+                      <p>Total Revenue</p>
+                      <span class="stat-change positive">+12.5%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>1,247</h3>
+                      <p>Transactions</p>
+                      <span class="stat-change positive">+8.3%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>$18,240</h3>
+                      <p>Provider Payouts</p>
+                      <span class="stat-change positive">+15.2%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>$24,610</h3>
+                      <p>Platform Revenue</p>
+                      <span class="stat-change positive">+10.8%</span>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Revenue Chart -->
+          <div class="chart-container">
+              <div class="chart-header">
+                  <h3>Revenue Trends</h3>
+                  <div class="chart-legend">
+                      <div class="legend-item">
+                          <div class="legend-color platform"></div>
+                          <span>Platform Revenue</span>
+                      </div>
+                      <div class="legend-item">
+                          <div class="legend-color provider"></div>
+                          <span>Provider Payouts</span>
+                      </div>
+                  </div>
+              </div>
+              <div class="chart-placeholder">
+                  <div class="chart-bars">
+                      <div class="chart-bar">
+                          <div class="bar-platform" style="height: 70%"></div>
+                          <div class="bar-provider" style="height: 50%"></div>
+                          <span>Jan</span>
+                      </div>
+                      <div class="chart-bar">
+                          <div class="bar-platform" style="height: 65%"></div>
+                          <div class="bar-provider" style="height: 45%"></div>
+                          <span>Feb</span>
+                      </div>
+                      <div class="chart-bar">
+                          <div class="bar-platform" style="height: 80%"></div>
+                          <div class="bar-provider" style="height: 55%"></div>
+                          <span>Mar</span>
+                      </div>
+                      <div class="chart-bar">
+                          <div class="bar-platform" style="height: 75%"></div>
+                          <div class="bar-provider" style="height: 60%"></div>
+                          <span>Apr</span>
+                      </div>
+                      <div class="chart-bar">
+                          <div class="bar-platform" style="height: 90%"></div>
+                          <div class="bar-provider" style="height: 70%"></div>
+                          <span>May</span>
+                      </div>
+                      <div class="chart-bar">
+                          <div class="bar-platform" style="height: 85%"></div>
+                          <div class="bar-provider" style="height: 65%"></div>
+                          <span>Jun</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Recent Transactions -->
+      <section class="admin-section">
+          <h2>Recent Transactions</h2>
+          <div class="table-container">
+              <div class="table-header">
+                  <h3>Transaction History</h3>
+                  <div class="table-filters">
+                      <select id="transactionType">
+                          <option value="">All Types</option>
+                          <option value="purchase">Data Purchase</option>
+                          <option value="subscription">Subscription</option>
+                          <option value="payout">Provider Payout</option>
+                          <option value="refund">Refund</option>
+                      </select>
+                      <select id="transactionStatus">
+                          <option value="">All Status</option>
+                          <option value="completed">Completed</option>
+                          <option value="pending">Pending</option>
+                          <option value="failed">Failed</option>
+                      </select>
+                  </div>
+              </div>
+              
+              <div class="table-wrapper">
+                  <table class="user-table">
+                      <thead>
+                          <tr>
+                              <th>Transaction ID</th>
+                              <th>User</th>
+                              <th>Type</th>
+                              <th>Amount</th>
+                              <th>Date</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>#TX-7842</td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">JD</div>
+                                      <div>
+                                          <div class="user-name">John Doe</div>
+                                          <div class="user-email">john.doe@company.com</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="type-badge purchase">Data Purchase</span>
+                              </td>
+                              <td>$299.00</td>
+                              <td>2024-03-15 14:30</td>
+                              <td>
+                                  <span class="status-badge completed">Completed</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="View Details" onclick="viewTransactionDetails('TX-7842')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="Download Receipt" onclick="downloadReceipt('TX-7842')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>#TX-7841</td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">SJ</div>
+                                      <div>
+                                          <div class="user-name">Sarah Johnson</div>
+                                          <div class="user-email">sarah@evresearch.org</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="type-badge payout">Provider Payout</span>
+                              </td>
+                              <td>$1,250.00</td>
+                              <td>2024-03-15 11:15</td>
+                              <td>
+                                  <span class="status-badge completed">Completed</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="View Details" onclick="viewTransactionDetails('TX-7841')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="Download Receipt" onclick="downloadReceipt('TX-7841')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>#TX-7840</td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">MR</div>
+                                      <div>
+                                          <div class="user-name">Mike Rodriguez</div>
+                                          <div class="user-email">mike@tesla.com</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="type-badge subscription">Subscription</span>
+                              </td>
+                              <td>$199.00</td>
+                              <td>2024-03-14 16:45</td>
+                              <td>
+                                  <span class="status-badge pending">Pending</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon success" title="Approve" onclick="approveTransaction('TX-7840')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon danger" title="Reject" onclick="rejectTransaction('TX-7840')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </section>
+
+      <!-- Provider Payouts -->
+      <section class="admin-section">
+          <h2>Provider Payouts</h2>
+          <div class="payouts-grid">
+              <div class="payout-card">
+                  <div class="payout-header">
+                      <h4>Sarah Johnson</h4>
+                      <span class="payout-amount">$2,450</span>
+                  </div>
+                  <div class="payout-info">
+                      <div class="info-item">
+                          <span class="label">Datasets Sold:</span>
+                          <span class="value">24</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Commission Rate:</span>
+                          <span class="value">70%</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Next Payout:</span>
+                          <span class="value">2024-03-31</span>
+                      </div>
+                  </div>
+                  <div class="payout-actions">
+                      <button class="admin-btn admin-btn-primary" onclick="processPayout(1)">Process Payout</button>
+                      <button class="admin-btn admin-btn-outline" onclick="viewPayoutDetails(1)">View Details</button>
+                  </div>
+              </div>
+              
+              <div class="payout-card">
+                  <div class="payout-header">
+                      <h4>EV Research Lab</h4>
+                      <span class="payout-amount">$1,890</span>
+                  </div>
+                  <div class="payout-info">
+                      <div class="info-item">
+                          <span class="label">Datasets Sold:</span>
+                          <span class="value">18</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Commission Rate:</span>
+                          <span class="value">65%</span>
+                      </div>
+                      <div class="info-item">
+                          <span class="label">Next Payout:</span>
+                          <span class="value">2024-03-31</span>
+                      </div>
+                  </div>
+                  <div class="payout-actions">
+                      <button class="admin-btn admin-btn-primary" onclick="processPayout(2)">Process Payout</button>
+                      <button class="admin-btn admin-btn-outline" onclick="viewPayoutDetails(2)">View Details</button>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </div>
+
+    <!-- Security Tab -->
+    <div id="security" class="tab-content">
+      <!-- Security Overview -->
+      <section class="admin-section">
+          <div class="dashboard-header">
+              <h2>Security Overview</h2>
+              <div class="header-actions">
+                  <button class="admin-btn admin-btn-primary" onclick="runSecurityScan()">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                      Run Security Scan
+                  </button>
+                  <button class="admin-btn admin-btn-outline">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                      </svg>
+                      Export Logs
+                  </button>
+              </div>
+          </div>
+
+          <!-- Security Stats -->
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon security">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>98.2%</h3>
+                      <p>System Uptime</p>
+                      <span class="stat-change positive">+2.1%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon security">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>24</h3>
+                      <p>Active API Keys</p>
+                      <span class="stat-change neutral">0%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon security">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M20 8h-3V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>3</h3>
+                      <p>Security Alerts</p>
+                      <span class="stat-change negative">+1</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon security">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 8c0 1.1-.9 2-2 2h-2v2h4v2H9v-4c0-1.1.9-2 2-2h2V9H9V7h4c1.1 0 2 .9 2 2v2z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>100%</h3>
+                      <p>GDPR Compliance</p>
+                      <span class="stat-change positive">+5%</span>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Security Alerts -->
+          <div class="alerts-container">
+              <div class="alert-header">
+                  <h3>Security Alerts</h3>
+                  <span class="alert-count">3 Active Alerts</span>
+              </div>
+              <div class="alerts-list">
+                  <div class="alert-item critical">
+                      <div class="alert-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                          </svg>
+                      </div>
+                      <div class="alert-content">
+                          <h4>Multiple Failed Login Attempts</h4>
+                          <p>User account "john.doe@company.com" has 15 failed login attempts in the last hour</p>
+                          <span class="alert-time">10 minutes ago</span>
+                      </div>
+                      <div class="alert-actions">
+                          <button class="admin-btn admin-btn-danger" onclick="blockIP('192.168.1.100')">Block IP</button>
+                          <button class="admin-btn admin-btn-outline" onclick="investigateAlert(1)">Investigate</button>
+                      </div>
+                  </div>
+                  <div class="alert-item warning">
+                      <div class="alert-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                          </svg>
+                      </div>
+                      <div class="alert-content">
+                          <h4>Unusual API Usage Pattern</h4>
+                          <p>API key "ak_7842x" showing 300% increase in request volume</p>
+                          <span class="alert-time">2 hours ago</span>
+                      </div>
+                      <div class="alert-actions">
+                          <button class="admin-btn admin-btn-warning" onclick="throttleAPI('ak_7842x')">Throttle</button>
+                          <button class="admin-btn admin-btn-outline" onclick="investigateAlert(2)">Review</button>
+                      </div>
+                  </div>
+                  <div class="alert-item info">
+                      <div class="alert-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                          </svg>
+                      </div>
+                      <div class="alert-content">
+                          <h4>Data Export Request</h4>
+                          <p>Large dataset export requested by user "sarah@evresearch.org"</p>
+                          <span class="alert-time">5 hours ago</span>
+                      </div>
+                      <div class="alert-actions">
+                          <button class="admin-btn admin-btn-primary" onclick="approveExport(1)">Approve</button>
+                          <button class="admin-btn admin-btn-outline" onclick="investigateAlert(3)">Review</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- API Access Management -->
+      <section class="admin-section">
+          <h2>API Access Management</h2>
+          <div class="table-container">
+              <div class="table-header">
+                  <h3>Active API Keys</h3>
+                  <div class="header-actions">
+                      <button class="admin-btn admin-btn-primary" onclick="generateAPIKey()">
+                          <svg class="btn-icon" viewBox="0 0 24 24">
+                              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                          </svg>
+                          Generate New Key
+                      </button>
+                  </div>
+              </div>
+              
+              <div class="table-wrapper">
+                  <table class="user-table">
+                      <thead>
+                          <tr>
+                              <th>API Key</th>
+                              <th>Owner</th>
+                              <th>Permissions</th>
+                              <th>Rate Limit</th>
+                              <th>Last Used</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>
+                                  <code class="api-key">ak_78x42y19z83a</code>
+                              </td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">JD</div>
+                                      <div>
+                                          <div class="user-name">John Doe</div>
+                                          <div class="user-email">john.doe@company.com</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <div class="permissions-tags">
+                                      <span class="permission-tag">data_read</span>
+                                      <span class="permission-tag">analytics</span>
+                                  </div>
+                              </td>
+                              <td>1000/hr</td>
+                              <td>2024-03-15 14:30</td>
+                              <td>
+                                  <span class="status-badge active">Active</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="Edit" onclick="editAPIKey('ak_78x42y19z83a')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon danger" title="Revoke" onclick="revokeAPIKey('ak_78x42y19z83a')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  <code class="api-key">ak_65y29x18z74b</code>
+                              </td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">SJ</div>
+                                      <div>
+                                          <div class="user-name">Sarah Johnson</div>
+                                          <div class="user-email">sarah@evresearch.org</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <div class="permissions-tags">
+                                      <span class="permission-tag">data_read</span>
+                                      <span class="permission-tag">data_write</span>
+                                      <span class="permission-tag">analytics</span>
+                                  </div>
+                              </td>
+                              <td>500/hr</td>
+                              <td>2024-03-15 11:15</td>
+                              <td>
+                                  <span class="status-badge active">Active</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="Edit" onclick="editAPIKey('ak_65y29x18z74b')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon danger" title="Revoke" onclick="revokeAPIKey('ak_65y29x18z74b')">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </section>
+
+      <!-- Data Access Logs -->
+      <section class="admin-section">
+          <h2>Data Access Logs</h2>
+          <div class="table-container">
+              <div class="table-header">
+                  <h3>Recent Access Events</h3>
+                  <div class="table-filters">
+                      <select id="logType">
+                          <option value="">All Events</option>
+                          <option value="login">Login</option>
+                          <option value="data_access">Data Access</option>
+                          <option value="api_call">API Call</option>
+                          <option value="export">Data Export</option>
+                      </select>
+                      <select id="logStatus">
+                          <option value="">All Status</option>
+                          <option value="success">Success</option>
+                          <option value="failed">Failed</option>
+                      </select>
+                  </div>
+              </div>
+              
+              <div class="table-wrapper">
+                  <table class="user-table">
+                      <thead>
+                          <tr>
+                              <th>Timestamp</th>
+                              <th>User</th>
+                              <th>Event Type</th>
+                              <th>IP Address</th>
+                              <th>Resource</th>
+                              <th>Status</th>
+                              <th>Details</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>2024-03-15 14:30:15</td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">JD</div>
+                                      <div>
+                                          <div class="user-name">John Doe</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="event-badge data_access">Data Access</span>
+                              </td>
+                              <td>192.168.1.100</td>
+                              <td>/api/v1/datasets/7842</td>
+                              <td>
+                                  <span class="status-badge completed">Success</span>
+                              </td>
+                              <td>
+                                  <button class="admin-btn admin-btn-outline" onclick="viewLogDetails(1)">View Details</button>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>2024-03-15 14:28:03</td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">SJ</div>
+                                      <div>
+                                          <div class="user-name">Sarah Johnson</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="event-badge api_call">API Call</span>
+                              </td>
+                              <td>203.0.113.45</td>
+                              <td>/api/v1/analytics/battery-health</td>
+                              <td>
+                                  <span class="status-badge completed">Success</span>
+                              </td>
+                              <td>
+                                  <button class="admin-btn admin-btn-outline" onclick="viewLogDetails(2)">View Details</button>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>2024-03-15 14:25:47</td>
+                              <td>
+                                  <div class="user-info">
+                                      <div class="user-avatar">-</div>
+                                      <div>
+                                          <div class="user-name">Unknown</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="event-badge login">Login</span>
+                              </td>
+                              <td>198.51.100.23</td>
+                              <td>/login</td>
+                              <td>
+                                  <span class="status-badge failed">Failed</span>
+                              </td>
+                              <td>
+                                  <button class="admin-btn admin-btn-outline" onclick="viewLogDetails(3)">View Details</button>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </section>
+
+      <!-- Compliance Status -->
+      <section class="admin-section">
+          <h2>Compliance Status</h2>
+          <div class="compliance-grid">
+              <div class="compliance-card">
+                  <div class="compliance-header">
+                      <h4>GDPR Compliance</h4>
+                      <span class="compliance-score excellent">100%</span>
+                  </div>
+                  <div class="compliance-progress">
+                      <div class="progress-bar">
+                          <div class="progress-fill" style="width: 100%"></div>
+                      </div>
+                  </div>
+                  <div class="compliance-details">
+                      <div class="detail-item">
+                          <span class="label">Data Anonymization:</span>
+                          <span class="value compliant">Compliant</span>
+                      </div>
+                      <div class="detail-item">
+                          <span class="label">Right to Erasure:</span>
+                          <span class="value compliant">Compliant</span>
+                      </div>
+                      <div class="detail-item">
+                          <span class="label">Data Portability:</span>
+                          <span class="value compliant">Compliant</span>
+                      </div>
+                  </div>
+              </div>
+              
+              <div class="compliance-card">
+                  <div class="compliance-header">
+                      <h4>CCPA Compliance</h4>
+                      <span class="compliance-score good">95%</span>
+                  </div>
+                  <div class="compliance-progress">
+                      <div class="progress-bar">
+                          <div class="progress-fill" style="width: 95%"></div>
+                      </div>
+                  </div>
+                  <div class="compliance-details">
+                      <div class="detail-item">
+                          <span class="label">Opt-out Mechanism:</span>
+                          <span class="value compliant">Compliant</span>
+                      </div>
+                      <div class="detail-item">
+                          <span class="label">Data Disclosure:</span>
+                          <span class="value compliant">Compliant</span>
+                      </div>
+                      <div class="detail-item">
+                          <span class="label">Minor Protection:</span>
+                          <span class="value warning">Needs Review</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content">
+      <!-- Platform Overview -->
+      <section class="admin-section">
+          <div class="dashboard-header">
+              <h2>Platform Performance</h2>
+              <div class="header-actions">
+                  <select id="analyticsPeriod">
+                      <option value="week">Last 7 Days</option>
+                      <option value="month" selected>Last 30 Days</option>
+                      <option value="quarter">Last 90 Days</option>
+                      <option value="year">Last 12 Months</option>
+                  </select>
+                  <button class="admin-btn admin-btn-outline">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                      </svg>
+                      Export Report
+                  </button>
+              </div>
+          </div>
+
+          <!-- Platform Stats -->
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>1,247</h3>
+                      <p>Active Users</p>
+                      <span class="stat-change positive">+15.3%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>568</h3>
+                      <p>Datasets Available</p>
+                      <span class="stat-change positive">+8.7%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>$42,850</h3>
+                      <p>Monthly Revenue</p>
+                      <span class="stat-change positive">+12.5%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>3,842</h3>
+                      <p>API Requests</p>
+                      <span class="stat-change positive">+22.1%</span>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="charts-grid">
+              <div class="chart-card">
+                  <div class="chart-header">
+                      <h4>User Growth</h4>
+                      <div class="chart-legend">
+                          <div class="legend-item">
+                              <div class="legend-color primary"></div>
+                              <span>New Users</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color secondary"></div>
+                              <span>Active Users</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="chart-placeholder">
+                      <div class="line-chart">
+                          <div class="chart-line primary" style="height: 80%"></div>
+                          <div class="chart-line secondary" style="height: 65%"></div>
+                          <div class="chart-points">
+                              <span>Jan</span>
+                              <span>Feb</span>
+                              <span>Mar</span>
+                              <span>Apr</span>
+                              <span>May</span>
+                              <span>Jun</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <div class="chart-card">
+                  <div class="chart-header">
+                      <h4>Dataset Categories</h4>
+                  </div>
+                  <div class="chart-placeholder">
+                      <div class="pie-chart">
+                          <div class="pie-segment" style="--percentage: 35; --color: #64FFDA;"></div>
+                          <div class="pie-segment" style="--percentage: 25; --color: #3B82F6;"></div>
+                          <div class="pie-segment" style="--percentage: 20; --color: #10B981;"></div>
+                          <div class="pie-segment" style="--percentage: 15; --color: #F59E0B;"></div>
+                          <div class="pie-segment" style="--percentage: 5; --color: #EF4444;"></div>
+                      </div>
+                      <div class="pie-legend">
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #64FFDA;"></div>
+                              <span>Battery Data (35%)</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #3B82F6;"></div>
+                              <span>Charging (25%)</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #10B981;"></div>
+                              <span>Driving (20%)</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Popular Datasets -->
+      <section class="admin-section">
+          <h2>Most Popular Datasets</h2>
+          <div class="table-container">
+              <div class="table-header">
+                  <h3>Top Performing Datasets</h3>
+                  <div class="table-filters">
+                      <select id="datasetPeriod">
+                          <option value="week">Last 7 Days</option>
+                          <option value="month" selected>Last 30 Days</option>
+                          <option value="quarter">Last 90 Days</option>
+                      </select>
+                  </div>
+              </div>
+              
+              <div class="table-wrapper">
+                  <table class="user-table">
+                      <thead>
+                          <tr>
+                              <th>Dataset</th>
+                              <th>Category</th>
+                              <th>Provider</th>
+                              <th>Downloads</th>
+                              <th>Revenue</th>
+                              <th>Rating</th>
+                              <th>Trend</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>
+                                  <div class="dataset-info">
+                                      <div class="dataset-icon">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                          </svg>
+                                      </div>
+                                      <div>
+                                          <div class="dataset-name">Battery Health (SOH)</div>
+                                          <div class="dataset-desc">State of Health metrics</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="category-badge battery">Battery Data</span>
+                              </td>
+                              <td>Sarah Johnson</td>
+                              <td>247</td>
+                              <td>$7,410</td>
+                              <td>
+                                  <div class="rating">
+                                      <span class="stars">★★★★★</span>
+                                      <span class="rating-value">4.9</span>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="trend positive">+15%</span>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  <div class="dataset-info">
+                                      <div class="dataset-icon">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                          </svg>
+                                      </div>
+                                      <div>
+                                          <div class="dataset-name">Charging Behavior</div>
+                                          <div class="dataset-desc">Charging session analysis</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="category-badge charging">Charging Data</span>
+                              </td>
+                              <td>EV Research Lab</td>
+                              <td>189</td>
+                              <td>$5,670</td>
+                              <td>
+                                  <div class="rating">
+                                      <span class="stars">★★★★☆</span>
+                                      <span class="rating-value">4.7</span>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="trend positive">+8%</span>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  <div class="dataset-info">
+                                      <div class="dataset-icon">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                          </svg>
+                                      </div>
+                                      <div>
+                                          <div class="dataset-name">Driving Patterns</div>
+                                          <div class="dataset-desc">Daily mileage analytics</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="category-badge driving">Driving Data</span>
+                              </td>
+                              <td>Mike Rodriguez</td>
+                              <td>156</td>
+                              <td>$4,680</td>
+                              <td>
+                                  <div class="rating">
+                                      <span class="stars">★★★★☆</span>
+                                      <span class="rating-value">4.6</span>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="trend positive">+12%</span>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </section>
+
+      <!-- AI Insights -->
+      <section class="admin-section">
+          <h2>AI-Powered Market Insights</h2>
+          <div class="insights-grid">
+              <div class="insight-card">
+                  <div class="insight-header">
+                      <h4>EV Market Trends</h4>
+                      <span class="insight-confidence">92%</span>
+                  </div>
+                  <div class="insight-content">
+                      <p>Growing demand for battery degradation data suggests increased focus on EV longevity and resale value analysis.</p>
+                      <div class="insight-metrics">
+                          <div class="metric">
+                              <span class="metric-value">+35%</span>
+                              <span class="metric-label">Battery data queries</span>
+                          </div>
+                          <div class="metric">
+                              <span class="metric-value">+28%</span>
+                              <span class="metric-label">Manufacturer interest</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="insight-actions">
+                      <button class="admin-btn admin-btn-outline" onclick="viewDetailedAnalysis(1)">View Detailed Analysis</button>
+                  </div>
+              </div>
+              
+              <div class="insight-card">
+                  <div class="insight-header">
+                      <h4>Infrastructure Development</h4>
+                      <span class="insight-confidence">87%</span>
+                  </div>
+                  <div class="insight-content">
+                      <p>Charging behavior data indicates need for fast-charging infrastructure in suburban commercial areas.</p>
+                      <div class="insight-metrics">
+                          <div class="metric">
+                              <span class="metric-value">42%</span>
+                              <span class="metric-label">Commercial charging</span>
+                          </div>
+                          <div class="metric">
+                              <span class="metric-value">3.2x</span>
+                              <span class="metric-label">DC charger demand</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="insight-actions">
+                      <button class="admin-btn admin-btn-outline" onclick="viewDetailedAnalysis(2)">View Detailed Analysis</button>
+                  </div>
+              </div>
+              
+              <div class="insight-card">
+                  <div class="insight-header">
+                      <h4>Consumer Behavior</h4>
+                      <span class="insight-confidence">85%</span>
+                  </div>
+                  <div class="insight-content">
+                      <p>Weekend driving patterns show increased EV usage for family trips, suggesting range anxiety is decreasing.</p>
+                      <div class="insight-metrics">
+                          <div class="metric">
+                              <span class="metric-value">+45%</span>
+                              <span class="metric-label">Weekend mileage</span>
+                          </div>
+                          <div class="metric">
+                              <span class="metric-value">18%</span>
+                              <span class="metric-label">Long-distance trips</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="insight-actions">
+                      <button class="admin-btn admin-btn-outline" onclick="viewDetailedAnalysis(3)">View Detailed Analysis</button>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Geographic Distribution -->
+      <section class="admin-section">
+          <h2>Geographic Distribution</h2>
+          <div class="geo-grid">
+              <div class="geo-card">
+                  <div class="geo-header">
+                      <h4>User Distribution by Region</h4>
+                  </div>
+                  <div class="geo-content">
+                      <div class="region-stats">
+                          <div class="region-item">
+                              <span class="region-name">North America</span>
+                              <div class="region-bar">
+                                  <div class="region-fill" style="width: 45%"></div>
+                              </div>
+                              <span class="region-percent">45%</span>
+                          </div>
+                          <div class="region-item">
+                              <span class="region-name">Europe</span>
+                              <div class="region-bar">
+                                  <div class="region-fill" style="width: 35%"></div>
+                              </div>
+                              <span class="region-percent">35%</span>
+                          </div>
+                          <div class="region-item">
+                              <span class="region-name">Asia</span>
+                              <div class="region-bar">
+                                  <div class="region-fill" style="width: 15%"></div>
+                              </div>
+                              <span class="region-percent">15%</span>
+                          </div>
+                          <div class="region-item">
+                              <span class="region-name">Other</span>
+                              <div class="region-bar">
+                                  <div class="region-fill" style="width: 5%"></div>
+                              </div>
+                              <span class="region-percent">5%</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <div class="geo-card">
+                  <div class="geo-header">
+                      <h4>Data Consumption by Country</h4>
+                  </div>
+                  <div class="geo-content">
+                      <div class="country-list">
+                          <div class="country-item">
+                              <span class="country-flag">🇺🇸</span>
+                              <span class="country-name">United States</span>
+                              <span class="country-data">1.2 TB</span>
+                          </div>
+                          <div class="country-item">
+                              <span class="country-flag">🇩🇪</span>
+                              <span class="country-name">Germany</span>
+                              <span class="country-data">890 GB</span>
+                          </div>
+                          <div class="country-item">
+                              <span class="country-flag">🇬🇧</span>
+                              <span class="country-name">United Kingdom</span>
+                              <span class="country-data">760 GB</span>
+                          </div>
+                          <div class="country-item">
+                              <span class="country-flag">🇨🇦</span>
+                              <span class="country-name">Canada</span>
+                              <span class="country-data">540 GB</span>
+                          </div>
+                          <div class="country-item">
+                              <span class="country-flag">🇫🇷</span>
+                              <span class="country-name">France</span>
+                              <span class="country-data">480 GB</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Add User Modal -->
+  <div id="addUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New User</h3>
+            <button class="modal-close" onclick="closeAddUserModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form class="user-form" id="addUserForm">
+                <div class="form-group">
+                    <label for="userName">Full Name</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Role</label>
+                    <select id="userRole" required>
+                        <option value="">Select Role</option>
+                        <option value="consumer">Data Consumer</option>
+                        <option value="provider">Data Provider</option>
+                        <option value="partner">Partner</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userPermissions">Permissions</label>
+                    <div class="permissions-grid">
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="permissions" value="data_view">
+                            View Data
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="permissions" value="data_upload">
+                            Upload Data
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="permissions" value="data_download">
+                            Download Data
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="permissions" value="api_access">
+                            API Access
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-btn admin-btn-outline" onclick="closeAddUserModal()">Cancel</button>
+            <button class="admin-btn admin-btn-primary" onclick="addNewUser()">Create User</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Generate API Key Modal -->
+  <div id="apiKeyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Generate New API Key</h3>
+            <button class="modal-close" onclick="closeAPIKeyModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form class="api-key-form" id="apiKeyForm">
+                <div class="form-group">
+                    <label for="keyOwner">Owner</label>
+                    <select id="keyOwner" required>
+                        <option value="">Select User</option>
+                        <option value="1">John Doe (john.doe@company.com)</option>
+                        <option value="2">Sarah Johnson (sarah@evresearch.org)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="keyPermissions">Permissions</label>
+                    <div class="permissions-grid">
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="data_read">
+                            Read Data
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="data_write">
+                            Write Data
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="analytics">
+                            Analytics Access
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="export">
+                            Data Export
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rateLimit">Rate Limit (requests/hour)</label>
+                    <input type="number" id="rateLimit" value="1000" min="100" max="10000">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="admin-btn admin-btn-outline" onclick="closeAPIKeyModal()">Cancel</button>
+            <button class="admin-btn admin-btn-primary" onclick="createAPIKey()">Generate Key</button>
+        </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <!-- Column 1 -->
+        <div class="footer-about">
+          <h3 class="footer-title">EV-DataHub</h3>
+          <p class="footer-desc">
+            Empowering the future of mobility through secure, anonymized electric vehicle data analytics and insights.
+          </p>
+          <div class="footer-socials">
+            <div class="footer-icon">youtube</div>
+            <div class="footer-icon">Twitter</div>
+            <div class="footer-icon">GitHub</div>
+          </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div>
+          <h4 class="footer-heading">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#">Data Catalog</a></li>
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3 -->
+        <div>
+          <h4 class="footer-heading">Company</h4>
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2024 EV-DataHub. All rights reserved. | Chợ dữ liệu phân tích xe điện</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+      // Tab switching functionality
+      function switchTab(tabName) {
+          // Hide all tab contents
+          document.querySelectorAll('.tab-content').forEach(tab => {
+              tab.classList.remove('active');
+          });
+          
+          // Remove active class from all tabs
+          document.querySelectorAll('.tab-btn').forEach(tab => {
+              tab.classList.remove('active');
+          });
+          
+          // Show selected tab content
+          document.getElementById(tabName).classList.add('active');
+          
+          // Add active class to clicked tab
+          document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      }
+      
+      // Add event listeners to tabs
+      document.querySelectorAll('.tab-btn').forEach(tab => {
+          tab.addEventListener('click', () => {
+              const tabName = tab.getAttribute('data-tab');
+              switchTab(tabName);
+          });
+      });
+
+      // User Management Functions
+      function showAddUserModal() {
+          document.getElementById('addUserModal').style.display = 'block';
+      }
+
+      function closeAddUserModal() {
+          document.getElementById('addUserModal').style.display = 'none';
+          document.getElementById('addUserForm').reset();
+      }
+
+      function addNewUser() {
+          const name = document.getElementById('userName').value;
+          const email = document.getElementById('userEmail').value;
+          const role = document.getElementById('userRole').value;
+          
+          if (name && email && role) {
+              alert(`User ${name} added successfully!`);
+              closeAddUserModal();
+          } else {
+              alert('Please fill in all required fields.');
+          }
+      }
+
+      function editUser(userId) {
+          alert(`Editing user with ID: ${userId}`);
+      }
+
+      function viewUserDetails(userId) {
+          alert(`Viewing details for user ID: ${userId}`);
+      }
+
+      function suspendUser(userId) {
+          if (confirm('Are you sure you want to suspend this user?')) {
+              alert(`User ${userId} suspended successfully!`);
+          }
+      }
+
+      function approveUser(userId) {
+          alert(`User ${userId} approved successfully!`);
+      }
+
+      function rejectUser(userId) {
+          if (confirm('Are you sure you want to reject this user?')) {
+              alert(`User ${userId} rejected successfully!`);
+          }
+      }
+
+      // Data Approval Functions
+      function approveDataset(datasetId) {
+          alert(`Dataset ${datasetId} approved successfully!`);
+      }
+
+      function reviewDataset(datasetId) {
+          alert(`Reviewing dataset ${datasetId}`);
+      }
+
+      function rejectDataset(datasetId) {
+          if (confirm('Are you sure you want to reject this dataset?')) {
+              alert(`Dataset ${datasetId} rejected successfully!`);
+          }
+      }
+
+      // Payment Functions
+      function viewTransactionDetails(transactionId) {
+          alert(`Viewing details for transaction: ${transactionId}`);
+      }
+
+      function downloadReceipt(transactionId) {
+          alert(`Downloading receipt for transaction: ${transactionId}`);
+      }
+
+      function approveTransaction(transactionId) {
+          alert(`Transaction ${transactionId} approved successfully!`);
+      }
+
+      function rejectTransaction(transactionId) {
+          if (confirm('Are you sure you want to reject this transaction?')) {
+              alert(`Transaction ${transactionId} rejected successfully!`);
+          }
+      }
+
+      function processPayout(providerId) {
+          alert(`Processing payout for provider: ${providerId}`);
+      }
+
+      function viewPayoutDetails(providerId) {
+          alert(`Viewing payout details for provider: ${providerId}`);
+      }
+
+      // Security Functions
+      function runSecurityScan() {
+          alert('Security scan initiated. Results will be available shortly.');
+      }
+
+      function blockIP(ipAddress) {
+          if (confirm(`Are you sure you want to block IP: ${ipAddress}?`)) {
+              alert(`IP ${ipAddress} blocked successfully!`);
+          }
+      }
+
+      function investigateAlert(alertId) {
+          alert(`Investigating alert: ${alertId}`);
+      }
+
+      function throttleAPI(apiKey) {
+          alert(`API key ${apiKey} throttled successfully!`);
+      }
+
+      function approveExport(exportId) {
+          alert(`Export ${exportId} approved successfully!`);
+      }
+
+      function generateAPIKey() {
+          document.getElementById('apiKeyModal').style.display = 'block';
+      }
+
+      function closeAPIKeyModal() {
+          document.getElementById('apiKeyModal').style.display = 'none';
+          document.getElementById('apiKeyForm').reset();
+      }
+
+      function createAPIKey() {
+          const owner = document.getElementById('keyOwner').value;
+          if (owner) {
+              alert('API key generated successfully!');
+              closeAPIKeyModal();
+          } else {
+              alert('Please select an owner for the API key.');
+          }
+      }
+
+      function editAPIKey(apiKey) {
+          alert(`Editing API key: ${apiKey}`);
+      }
+
+      function revokeAPIKey(apiKey) {
+          if (confirm(`Are you sure you want to revoke API key: ${apiKey}?`)) {
+              alert(`API key ${apiKey} revoked successfully!`);
+          }
+      }
+
+      function viewLogDetails(logId) {
+          alert(`Viewing log details: ${logId}`);
+      }
+
+      // Analytics Functions
+      function viewDetailedAnalysis(analysisId) {
+          alert(`Viewing detailed analysis: ${analysisId}`);
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+          const addUserModal = document.getElementById('addUserModal');
+          const apiKeyModal = document.getElementById('apiKeyModal');
+          
+          if (event.target === addUserModal) {
+              closeAddUserModal();
+          }
+          
+          if (event.target === apiKeyModal) {
+              closeAPIKeyModal();
+          }
+      }
+
+      // Select All checkbox functionality
+      document.getElementById('selectAll').addEventListener('change', function() {
+          const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+          checkboxes.forEach(checkbox => {
+              checkbox.checked = this.checked;
+          });
+      });
+  </script>
+</body>
+</html>
