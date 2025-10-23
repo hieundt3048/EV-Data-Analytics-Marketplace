@@ -32,7 +32,7 @@ function showDataManagementForm() {
         <input name="dataName" type="text" placeholder="Enter the data name..." required>
 
         <label>Describe:</label>
-        <textarea name="describe" placeholder="Enter a short description..."></textarea>
+        <textarea name="describe" type="text" placeholder="Enter a short description..."></textarea>
 
         <label>Data type:</label>
         <select name="dataType">
@@ -70,30 +70,6 @@ function handleUpload(e) {
   const name = f.dataName.value || '<no name>';
   alert('Dataset "' + name + '" uploaded!');
   location.reload();
-}
-
-/*--------------Form 2: Policies & Pricing --------------*/
-/*+++++++++++++++++++++++++*/
-
-
-/* Confirm modal utilities */
-function showConfirmModal() {
-  return new Promise(resolve => {
-    pendingRemovePIIConfirmResolve = resolve;
-    const modal = document.getElementById('confirmModal');
-    modal.style.display = 'flex';
-    modal.setAttribute('aria-hidden', 'false');
-  });
-}
-
-function closeConfirm(result) {
-  const modal = document.getElementById('confirmModal');
-  modal.style.display = 'none';
-  modal.setAttribute('aria-hidden', 'true');
-  if (pendingRemovePIIConfirmResolve) {
-    pendingRemovePIIConfirmResolve(result);
-    pendingRemovePIIConfirmResolve = null;
-  }
 }
 
 /* Optional cleanup */
