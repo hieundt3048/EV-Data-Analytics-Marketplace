@@ -13,3 +13,1190 @@
     <link rel="stylesheet" href="../static/css/index.css">
     <link rel="stylesheet" href="../static/css/consumer.css">
 </head>
+
+<body>
+  <!-- Header -->
+  <header class="consumer-header-area consumer-header-sticky">
+      <img class="consumer-logo" src="../static/images/LogoEV.png">
+      <!-- Search Bar -->
+      <div class="consumer-search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search EV data, models, analytics...">
+        <img class="consumer-search-icon" src="../static/images/search.png">
+      </div>
+      <nav class="consumer-main-nav">
+          <ul class="consumer-nav">
+              <li class="scroll-to-section"><a href="index.html">Home</a></li>
+              <li><a href="Admin.html">ADMIN</a></li>
+              <li><a href="Consumer.html" class="active">Consumer</a></li>
+              <li><a href="Provider.html">Provider</a></li>
+              <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
+              <li><a href="contact-us.html">Contact Support</a></li>
+          </ul>
+      </nav>
+  </header>
+
+  <!-- ***** Main Banner Area Start ***** -->
+  <section class="page-heading">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-12">
+                  <div class="header-text">
+                      <h2>Data Consumer Portal</h2>
+                      <div class="div-dec"></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <!-- ***** Main Banner Area End ***** -->
+
+  <!-- Consumer Navigation Tabs -->
+  <div class="consumer-tabs">
+    <div class="container">
+      <div class="tabs-container">
+        <button class="tab-btn active" data-tab="dashboard">Consumer Dashboard</button>
+        <button class="tab-btn" data-tab="data-discovery">Data Discovery</button>
+        <button class="tab-btn" data-tab="analytics">Analytics Dashboard</button>
+        <button class="tab-btn" data-tab="api">API Documentation</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="consumer-container">
+    <!-- Consumer Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+      <!-- Quick Stats Dashboard -->
+      <section class="consumer-section">
+          <h2>My Consumer Dashboard</h2>
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>24</h3>
+                      <p>Datasets Purchased</p>
+                      <span class="stat-change positive">+5 this month</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>$2,450</h3>
+                      <p>Total Spending</p>
+                      <span class="stat-change positive">+$320 this month</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>156</h3>
+                      <p>API Calls Today</p>
+                      <span class="stat-change positive">+12% from yesterday</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>98%</h3>
+                      <p>Data Quality Score</p>
+                      <span class="stat-change positive">+2% improvement</span>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="consumer-section">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions-grid">
+              <div class="consumer-card">
+                  <div class="card-body">
+                      <h5>Discover Data</h5>
+                      <p>Browse EV datasets for driving behavior, battery performance, charging usage, and V2G transactions</p>
+                      <button class="consumer-btn consumer-btn-primary" onclick="switchTab('data-discovery')">
+                          Explore Datasets
+                      </button>
+                  </div>
+              </div>
+
+              <div class="consumer-card">
+                  <div class="card-body">
+                      <h5>Analytics Tools</h5>
+                      <p>Access interactive dashboards for SoC/SoH battery metrics, charging frequency, and CO₂ savings analysis</p>
+                      <button class="consumer-btn consumer-btn-success" onclick="switchTab('analytics')">
+                          View Analytics
+                      </button>
+                  </div>
+              </div>
+
+              <div class="consumer-card">
+                  <div class="card-body">
+                      <h5>API Integration</h5>
+                      <p>Integrate EV data into third-party systems (insurance, smart city, fleet management)</p>
+                      <button class="consumer-btn consumer-btn-info" onclick="switchTab('api')">
+                          API Documentation
+                      </button>
+                  </div>
+              </div>
+
+              <div class="consumer-card">
+                  <div class="card-body">
+                      <h5>Purchase History</h5>
+                      <p>View your data purchases, subscriptions, and download history</p>
+                      <button class="consumer-btn consumer-btn-warning" onclick="viewPurchaseHistory()">
+                          View History
+                      </button>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Recent Activity -->
+      <section class="consumer-section">
+          <h2>Recent Data Purchases</h2>
+          <div class="table-container">
+              <div class="table-header">
+                  <h3>Your Recent Activity</h3>
+                  <div class="header-actions">
+                      <button class="consumer-btn consumer-btn-outline">
+                          <svg class="btn-icon" viewBox="0 0 24 24">
+                              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                          </svg>
+                          Export History
+                      </button>
+                  </div>
+              </div>
+              
+              <div class="table-wrapper">
+                  <table class="data-table">
+                      <thead>
+                          <tr>
+                              <th>Dataset</th>
+                              <th>Category</th>
+                              <th>Type</th>
+                              <th>Purchase Date</th>
+                              <th>Price</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>
+                                  <div class="dataset-info">
+                                      <div class="dataset-icon">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                          </svg>
+                                      </div>
+                                      <div>
+                                          <div class="dataset-name">Battery Performance Data</div>
+                                          <div class="dataset-desc">Raw battery metrics and SOH analysis</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="category-badge battery">Battery Data</span>
+                              </td>
+                              <td>
+                                  <span class="type-badge raw">Raw Data</span>
+                              </td>
+                              <td>2024-03-15</td>
+                              <td>$299</td>
+                              <td>
+                                  <span class="status-badge completed">Downloaded</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="Download Again" onclick="downloadDataset(1)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="View Analytics" onclick="viewDatasetAnalytics(1)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  <div class="dataset-info">
+                                      <div class="dataset-icon">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                          </svg>
+                                      </div>
+                                      <div>
+                                          <div class="dataset-name">Charging Behavior Analysis</div>
+                                          <div class="dataset-desc">Analyzed charging patterns and station usage</div>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td>
+                                  <span class="category-badge charging">Charging Data</span>
+                              </td>
+                              <td>
+                                  <span class="type-badge analyzed">Analyzed Data</span>
+                              </td>
+                              <td>2024-03-10</td>
+                              <td>$249</td>
+                              <td>
+                                  <span class="status-badge completed">Downloaded</span>
+                              </td>
+                              <td>
+                                  <div class="action-buttons">
+                                      <button class="btn-icon" title="Download Again" onclick="downloadDataset(2)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                          </svg>
+                                      </button>
+                                      <button class="btn-icon" title="View Analytics" onclick="viewDatasetAnalytics(2)">
+                                          <svg viewBox="0 0 24 24">
+                                              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                          </svg>
+                                      </button>
+                                  </div>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </section>
+    </div>
+
+    <!-- Data Discovery Tab -->
+    <div id="data-discovery" class="tab-content">
+      <!-- Search & Discovery Section -->
+      <section class="consumer-section">
+          <h2>1. Search & Discover Data</h2>
+          <div class="consumer-card">
+              <div class="card-body">
+                  <h5>Find the EV Data You Need</h5>
+                  <p class="section-description">Browse comprehensive EV datasets including driving behavior, battery performance, charging station usage, and V2G transactions.</p>
+                  
+                  <div class="search-filters">
+                      <div class="filter-group">
+                          <label for="data-category">Data Category</label>
+                          <select id="data-category">
+                              <option value="">All Categories</option>
+                              <option value="driving-behavior">Driving Behavior</option>
+                              <option value="battery-performance">Battery Performance</option>
+                              <option value="charging-usage">Charging Station Usage</option>
+                              <option value="v2g-transactions">V2G Transactions</option>
+                              <option value="vehicle-telemetry">Vehicle Telemetry</option>
+                              <option value="energy-consumption">Energy Consumption</option>
+                          </select>
+                      </div>
+                      <div class="filter-group">
+                          <label for="time-range">Time Range</label>
+                          <select id="time-range">
+                              <option value="">Any Time</option>
+                              <option value="last-7-days">Last 7 Days</option>
+                              <option value="last-30-days">Last 30 Days</option>
+                              <option value="last-6-months">Last 6 Months</option>
+                              <option value="last-year">Last Year</option>
+                              <option value="custom">Custom Range</option>
+                          </select>
+                      </div>
+                      <div class="filter-group">
+                          <label for="region">Region</label>
+                          <select id="region">
+                              <option value="">All Regions</option>
+                              <option value="north-america">North America</option>
+                              <option value="europe">Europe</option>
+                              <option value="asia">Asia</option>
+                              <option value="global">Global</option>
+                          </select>
+                      </div>
+                      <div class="filter-group">
+                          <label for="vehicle-type">Vehicle Type</label>
+                          <select id="vehicle-type">
+                              <option value="">All Types</option>
+                              <option value="sedan">Sedan</option>
+                              <option value="suv">SUV</option>
+                              <option value="truck">Truck</option>
+                              <option value="commercial">Commercial</option>
+                          </select>
+                      </div>
+                      <div class="filter-group">
+                          <label for="battery-type">Battery Type</label>
+                          <select id="battery-type">
+                              <option value="">All Types</option>
+                              <option value="lithium-ion">Lithium-ion</option>
+                              <option value="solid-state">Solid State</option>
+                              <option value="lifepo4">LiFePO4</option>
+                          </select>
+                      </div>
+                      <div class="filter-group">
+                          <label for="data-format">Data Format</label>
+                          <select id="data-format">
+                              <option value="">All Formats</option>
+                              <option value="raw">Raw Data</option>
+                              <option value="analyzed">Analyzed Data</option>
+                              <option value="api">API Access</option>
+                          </select>
+                      </div>
+                  </div>
+                  <button class="consumer-btn consumer-btn-primary" onclick="searchDatasets()">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                      </svg>
+                      Search Datasets
+                  </button>
+              </div>
+          </div>
+      </section>
+
+      <!-- Data Purchase Section -->
+      <section class="consumer-section">
+          <h2>2. Purchase & Subscription Plans</h2>
+          <div class="consumer-card">
+              <div class="card-body">
+                  <h5>Flexible Data Access Options</h5>
+                  <p class="section-description">Choose from pay-per-download, subscription plans, or API access for raw data or analyzed insights.</p>
+                  
+                  <div class="pricing-options">
+                      <div class="pricing-card">
+                          <h4>Pay-per-Download</h4>
+                          <div class="price">$50 - $500</div>
+                          <p>One-time purchase of specific datasets</p>
+                          <ul>
+                              <li>Immediate access to selected data</li>
+                              <li>CSV, JSON, or XML formats</li>
+                              <li>Full ownership rights</li>
+                              <li>Raw or analyzed data options</li>
+                          </ul>
+                          <button class="consumer-btn consumer-btn-outline">Select Plan</button>
+                      </div>
+                      <div class="pricing-card featured">
+                          <h4>Subscription</h4>
+                          <div class="price">$199<span>/month</span></div>
+                          <p>Unlimited access to all standard datasets</p>
+                          <ul>
+                              <li>Monthly data updates</li>
+                              <li>Dashboard access included</li>
+                              <li>Priority support</li>
+                              <li>Both raw and analyzed data</li>
+                          </ul>
+                          <button class="consumer-btn consumer-btn-primary">Select Plan</button>
+                      </div>
+                      <div class="pricing-card">
+                          <h4>API Access</h4>
+                          <div class="price">Custom</div>
+                          <p>Real-time data integration</p>
+                          <ul>
+                              <li>REST API endpoints</li>
+                              <li>Real-time data streams</li>
+                              <li>Custom integration support</li>
+                              <li>Webhook notifications</li>
+                          </ul>
+                          <button class="consumer-btn consumer-btn-outline">Contact Sales</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <!-- Featured Datasets -->
+      <section class="consumer-section">
+          <h2>Popular Datasets</h2>
+          <div class="datasets-grid">
+              <div class="dataset-card">
+                  <div class="dataset-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                      </svg>
+                  </div>
+                  <h4>Battery Health (SOH)</h4>
+                  <p>State of Health metrics from 5,000+ EVs across multiple manufacturers with detailed degradation analysis</p>
+                  <div class="dataset-meta">
+                      <span class="size">2.4 GB</span>
+                      <span class="records">250K records</span>
+                      <span class="format raw">Raw Data</span>
+                  </div>
+                  <div class="dataset-price">$299</div>
+                  <button class="consumer-btn consumer-btn-outline">View Details & Purchase</button>
+              </div>
+              <div class="dataset-card">
+                  <div class="dataset-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                  </div>
+                  <h4>Charging Behavior</h4>
+                  <p>Charging session data including duration, energy consumed, charger types and peak usage patterns</p>
+                  <div class="dataset-meta">
+                      <span class="size">1.8 GB</span>
+                      <span class="records">180K records</span>
+                      <span class="format analyzed">Analyzed Data</span>
+                  </div>
+                  <div class="dataset-price">$249</div>
+                  <button class="consumer-btn consumer-btn-outline">View Details & Purchase</button>
+              </div>
+              <div class="dataset-card">
+                  <div class="dataset-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                  </div>
+                  <h4>Driving Patterns</h4>
+                  <p>Daily mileage, speed profiles, route efficiency and regenerative braking usage analytics</p>
+                  <div class="dataset-meta">
+                      <span class="size">3.2 GB</span>
+                      <span class="records">320K records</span>
+                      <span class="format raw">Raw Data</span>
+                  </div>
+                  <div class="dataset-price">$349</div>
+                  <button class="consumer-btn consumer-btn-outline">View Details & Purchase</button>
+              </div>
+              <div class="dataset-card">
+                  <div class="dataset-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                      </svg>
+                  </div>
+                  <h4>V2G Transactions</h4>
+                  <p>Vehicle-to-Grid energy transactions, pricing data, and grid stabilization metrics</p>
+                  <div class="dataset-meta">
+                      <span class="size">1.5 GB</span>
+                      <span class="records">150K records</span>
+                      <span class="format analyzed">Analyzed Data</span>
+                  </div>
+                  <div class="dataset-price">$199</div>
+                  <button class="consumer-btn consumer-btn-outline">View Details & Purchase</button>
+              </div>
+          </div>
+      </section>
+    </div>
+
+    <!-- Analytics Dashboard Tab -->
+    <div id="analytics" class="tab-content">
+      <!-- Dashboard Overview -->
+      <section class="consumer-section">
+          <div class="dashboard-header">
+              <h2>Analytics Dashboard</h2>
+              <div class="header-actions">
+                  <select id="timeRange">
+                      <option value="7d">Last 7 Days</option>
+                      <option value="30d" selected>Last 30 Days</option>
+                      <option value="90d">Last 90 Days</option>
+                      <option value="1y">Last Year</option>
+                  </select>
+                  <button class="consumer-btn consumer-btn-outline">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                      </svg>
+                      Export Report
+                  </button>
+              </div>
+          </div>
+
+          <!-- Key Metrics -->
+          <div class="stats-grid">
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>2.4M</h3>
+                      <p>Data Points Analyzed</p>
+                      <span class="stat-change positive">+18.3%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>84.2%</h3>
+                      <p>Average Battery Efficiency</p>
+                      <span class="stat-change positive">+2.1%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>156km</h3>
+                      <p>Average Daily Range</p>
+                      <span class="stat-change positive">+5.7%</span>
+                  </div>
+              </div>
+              <div class="stat-card">
+                  <div class="stat-icon">
+                      <svg viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                  </div>
+                  <div class="stat-content">
+                      <h3>12.4t</h3>
+                      <p>CO₂ Savings</p>
+                      <span class="stat-change positive">+15.2%</span>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Main Charts -->
+          <div class="charts-grid">
+              <div class="chart-card large">
+                  <div class="chart-header">
+                      <h4>Battery Health Trends (SoC/SoH)</h4>
+                      <div class="chart-legend">
+                          <div class="legend-item">
+                              <div class="legend-color primary"></div>
+                              <span>State of Health</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color secondary"></div>
+                              <span>State of Charge</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="chart-placeholder">
+                      <div class="line-chart">
+                          <div class="chart-line primary" style="height: 85%"></div>
+                          <div class="chart-line secondary" style="height: 65%"></div>
+                          <div class="chart-points">
+                              <span>Jan</span>
+                              <span>Feb</span>
+                              <span>Mar</span>
+                              <span>Apr</span>
+                              <span>May</span>
+                              <span>Jun</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <div class="chart-card">
+                  <div class="chart-header">
+                      <h4>Charging Frequency Analysis</h4>
+                  </div>
+                  <div class="chart-placeholder">
+                      <div class="pie-chart">
+                          <div class="pie-segment" style="--percentage: 45; --color: #64FFDA;"></div>
+                          <div class="pie-segment" style="--percentage: 30; --color: #3B82F6;"></div>
+                          <div class="pie-segment" style="--percentage: 15; --color: #10B981;"></div>
+                          <div class="pie-segment" style="--percentage: 10; --color: #F59E0B;"></div>
+                      </div>
+                      <div class="pie-legend">
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #64FFDA;"></div>
+                              <span>Home (45%)</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #3B82F6;"></div>
+                              <span>Work (30%)</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #10B981;"></div>
+                              <span>Public (15%)</span>
+                          </div>
+                          <div class="legend-item">
+                              <div class="legend-color" style="background: #F59E0B;"></div>
+                              <span>Fast (10%)</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- AI Insights -->
+          <section class="consumer-section">
+              <h2>AI-Powered Insights & Trend Analysis</h2>
+              <div class="insights-grid">
+                  <div class="insight-card">
+                      <div class="insight-header">
+                          <h4>Battery Optimization Trends</h4>
+                          <span class="insight-confidence high">High</span>
+                      </div>
+                      <div class="insight-content">
+                          <p>Analysis shows optimal charging habits across your dataset. Continue avoiding frequent fast charging to maintain current health levels with 98.2% efficiency.</p>
+                          <div class="insight-metrics">
+                              <div class="metric">
+                                  <span class="metric-value">98.2%</span>
+                                  <span class="metric-label">Health Score</span>
+                              </div>
+                              <div class="metric">
+                                  <span class="metric-value">0.8%</span>
+                                  <span class="metric-label">Monthly Degradation</span>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="insight-actions">
+                          <button class="consumer-btn consumer-btn-outline">View Detailed Report</button>
+                      </div>
+                  </div>
+                  
+                  <div class="insight-card">
+                      <div class="insight-header">
+                          <h4>Charging Infrastructure Demand</h4>
+                          <span class="insight-confidence medium">Medium</span>
+                      </div>
+                      <div class="insight-content">
+                          <p>Consider shifting 15% of home charging to off-peak hours (10 PM - 6 AM) to reduce electricity costs by approximately $45 monthly and optimize grid load.</p>
+                          <div class="insight-metrics">
+                              <div class="metric">
+                                  <span class="metric-value">67%</span>
+                                  <span class="metric-label">Peak Usage</span>
+                              </div>
+                              <div class="metric">
+                                  <span class="metric-value">$45</span>
+                                  <span class="metric-label">Potential Savings</span>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="insight-actions">
+                          <button class="consumer-btn consumer-btn-outline">Optimize Schedule</button>
+                      </div>
+                  </div>
+
+                  <div class="insight-card">
+                      <div class="insight-header">
+                          <h4>Consumption Pattern Forecast</h4>
+                          <span class="insight-confidence high">High</span>
+                      </div>
+                      <div class="insight-content">
+                          <p>Weekend driving patterns show increased EV usage for family trips, suggesting range anxiety is decreasing with improved charging infrastructure.</p>
+                          <div class="insight-metrics">
+                              <div class="metric">
+                                  <span class="metric-value">+45%</span>
+                                  <span class="metric-label">Weekend Mileage</span>
+                              </div>
+                              <div class="metric">
+                                  <span class="metric-value">18%</span>
+                                  <span class="metric-label">Long-distance Trips</span>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="insight-actions">
+                          <button class="consumer-btn consumer-btn-outline">View Forecast Details</button>
+                      </div>
+                  </div>
+              </div>
+          </section>
+
+          <!-- Additional Analytics Tools -->
+          <section class="consumer-section">
+              <h2>Additional Analytics Tools</h2>
+              <div class="analytics-tools-grid">
+                  <div class="tool-card">
+                      <div class="tool-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                          </svg>
+                      </div>
+                      <h4>Route Efficiency Analysis</h4>
+                      <p>Analyze driving routes for optimal energy consumption and charging stops</p>
+                      <button class="consumer-btn consumer-btn-outline">Launch Tool</button>
+                  </div>
+                  <div class="tool-card">
+                      <div class="tool-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                          </svg>
+                      </div>
+                      <h4>Battery Degradation Model</h4>
+                      <p>Predict battery lifespan based on usage patterns and charging behavior</p>
+                      <button class="consumer-btn consumer-btn-outline">Launch Tool</button>
+                  </div>
+                  <div class="tool-card">
+                      <div class="tool-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                          </svg>
+                      </div>
+                      <h4>Charging Cost Calculator</h4>
+                      <p>Calculate optimal charging times and locations for cost efficiency</p>
+                      <button class="consumer-btn consumer-btn-outline">Launch Tool</button>
+                  </div>
+              </div>
+          </section>
+      </section>
+    </div>
+
+    <!-- API Documentation Tab -->
+    <div id="api" class="tab-content">
+      <!-- API Overview -->
+      <section class="consumer-section">
+          <div class="dashboard-header">
+              <h2>API Documentation & Integration</h2>
+              <div class="header-actions">
+                  <button class="consumer-btn consumer-btn-primary" onclick="generateAPIKey()">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      </svg>
+                      Generate API Key
+                  </button>
+                  <button class="consumer-btn consumer-btn-outline">
+                      <svg class="btn-icon" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                      </svg>
+                      Download SDK
+                  </button>
+              </div>
+          </div>
+
+          <!-- Quick Start -->
+          <div class="api-quickstart">
+              <h3>Quick Start Guide</h3>
+              <div class="quickstart-steps">
+                  <div class="step">
+                      <div class="step-number">1</div>
+                      <div class="step-content">
+                          <h4>Get Your API Key</h4>
+                          <p>Generate an API key from your dashboard with appropriate permissions for third-party integration</p>
+                      </div>
+                  </div>
+                  <div class="step">
+                      <div class="step-number">2</div>
+                      <div class="step-content">
+                          <h4>Make Your First Request</h4>
+                          <p>Use the API key to authenticate and make requests to our endpoints for insurance, smart city, or fleet management systems</p>
+                      </div>
+                  </div>
+                  <div class="step">
+                      <div class="step-number">3</div>
+                      <div class="step-content">
+                          <h4>Integrate & Scale</h4>
+                          <p>Implement the API in your applications and scale as needed with real-time data streams</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Core Endpoints -->
+          <div class="api-section">
+              <h3>Core API Endpoints</h3>
+              
+              <!-- Battery Data Endpoint -->
+              <div class="api-card">
+                  <div class="api-header">
+                      <h4>Get Battery Health Data</h4>
+                      <span class="api-method get">GET</span>
+                  </div>
+                  <div class="api-content">
+                      <div class="endpoint-url">
+                          <code>GET /api/v1/battery/health</code>
+                      </div>
+                      <p>Retrieve battery state of health (SoH) and state of charge (SoC) data for insurance and fleet management applications.</p>
+                      
+                      <div class="api-params">
+                          <h5>Query Parameters</h5>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Parameter</th>
+                                      <th>Type</th>
+                                      <th>Required</th>
+                                      <th>Description</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>vehicle_id</td>
+                                      <td>string</td>
+                                      <td>No</td>
+                                      <td>Filter by specific vehicle ID</td>
+                                  </tr>
+                                  <tr>
+                                      <td>start_date</td>
+                                      <td>string</td>
+                                      <td>No</td>
+                                      <td>Start date (YYYY-MM-DD)</td>
+                                  </tr>
+                                  <tr>
+                                      <td>end_date</td>
+                                      <td>string</td>
+                                      <td>No</td>
+                                      <td>End date (YYYY-MM-DD)</td>
+                                  </tr>
+                                  <tr>
+                                      <td>region</td>
+                                      <td>string</td>
+                                      <td>No</td>
+                                      <td>Filter by region</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+
+                      <div class="code-example">
+                          <h5>Example Request</h5>
+                          <div class="code-block">
+                              <pre><code>curl -X GET "https://api.evdatahub.com/v1/battery/health?start_date=2024-01-01&region=europe" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json"</code></pre>
+                          </div>
+                      </div>
+
+                      <div class="response-example">
+                          <h5>Example Response</h5>
+                          <div class="code-block">
+                              <pre><code>{
+  "data": [
+    {
+      "vehicle_id": "EV_7842",
+      "timestamp": "2024-03-15T10:30:00Z",
+      "state_of_health": 92.7,
+      "state_of_charge": 85.4,
+      "cycle_count": 124,
+      "temperature_avg": 25.4,
+      "region": "europe"
+    }
+  ],
+  "pagination": {
+    "total": 1500,
+    "page": 1,
+    "per_page": 100
+  }
+}</code></pre>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Charging Data Endpoint -->
+              <div class="api-card">
+                  <div class="api-header">
+                      <h4>Get Charging Sessions</h4>
+                      <span class="api-method get">GET</span>
+                  </div>
+                  <div class="api-content">
+                      <div class="endpoint-url">
+                          <code>GET /api/v1/charging/sessions</code>
+                      </div>
+                      <p>Retrieve detailed charging session data including duration, energy consumed, and charger types for smart city planning.</p>
+                      
+                      <div class="api-params">
+                          <h5>Query Parameters</h5>
+                          <table class="params-table">
+                              <thead>
+                                  <tr>
+                                      <th>Parameter</th>
+                                      <th>Type</th>
+                                      <th>Required</th>
+                                      <th>Description</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr>
+                                      <td>charger_type</td>
+                                      <td>string</td>
+                                      <td>No</td>
+                                      <td>AC, DC, or Fast</td>
+                                  </tr>
+                                  <tr>
+                                      <td>min_duration</td>
+                                      <td>integer</td>
+                                      <td>No</td>
+                                      <td>Minimum session duration in minutes</td>
+                                  </tr>
+                                  <tr>
+                                      <td>max_energy</td>
+                                      <td>number</td>
+                                      <td>No</td>
+                                      <td>Maximum energy consumed in kWh</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Driving Patterns Endpoint -->
+              <div class="api-card">
+                  <div class="api-header">
+                      <h4>Get Driving Patterns</h4>
+                      <span class="api-method get">GET</span>
+                  </div>
+                  <div class="api-content">
+                      <div class="endpoint-url">
+                          <code>GET /api/v1/driving/patterns</code>
+                      </div>
+                      <p>Access driving pattern data including mileage, speed profiles, and route efficiency for insurance risk assessment.</p>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Integration Examples -->
+          <div class="api-section">
+              <h3>Integration Examples</h3>
+              <div class="integration-examples">
+                  <div class="integration-card">
+                      <h4>Insurance Companies</h4>
+                      <p>Integrate EV data for usage-based insurance models, risk assessment, and personalized premiums.</p>
+                      <ul>
+                          <li>Driving behavior analysis</li>
+                          <li>Battery health monitoring</li>
+                          <li>Charging pattern assessment</li>
+                      </ul>
+                  </div>
+                  <div class="integration-card">
+                      <h4>Smart City Planning</h4>
+                      <p>Utilize EV data for infrastructure planning, traffic management, and energy grid optimization.</p>
+                      <ul>
+                          <li>Charging station demand analysis</li>
+                          <li>Traffic flow optimization</li>
+                          <li>Energy consumption forecasting</li>
+                      </ul>
+                  </div>
+                  <div class="integration-card">
+                      <h4>Fleet Management</h4>
+                      <p>Optimize EV fleet operations with real-time data on vehicle performance and charging needs.</p>
+                      <ul>
+                          <li>Route optimization</li>
+                          <li>Maintenance scheduling</li>
+                          <li>Charging infrastructure planning</li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+
+          <!-- SDKs & Libraries -->
+          <div class="api-section">
+              <h3>SDKs & Libraries</h3>
+              <div class="sdks-grid">
+                  <div class="sdk-card">
+                      <div class="sdk-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4z"/>
+                          </svg>
+                      </div>
+                      <h4>JavaScript</h4>
+                      <p>Official JavaScript SDK for browser and Node.js applications with real-time data streaming</p>
+                      <div class="sdk-actions">
+                          <button class="consumer-btn consumer-btn-outline">View Docs</button>
+                          <button class="consumer-btn consumer-btn-primary">Install</button>
+                      </div>
+                  </div>
+                  
+                  <div class="sdk-card">
+                      <div class="sdk-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M3 3h18v18H3V3zm4.73 15.04c.4.85 1.2 1.55 2.45 1.55 1.57 0 2.53-.8 2.53-2.55v-5.78h-1.7V17c0 .86-.35 1.08-.9 1.08-.58 0-.82-.4-1.09-.87l-1.19.83zm5.98-.18c.5.98 1.51 1.73 3.09 1.73 1.6 0 2.8-.83 2.8-2.36 0-1.41-.81-2.04-2.25-2.66l-.42-.18c-.73-.31-1.04-.52-1.04-1.02 0-.41.31-.73.81-.73.48 0 .8.26 1.09.73l1.31-.87c-.55-.96-1.33-1.33-2.4-1.33-1.51 0-2.48.96-2.48 2.23 0 1.38.81 2.03 2.03 2.55l.42.18c.78.34 1.24.55 1.24 1.13 0 .48-.45.83-1.15.83-.83 0-1.31-.43-1.67-1.03l-1.38.8z"/>
+                          </svg>
+                      </div>
+                      <h4>Python</h4>
+                      <p>Python client library for data analysis and integration with pandas and numpy support</p>
+                      <div class="sdk-actions">
+                          <button class="consumer-btn consumer-btn-outline">View Docs</button>
+                          <button class="consumer-btn consumer-btn-primary">Install</button>
+                      </div>
+                  </div>
+
+                  <div class="sdk-card">
+                      <div class="sdk-icon">
+                          <svg viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                          </svg>
+                      </div>
+                      <h4>Java</h4>
+                      <p>Java library for enterprise applications and Android with built-in authentication</p>
+                      <div class="sdk-actions">
+                          <button class="consumer-btn consumer-btn-outline">View Docs</button>
+                          <button class="consumer-btn consumer-btn-primary">Install</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Generate API Key Modal -->
+  <div id="apiKeyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Generate New API Key</h3>
+            <button class="modal-close" onclick="closeAPIKeyModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form class="api-key-form">
+                <div class="form-group">
+                    <label for="keyName">Key Name</label>
+                    <input type="text" id="keyName" placeholder="e.g., Insurance App Integration" required>
+                </div>
+                <div class="form-group">
+                    <label for="integrationType">Integration Type</label>
+                    <select id="integrationType">
+                        <option value="insurance">Insurance System</option>
+                        <option value="smart-city">Smart City Platform</option>
+                        <option value="fleet-management">Fleet Management</option>
+                        <option value="research">Research & Analysis</option>
+                        <option value="custom">Custom Integration</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="keyPermissions">Permissions</label>
+                    <div class="permissions-grid">
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="data_read" checked>
+                            Read EV Data
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="analytics">
+                            Access Analytics
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="realtime">
+                            Real-time Streams
+                        </label>
+                        <label class="permission-checkbox">
+                            <input type="checkbox" name="keyPermissions" value="export">
+                            Data Export
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rateLimit">Rate Limit (requests/hour)</label>
+                    <input type="number" id="rateLimit" value="1000" min="100" max="10000">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="consumer-btn consumer-btn-outline" onclick="closeAPIKeyModal()">Cancel</button>
+            <button class="consumer-btn consumer-btn-primary" onclick="createAPIKey()">Generate Key</button>
+        </div>
+    </div>
+  </div>
+
+  <footer class="consumer-footer">
+    <div class="consumer-footer-container">
+      <div class="consumer-footer-grid">
+        <!-- Column 1 -->
+        <div class="consumer-footer-about">
+          <h3 class="consumer-footer-title">EV-DataHub</h3>
+          <p class="consumer-footer-desc">
+            Empowering the future of mobility through secure, anonymized electric vehicle data analytics and insights.
+          </p>
+          <div class="consumer-footer-socials">
+            <div class="consumer-footer-icon">youtube</div>
+            <div class="consumer-footer-icon">Twitter</div>
+            <div class="consumer-footer-icon">GitHub</div>
+          </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div>
+          <h4 class="consumer-footer-heading">Platform</h4>
+          <ul class="consumer-footer-links">
+            <li><a href="#">Data Catalog</a></li>
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3 -->
+        <div>
+          <h4 class="consumer-footer-heading">Company</h4>
+          <ul class="consumer-footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="consumer-footer-bottom">
+        <p>© 2024 EV-DataHub. All rights reserved. | Chợ dữ liệu phân tích xe điện</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+      // Tab switching functionality
+      function switchTab(tabName) {
+          // Hide all tab contents
+          document.querySelectorAll('.tab-content').forEach(tab => {
+              tab.classList.remove('active');
+          });
+          
+          // Remove active class from all tabs
+          document.querySelectorAll('.tab-btn').forEach(tab => {
+              tab.classList.remove('active');
+          });
+          
+          // Show selected tab content
+          document.getElementById(tabName).classList.add('active');
+          
+          // Add active class to clicked tab
+          document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      }
+      
+      // Add event listeners to tabs
+      document.querySelectorAll('.tab-btn').forEach(tab => {
+          tab.addEventListener('click', () => {
+              const tabName = tab.getAttribute('data-tab');
+              switchTab(tabName);
+          });
+      });
+
+      function generateAPIKey() {
+          document.getElementById('apiKeyModal').style.display = 'block';
+      }
+
+      function closeAPIKeyModal() {
+          document.getElementById('apiKeyModal').style.display = 'none';
+      }
+
+      function createAPIKey() {
+          alert('API key generated successfully!');
+          closeAPIKeyModal();
+      }
+
+      function searchDatasets() {
+          alert('Search functionality would be implemented here');
+      }
+
+      function downloadDataset(datasetId) {
+          alert(`Downloading dataset: ${datasetId}`);
+      }
+
+      function viewDatasetAnalytics(datasetId) {
+          alert(`Viewing analytics for dataset: ${datasetId}`);
+      }
+
+      function viewPurchaseHistory() {
+          alert('Opening purchase history...');
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+          const modal = document.getElementById('apiKeyModal');
+          if (event.target === modal) {
+              closeAPIKeyModal();
+          }
+      }
+  </script>
+</body>
+</html>
