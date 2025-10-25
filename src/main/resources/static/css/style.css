@@ -392,3 +392,49 @@ body {
     width: 1.25rem;
     height: 1.25rem;
 }
+
+/* ==============================
+    NAVIGATION TABS 
+============================== */
+
+
+.main-tabs {
+    background: white;
+    border-bottom: 1px solid #E5E7EB;
+    margin-top: 2rem;
+}
+
+.tabs-container {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 1.5rem;
+}
+
+.tab-btn {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: #0A192F;
+}
+
+.tab-btn.active {
+    color: #0A192F;
+    border-bottom-color: #64FFDA;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
