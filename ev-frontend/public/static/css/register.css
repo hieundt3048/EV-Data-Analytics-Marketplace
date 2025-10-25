@@ -1,0 +1,347 @@
+:root {
+  --blue: #00C853;
+  --blue-light: #0066B3;
+  --green: #6FCF97;
+  --green-light: #85D4A8;
+  --gray-bg: #f9fafb;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--gray-bg);
+  color: #333;
+}
+
+/* Layout */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Left Panel */
+.left-panel {
+  flex: 1;
+  background: linear-gradient(135deg, var(--blue), var(--blue-light));
+  color: white;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px; /* 40px * 1.25 */
+}
+
+.left-content {
+  max-width: 500px; /* 400px * 1.25 */
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.logo-circle {
+  background: var(--green);
+  border-radius: 12.5px; /* 10px * 1.25 */
+  width: 75px; /* 60px * 1.25 */
+  height: 75px; /* 60px * 1.25 */
+  margin: 0 auto 25px; /* 20px * 1.25 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-icon {
+  width: 40px; /* 32px * 1.25 */
+  height: 40px; /* 32px * 1.25 */
+  color: white;
+}
+
+.site-title {
+  font-size: 35px; /* 28px * 1.25 */
+  margin: 12.5px 0; /* 10px * 1.25 */
+}
+
+.site-subtitle {
+  font-size: 25px; /* 20px * 1.25 */
+  color: var(--green);
+  margin-bottom: 12.5px; /* 10px * 1.25 */
+}
+
+.site-desc {
+  opacity: 0.9;
+  line-height: 1.5;
+  font-size: 20px; /* 16px * 1.25 */
+}
+.features-box {
+  margin-top: 37.5px; /* 30px * 1.25 */
+  padding: 30px; /* 24px * 1.25 */
+  border-radius: 22.5px; /* 18px * 1.25 */
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 22.5px; /* 18px * 1.25 */
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 70px; /* 56px * 1.25 */
+  height: 70px; /* 56px * 1.25 */
+  color: var(--green);
+}
+
+.feature-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1.375rem; /* 1.1rem * 1.25 */
+  line-height: 1.9; /* 1.65 * 1.15 minor adjust for readability */
+}
+
+.feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 7.5px; /* 6px * 1.25 */
+  margin: 5px 0; /* 4px * 1.25 */
+  color: rgba(255, 255, 255, 0.9);
+}
+/* Floating animation */
+.floating {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: float 6s ease-in-out infinite;
+}
+
+.decor-green {
+  width: 100px; /* 80px * 1.25 */
+  height: 100px; /* 80px * 1.25 */
+  top: 75px; /* 60px * 1.25 */
+  left: 75px; /* 60px * 1.25 */
+  background: var(--green);
+}
+
+.decor-white {
+  width: 75px; /* 60px * 1.25 */
+  height: 75px; /* 60px * 1.25 */
+  right: 75px; /* 60px * 1.25 */
+  bottom: 125px; /* 100px * 1.25 */
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.decor-small {
+  width: 50px; /* 40px * 1.25 */
+  height: 50px; /* 40px * 1.25 */
+  top: 50%;
+  left: 25%;
+  background: var(--green-light);
+}
+
+.delay-2 { animation-delay: -2s; }
+.delay-4 { animation-delay: -4s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Pulse animation */
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(111, 207, 151, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(111, 207, 151, 0); }
+}
+
+.pulse-green {
+  animation: pulse-green 2s infinite;
+}
+
+/* Right Panel */
+.right-panel {
+  flex: 1.1;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 50px 80px;
+}
+
+.form-container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 35px 55px;
+  background: #fff;
+  border-radius: 27px;
+  box-shadow: 0 20px 70px rgba(0, 78, 137, 0.08);
+}
+
+/* Progress bar */
+.progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.step {
+  width: 65px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 21px;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  background: var(--green);
+  color: white;
+}
+
+.step.completed {
+  background: var(--blue);
+  color: white;
+}
+
+.bar {
+  height: 5px;
+  width: 90px;
+  background: #ddd;
+  margin: 0 18px;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 19.5px;
+  color: #555;
+  margin-bottom: 35px;
+}
+
+/* Form */
+.form-title {
+  font-size: 45px;
+  margin-bottom: 16px;
+}
+
+.form-subtitle {
+  font-size: 24px;
+  margin-bottom: 35px;
+}
+
+.form-group {
+ margin-bottom: 30px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: 500;
+  font-size: 21px;
+}
+
+.input-field,
+select,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 25px;
+  border: 1.5px solid #ccc;
+  border-radius: 12px;
+  font-size: 22.5px;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4.5px rgba(111, 207, 151, 0.15);
+  outline: none;
+}
+
+.error {
+  color: #e11d48;
+  font-size: 19.5px;
+  display: block;
+  margin-top: 5px;
+}
+
+.success {
+  color: #16a34a;
+  font-size: 19.5px;
+  display: block;
+  margin-top: 5px;
+}
+
+.password-strength {
+  display: flex;
+  justify-content: space-between;
+  font-size: 19.5px;
+  margin: 6px 0;
+  color: #666;
+}
+
+.strength-bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.strength-bar div {
+  height: 100%;
+  width: 30%;
+  background: #ef4444;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* Checkbox */
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 25px;
+  font-size: 21px;
+}
+
+.form-check input {
+  margin-top: 4px;
+  width: 22px;
+  height: 14px;
+}
+
+/* Button */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 21px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.submit-btn:hover {
+  background: var(--blue-light);
+  transform: scale(1.03);
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 45px;
+  font-size: 19.5px;
+  color: #666;
+}
+
+.footer a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
