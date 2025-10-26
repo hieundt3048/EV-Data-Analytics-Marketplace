@@ -1,7 +1,11 @@
+package com.evmarketplace.utils;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
-class UtilsTest {
+public class UtilsTest {
 
     @Test
     void testValidateEmail() {

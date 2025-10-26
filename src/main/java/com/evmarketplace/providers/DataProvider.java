@@ -2,38 +2,25 @@ package com.evmarketplace.providers;
 
 public class DataProvider {
     private String providerId;
-    private String name;
+    private String providerName;
 
-    public DataProvider(String providerId, String name) {
+    public DataProvider(String providerId, String providerName) {
         this.providerId = providerId;
-        this.name = name;
+        this.providerName = providerName;
     }
 
-    public String getProviderId() {
-        return providerId;
+    public boolean registerData(String data) {
+        // Logic to register data
+        return true;
     }
 
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
+    public boolean setPricingPolicy(String policy) {
+        // Logic to set pricing policy
+        return true;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void registerData(String data) {
-        // Implementation for registering data
-    }
-
-    public void setPricingPolicy(String policy) {
-        // Implementation for setting pricing policy
-    }
-
-    public void trackRevenue() {
-        // Implementation for tracking revenue
+    public double trackRevenue() {
+        // Logic to track revenue
+        return 0.0;
     }
 }

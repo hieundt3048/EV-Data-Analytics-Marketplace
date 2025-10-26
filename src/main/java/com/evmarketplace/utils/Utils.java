@@ -1,16 +1,29 @@
+package com.evmarketplace.utils;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 public class Utils {
 
     public static boolean validateEmail(String email) {
-        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        return email != null && email.matches(emailRegex);
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
     }
 
-    public static String formatCurrency(double amount) {
-        java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance();
-        return currencyFormat.format(amount);
+    public static String formatData(String data) {
+        if (data == null) {
+            return null;
+        }
+        return data.trim();
     }
 
-    public static String sanitizeInput(String input) {
-        return input != null ? input.trim().replaceAll("[^a-zA-Z0-9 ]", "") : "";
+    public static LocalDate parseDate(String dateStr) throws DateTimeParseException {
+        if (dateStr == null) {
+            return null;
+        }
+        return LocalDate.parse(dateStr);
     }
 }

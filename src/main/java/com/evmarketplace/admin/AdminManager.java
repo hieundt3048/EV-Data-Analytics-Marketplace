@@ -1,7 +1,5 @@
 package com.evmarketplace.admin;
 
-import java.util.List;
-
 public class AdminManager {
     private String adminId;
 
@@ -9,23 +7,18 @@ public class AdminManager {
         this.adminId = adminId;
     }
 
-    public void manageUsers(List<String> userIds) {
+    public boolean manageUsers() {
         // Logic to manage users
+        return true;
     }
 
-    public void processPayments(List<String> paymentIds) {
+    public boolean processPayments() {
         // Logic to process payments
+        return true;
     }
 
-    public void generateReports() {
+    public String generateReports() {
         // Logic to generate reports
-    }
-
-    public String getAdminId() {
-        return adminId;
-    }
-
-    public void setAdminId(String adminId) {
-        this.adminId = adminId;
+        return "Generated report";
     }
 }

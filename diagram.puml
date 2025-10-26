@@ -1,0 +1,385 @@
+@startuml
+' EV Data Analytics Marketplace - Class Diagram (fixed)
+
+skinparam classAttributeIconSize 0
+
+' --------------------
+' Domain / Auth
+' --------------------
+package auth {
+  class User {
+    + id : UUID
+    + name : String
+    + email : String
+    + passwordHash : String
+    + roles : String
+    + organization : String
+    + register()
+    + authenticate()
+    + updateProfile()
+  }
+
+  class ProviderProfile {
+    + id : UUID
+    + userId : UUID
+    + providerName : String
+    + description : String
+    + bankAccount : String
+    + rating : Double
+    + uploadDataset()
+    + setPricingPolicy()
+  }
+
+  class ConsumerProfile {
+    + id : UUID
+    + userId : UUID
+    + companyName : String
+    + industry : String
+    + contactEmail : String
+    + contactPhone : String
+    + preferredDataFormat : String
+    + apiRateLimitPerMinute : Integer
+    + billingAccount : String
+    + vatNumber : String
+    + notes : String
+  }
+
+  class APIKey {
+    + id : UUID
+    + consumerId : UUID
+    + keyValue : String
+    + scopes : String
+    + rateLimit : int
+    + expiresAt : Date
+    + revoke()
+  }
+}
+
+' --------------------
+' Data models
+' --------------------
+package data {
+  enum DataType {
+    TELEMETRY
+    BATTERY
+    CHARGING
+    V2G
+    TRANSACTION
+  }
+
+  enum Format {
+    CSV
+    JSON
+    PARQUET
+    API
+  }
+
+  enum ProductStatus {
+    DRAFT
+    PENDING_REVIEW
+    PUBLISHED
+    ARCHIVED
+  }
+
+  class DataProduct {
+    + id : UUID
+    + providerId : UUID
+    + title : String
+    + description : String
+    + categories : String
+    + tags : String
+    + dataType : String
+    + format : String
+    + sizeBytes : long
+    + region : String
+    + startTime : Date
+    + endTime : Date
+    + status : String
+    + publish()
+    + requestReview()
+    + anonymize()
+  }
+
+  class DataAsset {
+    + id : UUID
+    + productId : UUID
+    + storageUri : String
+    + fileName : String
+    + sizeBytes : long
+    + checksum : String
+    + mimeType : String
+    + version : String
+  }
+
+  class DatasetMetadata {
+    + id : UUID
+    + productId : UUID
+    + keyValues : String
+  }
+}
+
+' --------------------
+' Marketplace
+' --------------------
+package marketplace {
+  enum PricingModel {
+    PER_DOWNLOAD
+    SUBSCRIPTION
+    API_ACCESS
+  }
+
+  enum AllowedUse {
+    RESEARCH
+    COMMERCIAL
+    OPEN
+  }
+
+  class PricingPolicy {
+    + id : UUID
+    + productId : UUID
+    + model : String
+    + price : String
+    + currency : String
+    + billingUnit : String
+    + calculatePrice()
+  }
+
+  class UsagePolicy {
+    + id : UUID
+    + productId : UUID
+    + allowedUse : String
+    + restrictions : String
+  }
+
+  class Purchase {
+    + id : UUID
+    + consumerId : UUID
+    + productId : UUID
+    + pricingPolicyId : UUID
+    + amount : String
+    + currency : String
+    + status : String
+    + createdAt : Date
+    + completePurchase()
+  }
+
+  class Subscription {
+    + id : UUID
+    + consumerId : UUID
+    + planId : UUID
+    + startDate : Date
+    + endDate : Date
+    + recurringFee : String
+    + status : String
+  }
+
+  class AccessGrant {
+    + id : UUID
+    + consumerId : UUID
+    + productId : UUID
+    + accessType : String
+    + grantedAt : Date
+    + expiresAt : Date
+    + revoke()
+  }
+}
+
+' --------------------
+' Billing
+' --------------------
+package billing {
+  enum PaymentMethod {
+    CARD
+    BANK_TRANSFER
+    WALLET
+  }
+
+  enum PaymentStatus {
+    PENDING
+    SUCCESS
+    FAILED
+    REFUNDED
+  }
+
+  class Transaction {
+    + id : UUID
+    + purchaseId : UUID
+    + subscriptionId : UUID
+    + amount : String
+    + providerShare : String
+    + platformFee : String
+    + method : String
+    + status : String
+    + timestamp : Date
+  }
+
+  class Invoice {
+    + id : UUID
+    + transactionId : UUID
+    + pdfUrl : String
+    + generatePdf()
+  }
+}
+
+' --------------------
+' Privacy & Compliance
+' --------------------
+package privacy {
+  enum JobStatus {
+    QUEUED
+    RUNNING
+    COMPLETED
+    FAILED
+  }
+
+  class AnonymizationJob {
+    + id : UUID
+    + productId : UUID
+    + rules : String
+    + status : String
+    + startedAt : Date
+    + finishedAt : Date
+    + run()
+  }
+
+  class Consent {
+    + id : UUID
+    + subjectId : UUID
+    + consentText : String
+    + grantedAt : Date
+    + revokedAt : Date
+  }
+
+  class AuditLog {
+    + id : UUID
+    + eventType : String
+    + actorId : UUID
+    + details : String
+    + timestamp : Date
+  }
+}
+
+' --------------------
+' Admin & Analytics
+' --------------------
+package admin {
+  enum ModerationStatus {
+    OPEN
+    APPROVED
+    REJECTED
+  }
+
+  class ModerationRequest {
+    + id : UUID
+    + productId : UUID
+    + adminId : UUID
+    + status : String
+    + reason : String
+    + requestedAt : Date
+    + review()
+  }
+
+  class RevenueReport {
+    + id : UUID
+    + providerId : UUID
+    + periodStart : Date
+    + periodEnd : Date
+    + totalRevenue : String
+    + items : String
+    + generate()
+  }
+}
+
+package analytics {
+  class Dashboard {
+    + id : UUID
+    + consumerId : UUID
+    + widgets : String
+    + generate()
+  }
+
+  class RecommendationEngine {
+    + generateFor()
+  }
+
+  class MarketStats {
+    + periodStart : Date
+    + periodEnd : Date
+    + stats : String
+    + compute()
+  }
+}
+
+class Review {
+  + id : UUID
+  + consumerId : UUID
+  + productId : UUID
+  + rating : int
+  + comment : String
+  + createdAt : Date
+}
+
+' --------------------
+' Associations (after classes/packages to avoid forward reference issues)
+' --------------------
+auth.User "1" -- "0..1" auth.ProviderProfile : has_profile
+auth.User "1" -- "0..1" auth.ConsumerProfile : has_profile
+auth.User "1" -- "0..*" auth.APIKey : issues
+
+data.ProviderProfile .. data.DataProduct : provides
+data.DataProduct "1" -- "0..*" data.DataAsset : contains
+data.DataProduct "1" -- "0..1" data.DatasetMetadata : metadata_of
+
+data.DataProduct "1" -- "0..*" marketplace.PricingPolicy
+data.DataProduct "1" -- "0..*" marketplace.UsagePolicy
+
+auth.User "1" o-- "0..*" marketplace.Purchase : purchases
+auth.User "1" o-- "0..*" marketplace.Subscription : subscribes
+
+marketplace.Purchase "1" -- "0..1" billing.Transaction : pays_for
+marketplace.Subscription "1" -- "0..*" billing.Transaction : billed_by
+
+marketplace.AccessGrant "1" -- "0..1" auth.APIKey : linked_to
+
+admin.ModerationRequest "1" -- "1" data.DataProduct : targets
+admin.RevenueReport "1" -- "0..*" billing.Transaction : summarizes
+
+' Repository layer (simplified labels)
+package repository {
+  interface UserRepository
+  interface ProviderProfileRepository
+  interface ConsumerProfileRepository
+  interface APIKeyRepository
+  interface DataProductRepository
+  interface DataAssetRepository
+  interface DatasetMetadataRepository
+  interface PricingPolicyRepository
+  interface UsagePolicyRepository
+  interface PurchaseRepository
+  interface SubscriptionRepository
+  interface AccessGrantRepository
+  interface TransactionRepository
+  interface InvoiceRepository
+  interface AnonymizationJobRepository
+  interface ConsentRepository
+  interface AuditLogRepository
+  interface ModerationRequestRepository
+  interface RevenueReportRepository
+  interface ReviewRepository
+}
+
+' Link simple repo labels to main entities (visual only)
+repository.UserRepository ..> auth.User
+repository.ProviderProfileRepository ..> auth.ProviderProfile
+repository.ConsumerProfileRepository ..> auth.ConsumerProfile
+repository.APIKeyRepository ..> auth.APIKey
+repository.DataProductRepository ..> data.DataProduct
+repository.DataAssetRepository ..> data.DataAsset
+repository.DatasetMetadataRepository ..> data.DatasetMetadata
+repository.PricingPolicyRepository ..> marketplace.PricingPolicy
+repository.PurchaseRepository ..> marketplace.Purchase
+repository.TransactionRepository ..> billing.Transaction
+repository.ModerationRequestRepository ..> admin.ModerationRequest
+repository.ReviewRepository ..> Review
+
+@enduml

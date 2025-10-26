@@ -1,5 +1,11 @@
+package com.evmarketplace.consumers;
+
+import com.evmarketplace.data.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataConsumerTest {
