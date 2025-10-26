@@ -1,0 +1,470 @@
+/* ----------------------------------
+   PROVIDER (SCOPED)
+   All selectors below are scoped to the .provider-page root to avoid
+   colliding with other pages' CSS. */
+
+.provider-page .provider-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 60px auto;
+  gap: 20px;
+}
+
+.provider-page .form-mini{
+  width: 400px;
+  margin: 40px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.provider-page .form-mini form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.provider-page .form-mini label {
+    font-weight: 500;
+    color: #374151;
+}
+
+.provider-page .form-mini input,
+.provider-page .form-mini select,
+.provider-page .form-mini textarea {
+    padding: 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.5rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+}
+
+.provider-page .form-mini input:focus,
+.provider-page .form-mini select:focus,
+.provider-page .form-mini textarea:focus {
+    outline: none;
+    border-color: #64FFDA;
+    box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+}
+
+
+/* ===== Upload button styling ===== */
+.provider-page .form-mini button[type="submit"] {
+  background: linear-gradient(135deg, #007bff, #005ce6);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.35s ease;
+  letter-spacing: 0.3px;
+}
+
+.provider-page .form-mini button[type="submit"]:hover {
+  background: linear-gradient(135deg, #005ce6, #0041b3);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 6px 14px rgba(0, 92, 230, 0.35);
+}
+
+.provider-page .form-mini button[type="submit"]:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* ===== Comeback button styling ===== */
+.provider-page .form-mini .btn-back {
+  background: linear-gradient(135deg, #ff7a18, #ff3d00);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.35s ease;
+  letter-spacing: 0.3px;
+}
+
+.provider-page .form-mini .btn-back:hover {
+  background: linear-gradient(135deg, #ff5722, #ff1100);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 6px 14px rgba(255, 80, 0, 0.35);
+}
+
+.provider-page .form-mini .btn-back:active {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: none;
+}
+
+/* ===== Button group center ===== */
+.provider-page .form-btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* ===== Stats grid styles ===== */
+.provider-page .stat-grid { 
+    display:flex; gap:1rem; margin:1rem 0 1.25rem; flex-wrap:wrap; 
+    justify-content:center;
+}
+
+.provider-page .stat-box { 
+    background:white; padding:1rem 1.25rem; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); min-width:140px; text-align:center;
+    flex:1; max-width:200px;
+}
+
+.provider-page .stat-box .num { 
+    font-size:1.5rem; font-weight:700; color:#0A192F;
+    margin-bottom:4px;
+}
+
+.provider-page .stat-box .label { 
+    font-size:0.85rem; color:#6B7280; 
+    text-transform:uppercase; letter-spacing:0.5px;
+}
+
+/* ===== Mini bar chart ===== */
+.provider-page .tab-btn:hover {
+  color: #0A192F;
+}
+.provider-page .tab-btn.active {
+  color: #0A192F;
+  border-bottom-color: #64FFDA;
+}
+
+.provider-page .tab-content {
+  display: none;
+}
+
+.provider-page .tab-content.active {
+  display: block;
+}
+
+.provider-page .table-small th, .provider-page .table-small td {
+     padding:10px 12px; border-bottom:1px solid #eef2f7; text-align:left; font-size:0.95rem; 
+     color:#374151;
+}
+
+.provider-page .table-small th {
+     background:#f8fafc; font-weight:600; color:#374151; font-size:0.85rem; text-transform:uppercase;
+     letter-spacing:0.5px;
+}
+
+/* ===== Simple modal confirm ===== */
+.provider-page .confirm-modal { 
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(2,6,23,0.45); z-index:9999;
+}
+
+.provider-page .confirm-modal .dialog { 
+    background:#fff; padding:20px; border-radius:10px; width:90%; max-width:420px; box-shadow:0 20px 50px rgba(2,6,23,0.2);
+    animation:fadeInScale .3s ease forwards;
+}
+
+.provider-page .confirm-modal .dialog p { 
+    margin-bottom:16px; color:#374151;
+    font-size:1rem;
+}
+
+.provider-page .confirm-modal .dialog .actions { 
+    display:flex; gap:8px; justify-content:flex-end;
+}
+.provider-page .confirm-modal .dialog .actions button { 
+    padding:10px 16px; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem; font-weight:600; transition:all 0.25s ease;
+}
+
+/* ==============================
+   GLOBAL BASE STYLES
+============================== */
+body {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #F3F4F6;
+}
+
+.font-montserrat { font-family: 'Montserrat', sans-serif; }
+.font-inter { font-family: 'Inter', sans-serif; }
+
+.bg-navy { background-color: #0A192F; }
+.text-navy { color: #0A192F; }
+.bg-electric { background-color: #64FFDA; }
+.text-electric { color: #64FFDA; }
+.border-electric { border-color: #64FFDA; }
+
+.provider-page .btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+.provider-page .btn-primary { background-color: #0A192F; color: white; }
+.provider-page .btn-primary:hover { background-color: #152642; transform: scale(1.05); }
+.provider-page .btn-success { background-color: #10B981; color: white; }
+.provider-page .btn-success:hover { background-color: #059669; transform: scale(1.05); }
+.provider-page .btn-warning { background-color: #F59E0B; color: white; }
+.provider-page .btn-warning:hover { background-color: #D97706; transform: scale(1.05); }
+.provider-page .btn-info { background-color: #3B82F6; color: white; }
+.provider-page .btn-info:hover { background-color: #2563EB; transform: scale(1.05); }
+.provider-page .btn-outline {
+  background: transparent;
+  border: 2px solid #0A192F;
+  color: #0A192F;
+}
+.provider-page .btn-outline:hover {
+  background: #0A192F;
+  color: white;
+}
+.provider-page .btn-danger { background-color: #DC2626; color: white; }
+.provider-page .btn-danger:hover { background-color: #B91C1C; transform: scale(1.05); }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.provider-page .data-node {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #64FFDA;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* ==============================
+   MAIN LAYOUT (scoped)
+============================== */
+.provider-page .main-container{
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.provider-page .main-section{
+  margin-bottom: 3rem;
+}
+
+.provider-page .main-section h2{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.75rem;
+  color: #0A192F;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #64FFDA;
+}
+
+/* ==============================
+   CARD STYLES (scoped)
+============================== */
+.provider-page .main-card{
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.provider-page .main-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+.provider-page .card-body {
+  padding: 2rem;
+}
+.provider-page .card-body h5 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #0A192F;
+  margin-bottom: 1.5rem;
+}
+
+.provider-page .card-body ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.provider-page .card-body li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+    color: #4B5563;
+}
+
+.provider-page .card-body li:before {
+    content: "•";
+    color: #64FFDA;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.provider-page .btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+.provider-page .btn-primary { background-color: #0A192F; color: white; }
+.provider-page .btn-primary:hover { background-color: #152642; transform: scale(1.05); }
+.provider-page .btn-success { background-color: #10B981; color: white; }
+.provider-page .btn-success:hover { background-color: #059669; transform: scale(1.05); }
+.provider-page .btn-warning { background-color: #F59E0B; color: white; }
+.provider-page .btn-warning:hover { background-color: #D97706; transform: scale(1.05); }
+.provider-page .btn-info { background-color: #3B82F6; color: white; }
+.provider-page .btn-info:hover { background-color: #2563EB; transform: scale(1.05); }
+.provider-page .btn-outline {
+  background: transparent;
+  border: 2px solid #0A192F;
+  color: #0A192F;
+}
+.provider-page .btn-outline:hover {
+  background: #0A192F;
+  color: white;
+}
+.provider-page .btn-danger { background-color: #DC2626; color: white; }
+.provider-page .btn-danger:hover { background-color: #B91C1C; transform: scale(1.05); }
+
+/* ==============================
+   TABLE STYLES (scoped)
+============================== */
+
+/* ==============================
+  BADGES (scoped)
+============================== */
+
+/* ==============================
+   PAGINATION (scoped)
+============================== */
+
+/* ==============================
+   MODAL (scoped)
+============================== */
+
+/* ==============================
+   FORM ELEMENTS (scoped)
+============================== */
+
+/* ==============================
+    PAGE HEADINGS & DASHBOARD HEADER
+============================== */
+/* Page Heading */
+.page-heading {
+    background: linear-gradient(135deg, #0A192F 0%, #1a365d 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+    margin-top: 80px;
+}
+
+.header-text h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.div-dec {
+    width: 80px;
+    height: 3px;
+    background: #64FFDA;
+    margin: 0 auto;
+    border-radius: 2px;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* ==============================
+    NAVIGATION TABS 
+============================== */
+
+
+.main-tabs {
+    background: white;
+    border-bottom: 1px solid #E5E7EB;
+    margin-top: 2rem;
+}
+
+.provider-page .tab-btn {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.provider-page .tab-btn:hover {
+  color: #0A192F;
+}
+
+.provider-page .tab-btn.active {
+  color: #0A192F;
+  border-bottom-color: #64FFDA;
+}
+
+.provider-page .tab-content {
+  display: none;
+}
+
+.provider-page .tab-content.active {
+  display: block;
+}
