@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.evmarketplace.Repository.ConsumerProfileRepository;
+import com.evmarketplace.Repository.DataProductRepository;
 import com.evmarketplace.Repository.DataProviderRepository;
 import com.evmarketplace.Repository.DatasetMetadataRepository;
 import com.evmarketplace.Repository.InvoiceRepository;
@@ -16,6 +17,15 @@ import com.evmarketplace.Repository.RoleRepository;
 import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.JwtFilter;
+import com.evmarketplace.data.DataProduct;
+import com.evmarketplace.data.DataType;
+import com.evmarketplace.data.Format;
+import com.evmarketplace.data.ProductStatus;
+import com.evmarketplace.providers.DataProvider;
+
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 
 
 @SpringBootApplication(scanBasePackages = "com.evmarketplace")
@@ -44,7 +54,9 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner seed(UserService userService) {
+    public CommandLineRunner seed(UserService userService,
+                                 DataProviderRepository dataProviderRepository,
+                                 DataProductRepository dataProductRepository) {
         return args -> {
             // --- TẠO NGƯỜI DÙNG MẪU (DEMO USER) ---
             // Tìm người dùng với email "test@ev.com".
@@ -62,6 +74,71 @@ public class Application {
             com.evmarketplace.Pojo.User admin = userService.findByEmail("admin@ev.com").orElseGet(() -> userService.register("Administrator","admin@ev.com","adminpass","ACME", true));
             // Gán vai trò "Admin" cho người dùng này.
             userService.assignRoleToUser(admin, "Admin");
+
+            // --- TẠO NHÀ CUNG CẤP DỮ LIỆU MẪU ---
+        com.evmarketplace.Pojo.User providerUser = userService.findByEmail("provider1@example.com")
+            .orElseGet(() -> userService.register("Provider One", "provider1@example.com", "providerpass", "EV Insight Labs", true));
+            userService.assignRoleToUser(providerUser, "Provider");
+            providerUser.setProviderApproved(true);
+        String providerOrg = providerUser.getOrganization() != null ? providerUser.getOrganization() : "EV Insight Labs";
+        com.evmarketplace.Pojo.User savedProviderUser = userService.updateUser(providerUser.getId(), providerUser.getName(), providerOrg, true, null);
+
+            DataProvider providerEntity = dataProviderRepository.findByUser(savedProviderUser)
+                    .orElseGet(() -> {
+                        DataProvider dp = new DataProvider(savedProviderUser, "EV Insight Labs");
+                        dp.setDescription("Specialist in EV charging and telemetry datasets");
+                        dp.setApproved(true);
+                        return dataProviderRepository.save(dp);
+                    });
+
+            // --- TẠO SẢN PHẨM DỮ LIỆU MẪU ---
+            List<DataProduct> existingProducts = dataProductRepository.findAll();
+            boolean hasTelemetry = existingProducts.stream().anyMatch(p -> "Urban Fleet Telemetry 2024".equalsIgnoreCase(p.getTitle()));
+            boolean hasCharging = existingProducts.stream().anyMatch(p -> "Fast Charging Session Logs".equalsIgnoreCase(p.getTitle()));
+            boolean hasBattery = existingProducts.stream().anyMatch(p -> "Battery Health Benchmark".equalsIgnoreCase(p.getTitle()));
+
+            List<DataProduct> seeds = new java.util.ArrayList<>();
+            if (!hasTelemetry) {
+                DataProduct telemetry = new DataProduct(providerEntity, "Urban Fleet Telemetry 2024");
+                telemetry.setDescription("Telematics data from 2,500 EVs operating in Tier-1 cities.");
+                telemetry.setCategories(Arrays.asList("Telematics", "Fleet"));
+                telemetry.setTags(Arrays.asList("gps", "speed", "soc"));
+                telemetry.setDataType(DataType.TELEMETRY);
+                telemetry.setFormat(Format.CSV);
+                telemetry.setSizeBytes(1_250_000_000L);
+                telemetry.setRegion("APAC");
+                telemetry.setStartTime(Instant.now().minusSeconds(60L * 60 * 24 * 30));
+                telemetry.setStatus(ProductStatus.PENDING_REVIEW);
+                seeds.add(telemetry);
+            }
+            if (!hasCharging) {
+                DataProduct charging = new DataProduct(providerEntity, "Fast Charging Session Logs");
+                charging.setDescription("DC fast-charging sessions with dwell time and grid impact metrics.");
+                charging.setCategories(Arrays.asList("Charging", "Infrastructure"));
+                charging.setTags(Arrays.asList("dcfc", "power", "queue"));
+                charging.setDataType(DataType.CHARGING);
+                charging.setFormat(Format.PARQUET);
+                charging.setSizeBytes(980_000_000L);
+                charging.setRegion("North America");
+                charging.setStartTime(Instant.now().minusSeconds(60L * 60 * 24 * 45));
+                charging.setStatus(ProductStatus.PENDING_REVIEW);
+                seeds.add(charging);
+            }
+            if (!hasBattery) {
+                DataProduct battery = new DataProduct(providerEntity, "Battery Health Benchmark");
+                battery.setDescription("Monthly SOH benchmarks collected from mixed OEM fleets.");
+                battery.setCategories(Arrays.asList("Battery", "Health"));
+                battery.setTags(Arrays.asList("soh", "temperature", "cycles"));
+                battery.setDataType(DataType.BATTERY);
+                battery.setFormat(Format.JSON);
+                battery.setSizeBytes(540_000_000L);
+                battery.setRegion("Europe");
+                battery.setStartTime(Instant.now().minusSeconds(60L * 60 * 24 * 60));
+                battery.setStatus(ProductStatus.PENDING_REVIEW);
+                seeds.add(battery);
+            }
+
+            seeds.forEach(dataProductRepository::save);
         };
     }
 

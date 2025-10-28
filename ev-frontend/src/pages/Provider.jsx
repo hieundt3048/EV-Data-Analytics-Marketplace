@@ -128,7 +128,7 @@ const Provider = () => {
                   <li>Choose to share data as <strong>Raw</strong> or <strong>Analyzed</strong></li>
                   <li>Manage dataset lists that have been uploaded, edited, or deleted</li>
                 </ul>
-                <button className="btn btn-primary" onClick={() => switchTab('data-management')}>Register & Manage Data Sources</button>
+                <button className="btn-p btn-primary" onClick={() => switchTab('data-management')}>Register & Manage Data Sources</button>
               </div>
             </div>
           </section>
@@ -143,7 +143,7 @@ const Provider = () => {
                   <li>Usage rights control</li>
                   <li>Free option for public data</li>
                 </ul>
-                <button className="btn btn-success" onClick={() => switchTab('policy-pricing')}>Setting up sharing policies & pricing</button>
+                <button className="btn-p btn-success" onClick={() => switchTab('policy-pricing')}>Setting up sharing policies & pricing</button>
               </div>
             </div>
           </section>
@@ -158,7 +158,7 @@ const Provider = () => {
                   <li>Analyze customer behavior</li>
                   <li>Download detailed reports</li>
                 </ul>
-                <button className="btn btn-warning" onClick={() => switchTab('revenue-tracking')}>Data revenue tracking</button>
+                <button className="btn-p btn-warning" onClick={() => switchTab('revenue-tracking')}>Data revenue tracking</button>
               </div>
             </div>
           </section>
@@ -173,7 +173,7 @@ const Provider = () => {
                   <li>GDPR & CCPA compliant</li>
                   <li>Permission control</li>
                 </ul>
-                <button className="btn btn-info" onClick={() => switchTab('security-anonymization')}>Data Security & Anonymization</button>
+                <button className="btn-p btn-info" onClick={() => switchTab('security-anonymization')}>Data Security & Anonymization</button>
               </div>
             </div>
           </section>
@@ -207,7 +207,7 @@ const Provider = () => {
               <input name="dataFile" type="file" accept=".csv,.json,.xlsx" required />
 
               <div className="form-btn-group">
-                <button type="submit" className="btn btn-primary">📤 Upload</button>
+                <button type="submit" className="btn-p btn-primary">📤 Upload</button>
                 <button type="button" className="btn-back" onClick={() => switchTab('dashboard')}>⬅ Come back</button>
               </div>
             </form>
@@ -255,7 +255,7 @@ const Provider = () => {
               <textarea name="policyDesc" placeholder="Short description of policy and usage terms..." />
 
               <div className="form-btn-group">
-                <button type="submit" className="btn btn-primary">Save Policy</button>
+                <button type="submit" className="btn-p btn-primary">Save Policy</button>
                 <button type="button" className="btn-back" onClick={() => switchTab('dashboard')}>⬅ Come back</button>
               </div>
             </form>
@@ -312,7 +312,7 @@ const Provider = () => {
 
           <div className="form-mini" style={{ marginTop: 12 + 'px' }}>
             <div className="form-btn-group">
-              <button type="button" className="btn btn-primary" onClick={exportCsv}>Export CSV</button>
+              <button type="button" className="btn-p btn-primary" onClick={exportCsv}>Export CSV</button>
               <button type="button" className="btn-back" onClick={() => switchTab('dashboard')}>⬅ Come back</button>
             </div>
           </div>
@@ -351,7 +351,7 @@ const Provider = () => {
               <textarea name="notes" placeholder="Notes for reviewers or processors..." />
 
               <div className="form-btn-group">
-                <button type="submit" className="btn btn-primary">Apply Settings</button>
+                <button type="submit" className="btn-p btn-primary">Apply Settings</button>
                 <button type="button" className="btn-back" onClick={() => switchTab('dashboard')}>⬅ Come back</button>
               </div>
             </form>

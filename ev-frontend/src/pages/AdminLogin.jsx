@@ -133,14 +133,6 @@ const AdminLogin = () => {
           </form>
         </div>
 
-        <footer className="footer">
-          <p>&copy; 2025 EV Data Analytics Marketplace</p>
-          <div className="footer-links">
-            <a href="#">Điều khoản</a>
-            <span>•</span>
-            <a href="#">Chính sách bảo mật</a>
-          </div>
-        </footer>
       </section>
     </main>
   );

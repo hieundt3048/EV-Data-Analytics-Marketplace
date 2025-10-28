@@ -245,10 +245,6 @@ const Register = () => {
           </div>
         </div>
 
-        <footer className="footer">
-          <p>&copy; 2025 EV Data Analytics Marketplace</p>
-          <a href="#">Điều khoản</a> • <a href="#">Chính sách bảo mật</a>
-        </footer>
       </section>
     </main>
   );

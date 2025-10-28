@@ -182,7 +182,7 @@ body, html {
 }
 .register-link:hover { color: var(--ev-blue-light); }
 
-.footer {
+/* .footer {
   background-color: #fff;
   margin-top: 25px;
   text-align: center;
@@ -199,7 +199,7 @@ body, html {
 }
 .footer-links a:hover {
   text-decoration: underline;
-}
+} */
 
 
 /* --- Social Login --- */
