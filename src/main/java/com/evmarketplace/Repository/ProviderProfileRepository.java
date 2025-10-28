@@ -2,13 +2,14 @@
 // Đáp ứng: Lớp truy xuất dữ liệu cho provider profile (ví dụ phương thức findByProviderName) theo class diagram.
 package com.evmarketplace.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.evmarketplace.Pojo.ProviderProfile;
 
 @Repository
-public interface ProviderProfileRepository extends CrudRepository<ProviderProfile, UUID> {
-    ProviderProfile findByProviderName(String name);
+public interface ProviderProfileRepository extends JpaRepository<ProviderProfile, UUID> {
+    Optional<ProviderProfile> findByProviderName(String name);
 }

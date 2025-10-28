@@ -2,19 +2,86 @@
 // Đáp ứng: Lưu thông tin liên quan tới consumer (tổ chức/chi tiết liên lạc, thông tin thanh toán) theo yêu cầu sản phẩm.
 package com.evmarketplace.Pojo;
 
-import java.util.List;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.UUID;
 
+@Entity
+@Table(name = "consumer_profiles")
 public class ConsumerProfile {
-    public UUID id;
-    public UUID userId; // liên kết tới User
-    public String organization;
-    public String contactName;
-    public String contactEmail;
-    public String billingAccount;
-    public List<UUID> apiKeys; // danh sách API key IDs (nếu quản lý riêng)
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user; // liên kết tới User
+
+    @Column(name = "organization")
+    private String organization;
+
+    @Column(name = "contact_name")
+    private String contactName;
+
+    @Column(name = "contact_email")
+    private String contactEmail;
+
+    @Column(name = "billing_account")
+    private String billingAccount;
 
     public ConsumerProfile() {}
 
-    // TODO: thêm annotation @Entity và các getter/setter khi chuyển sang JPA
+    public UUID getId() {
+        return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getBillingAccount() {
+        return billingAccount;
+    }
+
+    public void setBillingAccount(String billingAccount) {
+        this.billingAccount = billingAccount;
+    }
 }

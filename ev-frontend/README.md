@@ -10,7 +10,9 @@ This folder contains a Vite + React scaffold for the EV Data Analytics Marketpla
    ```
 2. Start the dev server:
    ```cmd
+   cd E:\tai\EV-Data-Analytics-Marketplace\ev-frontend
    npm run dev
+   cd E:\tai\EV-Data-Analytics-Marketplace\ev-frontend && npm run dev
    mvn spring-boot:run
    ```
 3. Build for production:

@@ -3,17 +3,41 @@ package com.evmarketplace;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import com.evmarketplace.Repository.ConsumerProfileRepository;
+import com.evmarketplace.Repository.DataProviderRepository;
+import com.evmarketplace.Repository.DatasetMetadataRepository;
+import com.evmarketplace.Repository.InvoiceRepository;
+import com.evmarketplace.Repository.RoleRepository;
+import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.JwtFilter;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 
 @SpringBootApplication(scanBasePackages = "com.evmarketplace")
-@EntityScan(basePackages = {"com.evmarketplace.Pojo"})
-@EnableJpaRepositories(basePackages = {"com.evmarketplace.userrepo"})
+@EntityScan(basePackages = {
+    "com.evmarketplace.Pojo",
+    "com.evmarketplace.billing",
+    "com.evmarketplace.data",
+    "com.evmarketplace.providers",
+    "com.evmarketplace.marketplace"
+})
+@EnableJpaRepositories(basePackageClasses = {
+    UserRepository.class,
+    RoleRepository.class,
+    ConsumerProfileRepository.class,
+    DatasetMetadataRepository.class,
+    InvoiceRepository.class,
+    DataProviderRepository.class,
+    com.evmarketplace.Repository.DataProductRepository.class,
+    com.evmarketplace.Repository.PurchaseRepository.class,
+    com.evmarketplace.Repository.TransactionRepository.class,
+    com.evmarketplace.Repository.APIKeyRepository.class
+})
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

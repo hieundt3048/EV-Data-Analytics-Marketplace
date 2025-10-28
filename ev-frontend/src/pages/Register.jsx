@@ -1,74 +1,104 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/register.css';
 
+const initialFormState = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  userType: '',
+  organization: '',
+  terms: false,
+};
+
 const Register = () => {
-  // State để lưu trữ dữ liệu từ form đăng ký
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'Consumer', // Giá trị mặc định cho vai trò là 'Consumer'
-  });
+  const [formData, setFormData] = useState(initialFormState);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [submitError, setSubmitError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Các state cục bộ cho UI
-  const [loading, setLoading] = useState(false); // State cho trạng thái loading
-  const [error, setError] = useState(null); // State để lưu thông báo lỗi
-  const navigate = useNavigate(); // Hook để thực hiện điều hướng
+  const wantsProvider = useMemo(() => formData.userType === 'data-provider', [formData.userType]);
+  const wantsConsumer = useMemo(() => formData.userType !== 'data-provider', [formData.userType]);
 
-  // Hàm xử lý khi người dùng thay đổi giá trị trong các ô input
   const handleChange = (e) => {
-    const { name, value } = e.target; // Lấy tên và giá trị từ input
-    // Cập nhật state formData
-    setFormData(prev => ({
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
-  // Hàm xử lý khi người dùng nhấn nút submit form
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Ngăn chặn hành vi mặc định của form
-    setLoading(true); // Bắt đầu hiển thị trạng thái loading
-    setError(null); // Xóa các lỗi cũ
+  const validate = () => {
+    const nextErrors = {};
 
-    // Kiểm tra nếu mật khẩu và xác nhận mật khẩu không khớp
-    if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu không khớp.');
-      setLoading(false);
-      return; // Dừng thực thi
+    if (!formData.name.trim()) {
+      nextErrors.name = 'Vui lòng nhập họ và tên.';
+    }
+    if (!formData.email.trim()) {
+      nextErrors.email = 'Vui lòng nhập email.';
+    }
+    if (!formData.password) {
+      nextErrors.password = 'Vui lòng nhập mật khẩu.';
+    }
+    if (!formData.confirmPassword) {
+      nextErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu.';
+    }
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      nextErrors.confirmPassword = 'Mật khẩu không khớp.';
+    }
+    if (!formData.terms) {
+      nextErrors.terms = 'Bạn phải đồng ý với điều khoản và chính sách.';
     }
 
-    // Chuẩn bị dữ liệu để gửi lên backend
+    return nextErrors;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSubmitError(null);
+
+    const nextErrors = validate();
+    setFieldErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setLoading(false);
+      return;
+    }
+
     const registrationData = {
-      name: formData.name,
-      email: formData.email,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
       password: formData.password,
-      roles: [formData.role] // Gửi vai trò dưới dạng một mảng
+      organization: formData.organization.trim() || null,
+      wantsConsumer,
+      wantsProvider,
     };
 
-    // Gọi API backend để đăng ký tài khoản
     fetch('/api/auth/register', {
-      method: 'POST', // Phương thức POST
-      headers: { 'Content-Type': 'application/json' }, // Khai báo kiểu nội dung là JSON
-      body: JSON.stringify(registrationData) // Gửi dữ liệu đăng ký
-    }).then(async res => {
-      // Nếu kết quả trả về không thành công
-      if (!res.ok) {
-        const txt = await res.text(); // Đọc nội dung lỗi
-        throw new Error(txt || 'Registration failed'); // Ném lỗi
-      }
-      return res.text(); // Nếu thành công, đọc nội dung text (ví dụ: "User registered successfully")
-    }).then(message => {
-      // Sau khi đăng ký thành công
-      console.log(message);
-      navigate('/login'); // Chuyển hướng người dùng đến trang đăng nhập
-    }).catch(err => {
-      // Xử lý nếu có lỗi trong quá trình fetch
-      console.error('Registration error', err);
-      setError('Đăng ký thất bại. Email có thể đã tồn tại.'); // Hiển thị lỗi cho người dùng
-    }).finally(() => setLoading(false)); // Kết thúc trạng thái loading
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(registrationData),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(txt || 'Registration failed');
+        }
+        return res.text();
+      })
+      .then(() => {
+        setFormData(initialFormState);
+        setFieldErrors({});
+        navigate('/login');
+      })
+      .catch((err) => {
+        console.error('Registration error', err);
+        setSubmitError('Đăng ký thất bại. Email có thể đã tồn tại.');
+      })
+      .finally(() => setLoading(false));
   };
 
   // Giao diện của component
@@ -117,12 +147,12 @@ const Register = () => {
                 <input 
                   type="text" 
                   id="fullName" 
-                  name="fullName"
+                  name="name"
                   placeholder="Nhập họ và tên đầy đủ"
-                  value={formData.fullName}
+                  value={formData.name}
                   onChange={handleChange}
                 />
-                {errors.fullName && <small className="error">{errors.fullName}</small>}
+                {fieldErrors.name && <small className="error">{fieldErrors.name}</small>}
               </div>
 
               <div className="form-group">
@@ -135,8 +165,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                 />
-                {errors.email && <small className="error">{errors.email}</small>}
-                {success.email && <small className="success">✓ Email khả dụng</small>}
+                {fieldErrors.email && <small className="error">{fieldErrors.email}</small>}
               </div>
 
               <div className="form-group">
@@ -149,7 +178,7 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                 />
-                {errors.password && <small className="error">{errors.password}</small>}
+                {fieldErrors.password && <small className="error">{fieldErrors.password}</small>}
               </div>
 
               <div className="form-group">
@@ -162,10 +191,7 @@ const Register = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
-                {errors.confirmPassword && <small className="error">{errors.confirmPassword}</small>}
-                {formData.confirmPassword && formData.password === formData.confirmPassword && 
-                  <small className="success">✓ Mật khẩu khớp</small>
-                }
+                {fieldErrors.confirmPassword && <small className="error">{fieldErrors.confirmPassword}</small>}
               </div>
 
               <div className="form-group">
@@ -206,12 +232,11 @@ const Register = () => {
                   Tôi đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách</a>
                 </label>
               </div>
-              {errors.terms && <small className="error">{errors.terms}</small>}
+              {fieldErrors.terms && <small className="error">{fieldErrors.terms}</small>}
 
               <button type="submit" className="submit-btn">Đăng ký ngay</button>
               {loading && <div className="info">Đang gửi...</div>}
-              {success.message && <div className="success">{success.message}</div>}
-              {errors.submit && <div className="error">{errors.submit}</div>}
+              {submitError && <div className="error">{submitError}</div>}
 
               <p className="login-prompt">
                 Đã có tài khoản? <Link to="/login">Đăng nhập</Link>

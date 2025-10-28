@@ -4,14 +4,14 @@ package com.evmarketplace.Repository;
 
 import java.util.List;
 import java.util.UUID;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.evmarketplace.marketplace.Purchase;
 import com.evmarketplace.marketplace.PurchaseStatus;
 
 @Repository
-public interface PurchaseRepository extends CrudRepository<Purchase, UUID> {
+public interface PurchaseRepository extends JpaRepository<Purchase, UUID> {
     List<Purchase> findByConsumerId(UUID consumerId);
     List<Purchase> findByStatus(PurchaseStatus status);
 }

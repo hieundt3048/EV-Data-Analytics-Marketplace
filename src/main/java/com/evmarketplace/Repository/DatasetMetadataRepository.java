@@ -1,12 +1,10 @@
 package com.evmarketplace.Repository;
 
-import java.util.UUID;
-import org.springframework.data.repository.CrudRepository;
+import com.evmarketplace.data.DatasetMetadata;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.evmarketplace.data.DatasetMetadata;
-
 @Repository
-public interface DatasetMetadataRepository extends CrudRepository<DatasetMetadata, UUID> {
-    DatasetMetadata findByProductId(UUID productId);
+public interface DatasetMetadataRepository extends JpaRepository<DatasetMetadata, java.util.UUID> {
+    DatasetMetadata findByProductId(java.util.UUID productId);
 }

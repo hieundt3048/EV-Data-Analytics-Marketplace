@@ -518,7 +518,7 @@ const Consumer = () => {
 
       {/* API Key Modal */}
       {showApiKeyModal && (
-        <div id="apiKeyModal" className="modal" onClick={(e) => { if (e.target.id === 'apiKeyModal') setShowApiKeyModal(false); }}>
+        <div id="apiKeyModal" className="modal modal-open" onClick={(e) => { if (e.target.id === 'apiKeyModal') setShowApiKeyModal(false); }}>
           <div className="modal-content">
             <div className="modal-header"><h3>Generate New API Key</h3><button className="modal-close" onClick={() => setShowApiKeyModal(false)}>&times;</button></div>
             <div className="modal-body">
