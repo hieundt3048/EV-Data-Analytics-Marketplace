@@ -122,4 +122,7 @@ public class User implements Serializable { // Implement Serializable để đ�
     public void setProviderApproved(boolean providerApproved) {
         this.providerApproved = providerApproved;
     }
+
+    // com.evmarketplace.model.User
+    private boolean deleted = false;
 }
