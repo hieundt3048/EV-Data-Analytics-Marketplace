@@ -123,6 +123,7 @@ public class User implements Serializable { // Implement Serializable để đ�
         this.providerApproved = providerApproved;
     }
 
-    // com.evmarketplace.model.User
+    // Flag soft-delete cho người dùng. Đặt columnDefinition với DEFAULT để Hibernate có thể thêm cột
+    @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean deleted = false;
 }

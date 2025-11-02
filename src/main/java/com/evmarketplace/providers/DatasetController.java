@@ -21,7 +21,7 @@ import com.evmarketplace.auth.SecurityUtils;
 import com.evmarketplace.data.DataProduct;
 import com.evmarketplace.data.ProductStatus;
 
-@RestController
+@RestController("providerDatasetController")
 @RequestMapping("/api/provider")
 public class DatasetController {
 

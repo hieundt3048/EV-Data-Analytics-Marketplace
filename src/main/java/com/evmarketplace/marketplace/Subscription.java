@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "MarketplaceSubscription")
 @Table(name = "subscriptions")
 public class Subscription {
 

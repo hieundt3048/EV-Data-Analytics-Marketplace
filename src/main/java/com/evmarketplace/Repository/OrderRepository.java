@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query("SELECT SUM(o.totalAmount) FROM Order o")
+    // Sử dụng tên thuộc tính trong entity `Order` là `amount` (không phải totalAmount)
+    @Query("SELECT SUM(o.amount) FROM Order o")
     Double calculateTotalRevenue();
 
     @Query("SELECT COUNT(o) FROM Order o")
