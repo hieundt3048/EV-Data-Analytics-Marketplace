@@ -1,12 +1,11 @@
 package com.evmarketplace.Service;
 
-import com.evmarketplace.provider.ProviderDataset;
+import com.evmarketplace.Pojo.ProviderDataset;
 import com.evmarketplace.Repository.ProviderDatasetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ProviderDatasetService {
@@ -26,8 +25,12 @@ public class ProviderDatasetService {
         return datasetRepository.findById(id).orElse(null);
     }
 
-    public ProviderDataset findById(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    public ProviderDataset updateS3Info(Long id, String s3Url, long sizeBytes) {
+        ProviderDataset dataset = findById(id);
+        if (dataset == null) return null;
+        dataset.setS3Url(s3Url);
+        dataset.setSizeBytes(sizeBytes);
+        dataset.setStatus("UPLOADED");
+        return datasetRepository.save(dataset);
     }
 }

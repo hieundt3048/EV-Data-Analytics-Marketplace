@@ -80,12 +80,11 @@ com\evmarketplace\Service\impl\AnonymizationServiceImpl.class
 com\evmarketplace\auth\AuthResponse.class
 com\evmarketplace\Repository\AccessGrantRepository.class
 com\evmarketplace\config\AsyncConfig.class
-com\evmarketplace\provider\ProviderDataset.class
+com\evmarketplace\Pojo\ProviderDataset.class
 com\evmarketplace\Controller\SubscriptionController.class
 com\evmarketplace\analytics\RecommendationEngine.class
 com\evmarketplace\privacy\AuditLog.class
 com\evmarketplace\Controller\GDPRController.class
-com\evmarketplace\Service\ProviderDatasetService.class
 com\evmarketplace\Service\GDPRComplianceService.class
 com\evmarketplace\auth\SimpleUser.class
 com\evmarketplace\auth\JwtUtil.class
@@ -94,7 +93,6 @@ com\evmarketplace\Service\UserService.class
 com\evmarketplace\Repository\SubscriptionRepository.class
 com\evmarketplace\Repository\ProviderDatasetRepository.class
 com\evmarketplace\Controller\AdminController$AdminUserUpdateRequest.class
-com\evmarketplace\provider\ProviderController.class
 com\evmarketplace\Repository\DatasetMetadataRepository.class
 com\evmarketplace\marketplace\AllowedUse.class
 com\evmarketplace\Repository\PaymentRepository.class

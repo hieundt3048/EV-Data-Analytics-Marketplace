@@ -5,6 +5,7 @@ D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\mar
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Repository\DatasetRepository.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\ConsumerController.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\SubscriptionController.java
+D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Pojo\ProviderDataset.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\marketplace\Purchase.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Repository\ProviderProfileRepository.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\privacy\Consent.java
@@ -59,7 +60,6 @@ D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Poj
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\config\SecurityConfig.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\auth\AuthRegisterRequest.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\billing\Transaction.java
-D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\provider\ProviderDataset.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Repository\ConsumerRepository.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\data\DataAsset.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Application.java
@@ -89,7 +89,6 @@ D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\mar
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\data\DataProduct.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\auth\JwtFilter.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Pojo\Order.java
-D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\provider\ProviderController.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\auth\SimpleUser.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\marketplace\PurchaseStatus.java
 D:\ProjectJava\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Service\SubscriptionService.java

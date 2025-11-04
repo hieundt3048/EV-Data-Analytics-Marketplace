@@ -1,6 +1,6 @@
 package com.evmarketplace.Repository;
 
-import com.evmarketplace.provider.ProviderDataset;
+import com.evmarketplace.Pojo.ProviderDataset;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
