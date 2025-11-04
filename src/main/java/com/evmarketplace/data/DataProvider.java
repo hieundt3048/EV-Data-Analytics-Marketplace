@@ -1,4 +1,4 @@
-package com.evmarketplace.providers;
+package com.evmarketplace.data;
 
 // Mục đích: Thực thể JPA cho nhà cung cấp dữ liệu (DataProvider).
 // Đáp ứng: Lưu thông tin cần thiết để ánh xạ User đã được phê duyệt thành một thực thể nhà cung cấp
@@ -101,4 +101,6 @@ public class DataProvider {
     public void setApproved(boolean approved) {
         this.approved = approved;
     }
+
+    
 }

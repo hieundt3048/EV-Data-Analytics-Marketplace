@@ -1,15 +1,27 @@
 package com.evmarketplace.Repository;
 
-import com.evmarketplace.Pojo.Order;// chua co model Order
+import com.evmarketplace.Pojo.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+@Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // Sử dụng tên thuộc tính trong entity `Order` là `amount` (không phải totalAmount)
-    @Query("SELECT SUM(o.amount) FROM Order o")
-    Double calculateTotalRevenue();
+    // Tổng doanh thu theo provider
+    @Query("SELECT COALESCE(SUM(o.amount), 0) FROM Order o WHERE o.providerId = :providerId AND o.status = 'PAID'")
+    Double getTotalRevenueByProvider(@Param("providerId") Long providerId);
 
-    @Query("SELECT COUNT(o) FROM Order o")
-    Long countOrders();
+    // Tổng số đơn hàng theo provider
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.providerId = :providerId AND o.status = 'PAID'")
+    Long getTotalOrdersByProvider(@Param("providerId") Long providerId);
+
+    // Doanh thu theo tháng (theo provider)
+    @Query("SELECT FUNCTION('MONTH', o.orderDate), SUM(o.amount) " +
+           "FROM Order o WHERE o.providerId = :providerId AND o.status = 'PAID' " +
+           "GROUP BY FUNCTION('MONTH', o.orderDate) ORDER BY FUNCTION('MONTH', o.orderDate)")
+    List<Object[]> getMonthlyRevenue(@Param("providerId") Long providerId);
 }

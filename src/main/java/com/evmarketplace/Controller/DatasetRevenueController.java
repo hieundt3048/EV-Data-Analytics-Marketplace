@@ -1,21 +1,26 @@
 package com.evmarketplace.Controller;
-
+  
+import com.evmarketplace.Pojo.RevenueReportDTO;
 import com.evmarketplace.Service.RevenueService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/provider/revenue")
 public class DatasetRevenueController {
 
-    @Autowired
-    private RevenueService revenueService;
+    private final RevenueService revenueService;
 
-    // API: GET /api/provider/revenue/report
+    public DatasetRevenueController(RevenueService revenueService) {
+        this.revenueService = revenueService;
+    }
+
+    // GET /api/provider/revenue/report?providerId=1
     @GetMapping("/report")
-    public Map<String, Object> getRevenueReport() {
-        return revenueService.getRevenueSummary();
+    public ResponseEntity<?> getRevenueReport(@RequestParam(value = "providerId", required = true) Long providerId) {
+        if (providerId == null) {
+            return ResponseEntity.badRequest().body("Provider ID is required");
+        }
+        return ResponseEntity.ok(revenueService.getRevenueSummaryForProvider(providerId));
     }
 }

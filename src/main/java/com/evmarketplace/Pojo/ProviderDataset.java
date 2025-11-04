@@ -11,32 +11,30 @@ public class ProviderDataset {
     private Long id;
 
     private String name;
+
+    @Column(length = 2000)
     private String description;
+
     private String s3Url;
+
     private long sizeBytes;
 
-    // optional: trạng thái upload
+    // status: CREATED, UPLOADING, UPLOADED, ANONYMIZING, ANONYMIZED, ERASED
     private String status = "CREATED";
 
-    
-    // ---- Thêm chính sách giá & quyền ----
-    private String pricingType; // "per_request" hoặc "subscription"
-    private Double price; // giá tiền
-    private String usagePolicy; // mô tả quyền sử dụng (vd: "Chỉ dùng nội bộ", "Chia sẻ lại được")
+    // Policy fields
+    private String pricingType; // per_request | subscription
+    private Double price;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(length = 2000)
+    private String usagePolicy;
+
+    // owner provider id (nullable)
+    private Long providerId;
 
     public ProviderDataset() {}
 
-    public ProviderDataset(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
-
-    // Getters và setters
-    // ...
+    // getters / setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -52,6 +50,9 @@ public class ProviderDataset {
     public long getSizeBytes() { return sizeBytes; }
     public void setSizeBytes(long sizeBytes) { this.sizeBytes = sizeBytes; }
 
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
     public String getPricingType() { return pricingType; }
     public void setPricingType(String pricingType) { this.pricingType = pricingType; }
 
@@ -61,9 +62,6 @@ public class ProviderDataset {
     public String getUsagePolicy() { return usagePolicy; }
     public void setUsagePolicy(String usagePolicy) { this.usagePolicy = usagePolicy; }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Long getProviderId() { return providerId; }
+    public void setProviderId(Long providerId) { this.providerId = providerId; }
 }

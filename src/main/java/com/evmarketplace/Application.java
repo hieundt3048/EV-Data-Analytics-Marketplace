@@ -18,10 +18,10 @@ import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.JwtFilter;
 import com.evmarketplace.data.DataProduct;
+import com.evmarketplace.data.DataProvider;
 import com.evmarketplace.data.DataType;
 import com.evmarketplace.data.Format;
 import com.evmarketplace.data.ProductStatus;
-import com.evmarketplace.providers.DataProvider;
 
 import java.time.Instant;
 import java.util.Arrays;

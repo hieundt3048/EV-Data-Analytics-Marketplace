@@ -2,10 +2,6 @@
 // Đáp ứng: Đại diện DataProduct theo class diagram, chứa metadata, loại dữ liệu, định dạng, kích thước và trạng thái.
 package com.evmarketplace.data;
 
-// Mục đích: Thực thể DataProduct lưu thông tin sản phẩm dữ liệu được niêm yết.
-// Đáp ứng: Chuyển đổi từ POJO sang entity JPA để Spring Data quản lý/persist theo sơ đồ lớp.
-
-import com.evmarketplace.providers.DataProvider;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.CollectionTable;

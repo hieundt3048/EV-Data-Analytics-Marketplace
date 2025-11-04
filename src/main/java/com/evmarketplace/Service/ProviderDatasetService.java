@@ -2,7 +2,6 @@ package com.evmarketplace.Service;
 
 import com.evmarketplace.Pojo.ProviderDataset;
 import com.evmarketplace.Repository.ProviderDatasetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,27 +9,47 @@ import java.util.List;
 @Service
 public class ProviderDatasetService {
 
-    @Autowired
-    private ProviderDatasetRepository datasetRepository;
+    private final ProviderDatasetRepository repo;
 
-    public ProviderDataset save(ProviderDataset dataset) {
-        return datasetRepository.save(dataset);
+    public ProviderDatasetService(ProviderDatasetRepository repo) {
+        this.repo = repo;
     }
 
-    public List<ProviderDataset> findAll() {
-        return datasetRepository.findAll();
+    public ProviderDataset save(ProviderDataset dataset) {
+        return repo.save(dataset);
     }
 
     public ProviderDataset findById(Long id) {
-        return datasetRepository.findById(id).orElse(null);
+        return repo.findById(id).orElse(null);
+    }
+
+    public List<ProviderDataset> findAll() {
+        return repo.findAll();
     }
 
     public ProviderDataset updateS3Info(Long id, String s3Url, long sizeBytes) {
-        ProviderDataset dataset = findById(id);
-        if (dataset == null) return null;
-        dataset.setS3Url(s3Url);
-        dataset.setSizeBytes(sizeBytes);
-        dataset.setStatus("UPLOADED");
-        return datasetRepository.save(dataset);
+        ProviderDataset d = findById(id);
+        if (d == null) return null;
+        d.setS3Url(s3Url);
+        d.setSizeBytes(sizeBytes);
+        d.setStatus("UPLOADED");
+        return repo.save(d);
+    }
+
+    public ProviderDataset updatePolicy(Long id, String pricingType, Double price, String usagePolicy) {
+        ProviderDataset d = findById(id);
+        if (d == null) return null;
+        d.setPricingType(pricingType);
+        d.setPrice(price);
+        d.setUsagePolicy(usagePolicy);
+        return repo.save(d);
+    }
+
+    public void markErased(Long id) {
+        ProviderDataset d = findById(id);
+        if (d != null) {
+            d.setStatus("ERASED");
+            repo.save(d);
+        }
     }
 }

@@ -15,7 +15,8 @@ public class Consumer {
     private String organization;
     private String role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany
+    @JoinColumn(name = "buyer_id")
     private List<Order> orders;
 
     @OneToMany(mappedBy = "user")
