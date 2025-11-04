@@ -21,7 +21,7 @@ import com.evmarketplace.auth.SecurityUtils;
 import com.evmarketplace.data.DataProduct;
 import com.evmarketplace.data.ProductStatus;
 
-@RestController("providerDatasetController")
+@RestController("providerDatasetController1")
 @RequestMapping("/api/provider")
 public class DatasetController {
 
@@ -34,7 +34,7 @@ public class DatasetController {
     }
 
     // ------------------- API POST: Upload metadata dataset -------------------
-    @PostMapping("/datasets")
+    @PostMapping("/datasets/{id}/upload-metadata")
     public ResponseEntity<?> uploadDatasetMetadata(@RequestBody DataProduct body, HttpServletRequest req) {
         List<String> roles = SecurityUtils.getRolesFromRequest(req);
         if (roles == null || !roles.contains("Provider"))

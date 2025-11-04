@@ -33,6 +33,7 @@ import java.util.List;
     "com.evmarketplace.Pojo",
     "com.evmarketplace.billing",
     "com.evmarketplace.data",
+    "com.evmarketplace.provider",
     "com.evmarketplace.providers",
     "com.evmarketplace.marketplace"
 })
