@@ -12,10 +12,23 @@ import java.util.Optional;
 public class DatasetService {
     private final DatasetRepository repo;
 
-    public DatasetService(DatasetRepository repo) { this.repo = repo; }
+    public DatasetService(DatasetRepository repo) { 
+        this.repo = repo; 
+    }
 
-    public List<Dataset> search(Specification<Dataset> spec) { return repo.findAll(spec); }
-    public List<Dataset> findAll() { return repo.findAll(); }
-    public Optional<Dataset> findById(Long id) { return repo.findById(id); }
-    public Dataset save(Dataset d) { return repo.save(d); }
+    public List<Dataset> search(Specification<Dataset> spec) { 
+        return repo.findAll(spec); 
+    }
+    
+    public List<Dataset> findAll() { 
+        return repo.findAll(); 
+    }
+    
+    public Optional<Dataset> findById(Long id) { 
+        return repo.findById(id); 
+    }
+    
+    public Dataset save(Dataset dataset) { 
+        return repo.save(dataset); 
+    }
 }
