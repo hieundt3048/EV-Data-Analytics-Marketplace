@@ -3,7 +3,7 @@ import '../styles/index.css';
 import '../styles/admin.css';
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('users');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAPIKeyModal, setShowAPIKeyModal] = useState(false);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
@@ -60,7 +60,7 @@ const Admin = () => {
       const [analyticsRes, usersRes, pendingRes, transactionsRes, revenueRes, apiKeyRes] = await Promise.all([
         fetchWithAuth('/api/admin/analytics/overview'),
         fetchWithAuth('/api/admin/users'),
-        fetchWithAuth('/api/admin/datasets/pending'),
+        fetchWithAuth('/api/admin/provider-datasets/pending'),
         fetchWithAuth('/api/admin/payments/transactions'),
         fetchWithAuth('/api/admin/payments/revenue-share'),
         fetchWithAuth('/api/admin/security/apikeys')
@@ -111,7 +111,7 @@ const Admin = () => {
 
   const approveDataset = async (id) => {
     try {
-      await fetchWithAuth(`/api/admin/datasets/${id}/approve`, { method: 'PUT' });
+      await fetchWithAuth(`/api/admin/provider-datasets/${id}/approve`, { method: 'PUT' });
       refreshAll();
     } catch (err) {
       setError(`Không thể phê duyệt dataset: ${err.message}`);
@@ -119,8 +119,12 @@ const Admin = () => {
   };
 
   const rejectDataset = async (id) => {
+    const reason = window.prompt('Lý do từ chối (optional):');
     try {
-      await fetchWithAuth(`/api/admin/datasets/${id}/reject`, { method: 'PUT' });
+      await fetchWithAuth(`/api/admin/provider-datasets/${id}/reject`, { 
+        method: 'PUT',
+        body: JSON.stringify({ reason: reason || '' })
+      });
       refreshAll();
     } catch (err) {
       setError(`Không thể từ chối dataset: ${err.message}`);
@@ -222,7 +226,9 @@ const Admin = () => {
   const totalProviders = analytics?.providers ?? providerUsers.length;
   const totalConsumers = analytics?.consumers ?? consumerUsers.length;
   const pendingProducts = analytics?.pendingProducts ?? pendingDatasets.length;
-  const publishedProducts = analytics?.publishedProducts ?? 0;
+  const pendingProviderDatasets = analytics?.pendingProviderDatasets ?? pendingDatasets.length;
+  const approvedProviderDatasets = analytics?.approvedProviderDatasets ?? 0;
+  const publishedProducts = analytics?.publishedProducts ?? approvedProviderDatasets;
   const numberFrom = (value) => {
     if (value == null) return 0;
     if (typeof value === 'number') return value;
@@ -434,7 +440,6 @@ const Admin = () => {
       <div className="admin-tabs">
         <div className="container">
           <div className="tabs-container">
-            <button className="tab-btn" data-tab="dashboard" onClick={() => setActiveTab('dashboard')}>Dashboard</button>
             <button className="tab-btn" data-tab="users" onClick={() => setActiveTab('users')}>User Management</button>
             <button className="tab-btn" data-tab="payments" onClick={() => setActiveTab('payments')}>Payments</button>
             <button className="tab-btn" data-tab="security" onClick={() => setActiveTab('security')}>Security</button>
@@ -444,96 +449,6 @@ const Admin = () => {
       </div>
 
       <main className="admin-container">
-        {/* Dashboard Tab */}
-        <div id="dashboard" className="tab-content">
-          <section className="admin-section">
-            <h2>Platform Overview</h2>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <svg viewBox="0 0 24 24"><path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 7c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div className="stat-content"><h3>{formatNumber(totalUsers)}</h3><p>Active Users</p></div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <div className="stat-content"><h3>{formatNumber(publishedProducts)}</h3><p>Datasets Available</p></div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/></svg>
-                </div>
-                <div className="stat-content"><h3>{formatCurrency(totalRevenue)}</h3><p>Total Revenue</p></div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                </div>
-                <div className="stat-content"><h3>98.2%</h3><p>Platform Uptime</p></div>
-              </div>
-            </div>
-          </section>
-          
-          <section className="admin-section">
-            <h2>Quick Actions</h2>
-            <div className="quick-actions-grid">
-              <div className="admin-card">
-                <div className="card-body">
-                  <h5>User Management & Permissions</h5>
-                  <ul>
-                    <li>View and manage all registered users</li>
-                    <li>Assign roles and permissions</li>
-                    <li>Approve or reject data submissions</li>
-                    <li>Monitor user activity and compliance</li>
-                  </ul>
-                  <button className="admin-btn admin-btn-primary" onClick={() => setActiveTab('users')}>Manage Users</button>
-                </div>
-              </div>
-
-              <div className="admin-card">
-                <div className="card-body">
-                  <h5>Payment & Revenue Sharing</h5>
-                  <ul>
-                    <li>Monitor all payment transactions</li>
-                    <li>Distribute revenue to data providers</li>
-                    <li>Generate financial reports</li>
-                    <li>Manage subscription billing</li>
-                  </ul>
-                  <button className="admin-btn admin-btn-success" onClick={() => setActiveTab('payments')}>Payment Dashboard</button>
-                </div>
-              </div>
-
-              <div className="admin-card">
-                <div className="card-body">
-                  <h5>Security & Privacy Compliance</h5>
-                  <ul>
-                    <li>Monitor data encryption and security protocols</li>
-                    <li>Manage API access controls</li>
-                    <li>Ensure GDPR, CCPA compliance</li>
-                    <li>Audit data access logs</li>
-                  </ul>
-                  <button className="admin-btn admin-btn-warning" onClick={() => setActiveTab('security')}>Security Center</button>
-                </div>
-              </div>
-
-              <div className="admin-card">
-                <div className="card-body">
-                  <h5>Analytics & Market Insights</h5>
-                  <ul>
-                    <li>View most popular datasets and trends</li>
-                    <li>AI-powered EV market development insights</li>
-                    <li>Generate comprehensive market reports</li>
-                    <li>Monitor platform performance metrics</li>
-                  </ul>
-                  <button className="admin-btn admin-btn-info" onClick={() => setActiveTab('analytics')}>View Analytics</button>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
         {/* Users Tab */}
         <div id="users" className="tab-content">
           <section className="admin-section">
@@ -543,10 +458,6 @@ const Admin = () => {
                 <button className="admin-btn admin-btn-primary" onClick={openAddUserModal}>
                   <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                   Add New User
-                </button>
-                <button className="admin-btn admin-btn-outline" onClick={noopAlert('Exporting users (demo)')}>
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                  Export Users
                 </button>
               </div>
             </div>
@@ -713,23 +624,54 @@ const Admin = () => {
                 <div className="empty-state">Không có bộ dữ liệu nào cần phê duyệt.</div>
               )}
               {pendingDatasets.map((dataset) => {
-                const providerLabel = dataset.providerName || `Provider ${shortId(dataset.providerId)}`;
+                const providerLabel = dataset.providerName || `Provider #${dataset.providerId || 'N/A'}`;
                 return (
                   <div className="approval-card" key={dataset.id}>
                     <div className="approval-header">
-                      <h4>{dataset.title || 'Dataset chưa đặt tên'}</h4>
-                      <span className="approval-badge pending">Pending</span>
+                      <h4>{dataset.name || 'Dataset chưa đặt tên'}</h4>
+                      <span className="approval-badge pending">{dataset.status || 'PENDING_REVIEW'}</span>
                     </div>
                     <div className="approval-info">
-                      <div className="info-item"><span className="label">Provider:</span><span className="value">{providerLabel}</span></div>
-                      <div className="info-item"><span className="label">Region:</span><span className="value">{dataset.region || 'N/A'}</span></div>
-                      <div className="info-item"><span className="label">Size:</span><span className="value">{formatBytes(dataset.sizeBytes)}</span></div>
-                      <div className="info-item"><span className="label">Submitted:</span><span className="value">{formatDateTime(dataset.submittedAt)}</span></div>
+                      <div className="info-item">
+                        <span className="label">Provider:</span>
+                        <span className="value">{providerLabel}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="label">Description:</span>
+                        <span className="value">{dataset.description || 'N/A'}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="label">Pricing:</span>
+                        <span className="value">
+                          {dataset.pricingType === 'per_request' ? 'Per Request' : 'Subscription'} - 
+                          {formatCurrency(dataset.price || 0)}
+                        </span>
+                      </div>
+                      <div className="info-item">
+                        <span className="label">Size:</span>
+                        <span className="value">{formatBytes(dataset.sizeBytes)}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="label">S3 URL:</span>
+                        <span className="value" style={{ fontSize: '0.85em', wordBreak: 'break-all' }}>
+                          {dataset.s3Url || 'N/A'}
+                        </span>
+                      </div>
                     </div>
                     <div className="approval-actions">
-                      <button className="admin-btn admin-btn-success" onClick={() => approveDataset(dataset.id)}>Approve</button>
-                      <button className="admin-btn admin-btn-outline" onClick={noopAlert(`Review dataset ${shortId(dataset.id)}`)}>Review</button>
-                      <button className="admin-btn admin-btn-danger" onClick={() => rejectDataset(dataset.id)}>Reject</button>
+                      <button className="admin-btn admin-btn-success" onClick={() => approveDataset(dataset.id)}>
+                        ✓ Approve
+                      </button>
+                      <button 
+                        className="admin-btn admin-btn-outline" 
+                        onClick={() => window.open(dataset.s3Url, '_blank')}
+                        disabled={!dataset.s3Url}
+                      >
+                        👁 Review File
+                      </button>
+                      <button className="admin-btn admin-btn-danger" onClick={() => rejectDataset(dataset.id)}>
+                        ✗ Reject
+                      </button>
                     </div>
                   </div>
                 );

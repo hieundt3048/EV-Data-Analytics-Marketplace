@@ -3,36 +3,74 @@ package com.evmarketplace.Pojo;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Entity Order đại diện cho đơn hàng dataset giữa provider và buyer.
+ * Dùng cho truy vấn doanh thu và lịch sử mua hàng.
+ */
+
 @Entity
 @Table(name = "orders")
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String status;
+
+    // ID dataset được mua
+    @Column(name = "dataset_id", nullable = false)
+    private Long datasetId;
+
+    // Người mua
+    @Column(name = "buyer_id", nullable = false)
+    private Long buyerId;
+
+    // Nhà cung cấp dữ liệu
+    @Column(name = "provider_id", nullable = false)
+    private Long providerId;
+
+    // Số tiền thanh toán
+    @Column(nullable = false)
     private Double amount;
-    private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    // Ngày đặt hàng
+    @Column(name = "order_date", nullable = false)
+    private LocalDateTime orderDate;
 
-    @ManyToOne
-    @JoinColumn(name = "dataset_id")
-    private Dataset dataset;
+    // Trạng thái đơn hàng: PAID, PENDING, CANCELLED
+    @Column(nullable = false, length = 20)
+    private String status;
 
+    // --- Constructors ---
     public Order() {}
 
+    public Order(Long datasetId, Long buyerId, Long providerId, Double amount, LocalDateTime orderDate, String status) {
+        this.datasetId = datasetId;
+        this.buyerId = buyerId;
+        this.providerId = providerId;
+        this.amount = amount;
+        this.orderDate = orderDate;
+        this.status = status;
+    }
+
+    // --- Getters & Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+
+    public Long getDatasetId() { return datasetId; }
+    public void setDatasetId(Long datasetId) { this.datasetId = datasetId; }
+
+    public Long getBuyerId() { return buyerId; }
+    public void setBuyerId(Long buyerId) { this.buyerId = buyerId; }
+
+    public Long getProviderId() { return providerId; }
+    public void setProviderId(Long providerId) { this.providerId = providerId; }
+
     public Double getAmount() { return amount; }
     public void setAmount(Double amount) { this.amount = amount; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public Dataset getDataset() { return dataset; }
-    public void setDataset(Dataset dataset) { this.dataset = dataset; }
+
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

@@ -1,10 +1,28 @@
 import React, { useEffect, useState } from 'react';
+import axiosInstance from '../utils/axiosConfig';
 import '../styles/index.css';
 import '../styles/consumer.css';
 
 const Consumer = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  
+  // Search & Filter states
+  const [datasets, setDatasets] = useState([]);
+  const [filteredDatasets, setFilteredDatasets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    category: '',
+    timeRange: '',
+    region: '',
+    vehicleType: '',
+    batteryType: '',
+    dataFormat: '',
+    pricingType: '',
+    minPrice: '',
+    maxPrice: '',
+    searchQuery: ''
+  });
 
   useEffect(() => {
     // sync tab active classes for CSS (keeps existing styles intact)
@@ -14,13 +32,189 @@ const Consumer = () => {
     const content = document.getElementById(activeTab);
     if (btn) btn.classList.add('active');
     if (content) content.classList.add('active');
+    
+    // Load datasets when switching to data-discovery tab
+    if (activeTab === 'data-discovery') {
+      fetchApprovedDatasets();
+    }
   }, [activeTab]);
+
+  // Fetch approved datasets from backend
+  const fetchApprovedDatasets = async () => {
+    try {
+      setLoading(true);
+      // Get all approved datasets
+      const response = await axiosInstance.get('/consumers/datasets/approved');
+      console.log('✅ Fetched approved datasets:', response.data);
+      console.log('📊 Total datasets:', response.data.length);
+      if (response.data.length > 0) {
+        console.log('🔍 First dataset:', response.data[0]);
+      }
+      setDatasets(response.data);
+      setFilteredDatasets(response.data);
+    } catch (error) {
+      console.error('Error fetching datasets:', error);
+      setDatasets([]);
+      setFilteredDatasets([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle filter changes (chỉ cập nhật state, không lọc ngay)
+  const handleFilterChange = (filterName, value) => {
+    const newFilters = { ...filters, [filterName]: value };
+    setFilters(newFilters);
+    //chờ user nhấn Search Datasets
+  };
+
+  // Apply filters to datasets
+  const applyFilters = (currentFilters) => {
+    console.log('🔍 Applying filters:', currentFilters);
+    console.log('📦 Total datasets to filter:', datasets.length);
+    
+    let filtered = [...datasets];
+
+    // Filter by search query (name or description)
+    if (currentFilters.searchQuery) {
+      const query = currentFilters.searchQuery.toLowerCase();
+      filtered = filtered.filter(ds => 
+        ds.name?.toLowerCase().includes(query) || 
+        ds.description?.toLowerCase().includes(query)
+      );
+      console.log(`  ✓ After search query: ${filtered.length} datasets`);
+    }
+
+    // Filter by category
+    if (currentFilters.category) {
+      filtered = filtered.filter(ds => {
+        const datasetCategory = (ds.category || '').toString().toLowerCase().trim();
+        const filterCategory = currentFilters.category.toLowerCase().trim();
+        return datasetCategory === filterCategory;
+      });
+      console.log(`  ✓ After category filter: ${filtered.length} datasets`);
+    }
+
+    // Filter by time range
+    if (currentFilters.timeRange) {
+      filtered = filtered.filter(ds => {
+        const datasetTimeRange = (ds.timeRange || '').toString().toLowerCase().trim();
+        const filterTimeRange = currentFilters.timeRange.toLowerCase().trim();
+        return datasetTimeRange === filterTimeRange;
+      });
+      console.log(`  ✓ After time range filter: ${filtered.length} datasets`);
+    }
+
+    // Filter by region
+    if (currentFilters.region) {
+      console.log(`  🌏 Filtering by region: "${currentFilters.region}"`);
+      console.log('  📊 Datasets regions:', datasets.map(ds => ({ name: ds.name, region: ds.region })));
+      filtered = filtered.filter(ds => {
+        const datasetRegion = (ds.region || '').toString().toLowerCase().trim();
+        const filterRegion = currentFilters.region.toLowerCase().trim();
+        console.log(`    Comparing: dataset="${datasetRegion}" vs filter="${filterRegion}"`);
+        return datasetRegion === filterRegion;
+      });
+      console.log(`  ✓ After region filter: ${filtered.length} datasets`);
+    }
+
+    // Filter by vehicle type
+    if (currentFilters.vehicleType) {
+      filtered = filtered.filter(ds => {
+        const datasetVehicleType = (ds.vehicleType || '').toString().toLowerCase().trim();
+        const filterVehicleType = currentFilters.vehicleType.toLowerCase().trim();
+        return datasetVehicleType === filterVehicleType;
+      });
+    }
+
+    // Filter by battery type
+    if (currentFilters.batteryType) {
+      filtered = filtered.filter(ds => {
+        const datasetBatteryType = (ds.batteryType || '').toString().toLowerCase().trim();
+        const filterBatteryType = currentFilters.batteryType.toLowerCase().trim();
+        return datasetBatteryType === filterBatteryType;
+      });
+    }
+
+    // Filter by data format
+    if (currentFilters.dataFormat) {
+      filtered = filtered.filter(ds => {
+        const datasetDataFormat = (ds.dataFormat || '').toString().toLowerCase().trim();
+        const filterDataFormat = currentFilters.dataFormat.toLowerCase().trim();
+        return datasetDataFormat === filterDataFormat;
+      });
+    }
+
+    // Filter by pricing type
+    if (currentFilters.pricingType) {
+      filtered = filtered.filter(ds => {
+        const datasetPricingType = (ds.pricingType || '').toString().toLowerCase().trim();
+        const filterPricingType = currentFilters.pricingType.toLowerCase().trim();
+        return datasetPricingType === filterPricingType;
+      });
+    }
+
+    // Filter by price range
+    if (currentFilters.minPrice) {
+      filtered = filtered.filter(ds => ds.price >= parseFloat(currentFilters.minPrice));
+    }
+    if (currentFilters.maxPrice) {
+      filtered = filtered.filter(ds => ds.price <= parseFloat(currentFilters.maxPrice));
+    }
+
+    console.log('✅ Final filtered datasets:', filtered.length);
+    setFilteredDatasets(filtered);
+  };
+
+  // Search datasets
+  const searchDatasets = () => {
+    applyFilters(filters);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    const resetFilters = {
+      category: '',
+      timeRange: '',
+      region: '',
+      vehicleType: '',
+      batteryType: '',
+      dataFormat: '',
+      pricingType: '',
+      minPrice: '',
+      maxPrice: '',
+      searchQuery: ''
+    };
+    setFilters(resetFilters);
+    setFilteredDatasets(datasets);
+  };
+
+  // Format currency
+  const formatCurrency = (value) => new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: 'USD' 
+  }).format(value || 0);
+
+  // Format bytes to readable size
+  const formatBytes = (bytes) => {
+    const value = Number(bytes);
+    if (!value || Number.isNaN(value)) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+    const scaled = value / (1024 ** index);
+    return `${scaled.toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+  };
 
   // Demo actions (replace with real API calls when available)
   const downloadDataset = (id) => alert(`Downloading dataset: ${id}`);
   const viewDatasetAnalytics = (id) => alert(`Viewing analytics for dataset: ${id}`);
   const viewPurchaseHistory = () => alert('Opening purchase history...');
-  const searchDatasets = () => alert('Search functionality would be implemented here');
+  const purchaseDataset = (dataset) => {
+    if (window.confirm(`Purchase "${dataset.name}" for ${formatCurrency(dataset.price)}?`)) {
+      alert(`Purchase initiated for dataset: ${dataset.name}`);
+      // TODO: Implement actual purchase flow
+    }
+  };
 
   return (
     <>
@@ -209,17 +403,219 @@ const Consumer = () => {
                 <p className="section-description">Browse comprehensive EV datasets including driving behavior, battery performance, charging station usage, and V2G transactions.</p>
 
                 <div className="search-filters">
-                  <div className="filter-group"><label htmlFor="data-category">Data Category</label><select id="data-category"><option value="">All Categories</option><option value="driving-behavior">Driving Behavior</option><option value="battery-performance">Battery Performance</option><option value="charging-usage">Charging Station Usage</option><option value="v2g-transactions">V2G Transactions</option><option value="vehicle-telemetry">Vehicle Telemetry</option><option value="energy-consumption">Energy Consumption</option></select></div>
-                  <div className="filter-group"><label htmlFor="time-range">Time Range</label><select id="time-range"><option value="">Any Time</option><option value="last-7-days">Last 7 Days</option><option value="last-30-days">Last 30 Days</option><option value="last-6-months">Last 6 Months</option><option value="last-year">Last Year</option><option value="custom">Custom Range</option></select></div>
-                  <div className="filter-group"><label htmlFor="region">Region</label><select id="region"><option value="">All Regions</option><option value="north-america">North America</option><option value="europe">Europe</option><option value="asia">Asia</option><option value="global">Global</option></select></div>
-                  <div className="filter-group"><label htmlFor="vehicle-type">Vehicle Type</label><select id="vehicle-type"><option value="">All Types</option><option value="sedan">Sedan</option><option value="suv">SUV</option><option value="truck">Truck</option><option value="commercial">Commercial</option></select></div>
-                  <div className="filter-group"><label htmlFor="battery-type">Battery Type</label><select id="battery-type"><option value="">All Types</option><option value="lithium-ion">Lithium-ion</option><option value="solid-state">Solid State</option><option value="lifepo4">LiFePO4</option></select></div>
-                  <div className="filter-group"><label htmlFor="data-format">Data Format</label><select id="data-format"><option value="">All Formats</option><option value="raw">Raw Data</option><option value="analyzed">Analyzed Data</option><option value="api">API Access</option></select></div>
+                  <div className="filter-group">
+                    <label htmlFor="data-category">Data Category</label>
+                    <select 
+                      id="data-category"
+                      value={filters.category}
+                      onChange={(e) => handleFilterChange('category', e.target.value)}
+                    >
+                      <option value="">All Categories</option>
+                      <option value="charging_behavior">Charging Behavior</option>
+                      <option value="battery_health">Battery Health</option>
+                      <option value="route_optimization">Route Optimization</option>
+                      <option value="energy_consumption">Energy Consumption</option>
+                    </select>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label htmlFor="time-range">Time Range</label>
+                    <select 
+                      id="time-range"
+                      value={filters.timeRange}
+                      onChange={(e) => handleFilterChange('timeRange', e.target.value)}
+                    >
+                      <option value="">Any Time</option>
+                      <option value="2020-2021">2020-2021</option>
+                      <option value="2021-2022">2021-2022</option>
+                      <option value="2022-2023">2022-2023</option>
+                      <option value="2023-2024">2023-2024</option>
+                      <option value="2024-present">2024-Present</option>
+                    </select>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label htmlFor="region">Region</label>
+                    <select 
+                      id="region"
+                      value={filters.region}
+                      onChange={(e) => handleFilterChange('region', e.target.value)}
+                    >
+                      <option value="">All Regions</option>
+                      <option value="north_america">North America</option>
+                      <option value="europe">Europe</option>
+                      <option value="asia">Asia</option>
+                      <option value="australia">Australia</option>
+                      <option value="africa">Africa</option>
+                      <option value="south_america">South America</option>
+                    </select>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label htmlFor="vehicle-type">Vehicle Type</label>
+                    <select 
+                      id="vehicle-type"
+                      value={filters.vehicleType}
+                      onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
+                    >
+                      <option value="">All Types</option>
+                      <option value="sedan">Sedan</option>
+                      <option value="suv">SUV</option>
+                      <option value="truck">Truck</option>
+                      <option value="bus">Bus</option>
+                      <option value="motorcycle">Motorcycle</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label htmlFor="battery-type">Battery Type</label>
+                    <select 
+                      id="battery-type"
+                      value={filters.batteryType}
+                      onChange={(e) => handleFilterChange('batteryType', e.target.value)}
+                    >
+                      <option value="">All Types</option>
+                      <option value="lithium_ion">Lithium-Ion</option>
+                      <option value="solid_state">Solid-State</option>
+                      <option value="nickel_metal_hydride">Nickel-Metal Hydride</option>
+                      <option value="lead_acid">Lead-Acid</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label htmlFor="data-format">Data Format</label>
+                    <select 
+                      id="data-format"
+                      value={filters.dataFormat}
+                      onChange={(e) => handleFilterChange('dataFormat', e.target.value)}
+                    >
+                      <option value="">All Formats</option>
+                      <option value="CSV">CSV</option>
+                      <option value="JSON">JSON</option>
+                      <option value="XML">XML</option>
+                      <option value="Parquet">Parquet</option>
+                      <option value="Excel">Excel</option>
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label htmlFor="pricing-type">Pricing Model</label>
+                    <select 
+                      id="pricing-type"
+                      value={filters.pricingType}
+                      onChange={(e) => handleFilterChange('pricingType', e.target.value)}
+                    >
+                      <option value="">All Models</option>
+                      <option value="per_request">Pay per Download</option>
+                      <option value="subscription">Subscription</option>
+                    </select>
+                  </div>
+
+                  <div className="filter-group">
+                    <label htmlFor="min-price">Min Price ($)</label>
+                    <input 
+                      id="min-price"
+                      type="number" 
+                      min="0" 
+                      step="0.01"
+                      placeholder="Min"
+                      value={filters.minPrice}
+                      onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                      style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                    />
+                  </div>
+
+                  <div className="filter-group">
+                    <label htmlFor="max-price">Max Price ($)</label>
+                    <input 
+                      id="max-price"
+                      type="number" 
+                      min="0" 
+                      step="0.01"
+                      placeholder="Max"
+                      value={filters.maxPrice}
+                      onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                      style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                    />
+                  </div>
                 </div>
 
-                <button className="consumer-btn consumer-btn-primary" onClick={searchDatasets}><svg className="btn-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>Search Datasets</button>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                  <button className="consumer-btn consumer-btn-primary" onClick={searchDatasets} disabled={loading}>
+                    <svg className="btn-icon" viewBox="0 0 24 24">
+                      <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    {loading ? 'Searching...' : 'Search Datasets'}
+                  </button>
+                  <button className="consumer-btn consumer-btn-outline" onClick={clearFilters} disabled={loading}>
+                    Clear Filters
+                  </button>
+                </div>
               </div>
             </div>
+
+            {/* Search Results */}
+            <section className="consumer-section">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h2>Available Datasets ({filteredDatasets.length})</h2>
+              </div>
+
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <p>Loading datasets...</p>
+                </div>
+              ) : filteredDatasets.length === 0 ? (
+                <div className="consumer-card">
+                  <div className="card-body" style={{ textAlign: 'center', padding: '40px' }}>
+                    <h5>No datasets found</h5>
+                    <p>Try adjusting your search filters or browse all available datasets.</p>
+                    <button className="consumer-btn consumer-btn-primary" onClick={clearFilters}>
+                      Clear Filters & View All
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="datasets-grid">
+                  {filteredDatasets.map((dataset) => (
+                    <div className="dataset-card" key={dataset.id}>
+                      <div className="dataset-icon">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                      </div>
+                      <h4>{dataset.name}</h4>
+                      <p>{dataset.description || 'No description available'}</p>
+                      
+                      {/* Metadata tags */}
+                      <div className="dataset-tags">
+                        {dataset.category && <span className="tag tag-category">{dataset.category.replace('_', ' ')}</span>}
+                        {dataset.region && <span className="tag tag-region">{dataset.region.replace('_', ' ')}</span>}
+                        {dataset.vehicleType && <span className="tag tag-vehicle">{dataset.vehicleType}</span>}
+                        {dataset.batteryType && <span className="tag tag-battery">{dataset.batteryType.replace('_', ' ')}</span>}
+                        {dataset.timeRange && <span className="tag tag-time">{dataset.timeRange}</span>}
+                        {dataset.dataFormat && <span className="tag tag-format">{dataset.dataFormat}</span>}
+                      </div>
+                      
+                      <div className="dataset-meta">
+                        <span className="size">{formatBytes(dataset.sizeBytes)}</span>
+                        <span className={`format ${dataset.pricingType}`}>
+                          {dataset.pricingType === 'subscription' ? 'Subscription' : 'Pay per Download'}
+                        </span>
+                      </div>
+                      <div className="dataset-price">{formatCurrency(dataset.price)}</div>
+                      <button 
+                        className="consumer-btn consumer-btn-primary" 
+                        onClick={() => purchaseDataset(dataset)}
+                      >
+                        Purchase Dataset
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
 
             {/* Pricing & Plans */}
             <section className="consumer-section">

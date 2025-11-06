@@ -553,6 +553,8 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
+    justify-items: center;
+    justify-content: center;
 }
 
 .dataset-card {
@@ -562,6 +564,8 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     text-align: center;
+    width: 100%;
+    max-width: 400px;
 }
 
 .dataset-card:hover {
@@ -598,6 +602,53 @@
     color: #6B7280;
     margin-bottom: 1rem;
     line-height: 1.5;
+}
+
+/* Dataset Tags/Metadata */
+.dataset-card .dataset-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    min-height: 2rem;
+}
+
+.dataset-card .tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.tag-category {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.tag-region {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.tag-vehicle {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.tag-battery {
+    background: #FCE7F3;
+    color: #831843;
+}
+
+.tag-time {
+    background: #E0E7FF;
+    color: #3730A3;
+}
+
+.tag-format {
+    background: #FEE2E2;
+    color: #991B1B;
 }
 
 .dataset-card .dataset-meta {

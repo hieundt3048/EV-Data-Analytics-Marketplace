@@ -5,9 +5,11 @@ package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.APIKey;
 import com.evmarketplace.Pojo.User;
+import com.evmarketplace.Pojo.ProviderDataset;
 import com.evmarketplace.Repository.APIKeyRepository;
 import com.evmarketplace.Repository.TransactionRepository;
 import com.evmarketplace.Service.UserService;
+import com.evmarketplace.Service.ProviderDatasetService;
 import com.evmarketplace.data.DataProduct;
 import com.evmarketplace.data.ProductStatus;
 import com.evmarketplace.marketplace.Purchase;
@@ -41,19 +43,22 @@ public class AdminController {
     private final PurchaseRepository purchaseRepository;
     private final TransactionRepository transactionRepository;
     private final APIKeyRepository apiKeyRepository;
+    private final ProviderDatasetService providerDatasetService;
 
     public AdminController(
             UserService userService,
             DataProductRepository dataProductRepository,
             PurchaseRepository purchaseRepository,
             TransactionRepository transactionRepository,
-            APIKeyRepository apiKeyRepository
+            APIKeyRepository apiKeyRepository,
+            ProviderDatasetService providerDatasetService
     ) {
         this.userService = userService;
         this.dataProductRepository = dataProductRepository;
         this.purchaseRepository = purchaseRepository;
         this.transactionRepository = transactionRepository;
         this.apiKeyRepository = apiKeyRepository;
+        this.providerDatasetService = providerDatasetService;
     }
 
     /**
@@ -205,14 +210,71 @@ public class AdminController {
         List<DataProduct> products = dataProductRepository.findAll();
         long pending = products.stream().filter(p -> p.getStatus() == ProductStatus.PENDING_REVIEW).count();
         long published = products.stream().filter(p -> p.getStatus() == ProductStatus.PUBLISHED).count();
+        
+        // Thêm thống kê Provider Datasets
+        List<ProviderDataset> providerDatasets = providerDatasetService.findAll();
+        long pendingProviderDatasets = providerDatasets.stream()
+            .filter(d -> "PENDING_REVIEW".equals(d.getStatus()))
+            .count();
+        long approvedProviderDatasets = providerDatasets.stream()
+            .filter(d -> "APPROVED".equals(d.getStatus()))
+            .count();
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("totalUsers", totalUsers);
-    response.put("providers", providers);
-    response.put("consumers", consumers);
-    response.put("pendingProducts", pending);
-    response.put("publishedProducts", published);
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalUsers", totalUsers);
+        response.put("providers", providers);
+        response.put("consumers", consumers);
+        response.put("pendingProducts", pending);
+        response.put("publishedProducts", published);
+        response.put("pendingProviderDatasets", pendingProviderDatasets);
+        response.put("approvedProviderDatasets", approvedProviderDatasets);
         return ResponseEntity.ok(response);
+    }
+
+    // ==================== PROVIDER DATASETS MODERATION ====================
+    
+    /**
+     * Lấy danh sách datasets đang chờ duyệt từ providers
+     */
+    @GetMapping("/provider-datasets/pending")
+    public ResponseEntity<List<ProviderDataset>> getPendingProviderDatasets() {
+        List<ProviderDataset> pending = providerDatasetService.findByStatus("PENDING_REVIEW");
+        return ResponseEntity.ok(pending);
+    }
+
+    /**
+     * Lấy tất cả provider datasets (bao gồm cả đã duyệt, chờ duyệt, bị từ chối)
+     */
+    @GetMapping("/provider-datasets")
+    public ResponseEntity<List<ProviderDataset>> getAllProviderDatasets() {
+        return ResponseEntity.ok(providerDatasetService.findAll());
+    }
+
+    /**
+     * Duyệt dataset của provider
+     */
+    @PutMapping("/provider-datasets/{id}/approve")
+    public ResponseEntity<?> approveProviderDataset(@PathVariable Long id) {
+        ProviderDataset approved = providerDatasetService.approveDataset(id);
+        if (approved == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(approved);
+    }
+
+    /**
+     * Từ chối dataset của provider
+     */
+    @PutMapping("/provider-datasets/{id}/reject")
+    public ResponseEntity<?> rejectProviderDataset(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Not specified";
+        ProviderDataset rejected = providerDatasetService.rejectDataset(id, reason);
+        if (rejected == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(rejected);
     }
 
     public static class AdminUserUpdateRequest {

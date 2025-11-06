@@ -49,6 +49,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Cho phép tất cả các request đến các đường dẫn bắt đầu bằng "/api/auth/" và "/api/admin/login" mà không cần xác thực.
                         .antMatchers("/api/auth/**", "/api/admin/login").permitAll()
+                        // Cho phép truy cập Provider APIs để test
+                        .antMatchers("/api/provider/**").permitAll()
                         // Yêu cầu xác thực cho tất cả các request khác.
                         .anyRequest().authenticated()
                 )

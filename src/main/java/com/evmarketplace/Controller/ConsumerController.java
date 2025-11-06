@@ -1,7 +1,9 @@
 package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.Consumer;
+import com.evmarketplace.Pojo.ProviderDataset;
 import com.evmarketplace.Service.ConsumerService;
+import com.evmarketplace.Service.ProviderDatasetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,9 @@ public class ConsumerController {
 
     @Autowired
     private ConsumerService consumerService;
+    
+    @Autowired
+    private ProviderDatasetService providerDatasetService;
 
     // ✅ Lấy danh sách tất cả người dùng dữ liệu
     @GetMapping
@@ -48,5 +53,12 @@ public class ConsumerController {
     public ResponseEntity<Void> deleteConsumer(@PathVariable Long id) {
         consumerService.deleteConsumer(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    // ✅ Lấy danh sách datasets đã được approve cho Consumer
+    @GetMapping("/datasets/approved")
+    public ResponseEntity<List<ProviderDataset>> getApprovedDatasets() {
+        List<ProviderDataset> approvedDatasets = providerDatasetService.findByStatus("APPROVED");
+        return ResponseEntity.ok(approvedDatasets);
     }
 }

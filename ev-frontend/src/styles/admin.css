@@ -100,16 +100,18 @@
 }
 
 .admin-btn-primary {
-    background-color: #0A192F;
-    color: white;
-    border: 2px solid #0A192F;
+    background: linear-gradient(135deg, #4fd1c5 0%, #64FFDA 100%);
+    color: #0A192F;
+    border: none;
+    box-shadow: 0 4px 15px rgba(100, 255, 218, 0.4);
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .admin-btn-primary:hover {
-    background-color: #152642;
-    border-color: #152642;
+    background: linear-gradient(135deg, #64FFDA 0%, #81FFF0 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(10, 25, 47, 0.3);
+    box-shadow: 0 6px 20px rgba(100, 255, 218, 0.6);
 }
 
 .admin-btn-success {
@@ -669,6 +671,15 @@
 .payout-actions {
     display: flex;
     gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.approval-actions button,
+.payout-actions button {
+    flex: 1 1 auto;
+    min-width: 100px;
+    white-space: nowrap;
 }
 
 /* Chart Container */
@@ -1696,6 +1707,13 @@
     .payout-actions,
     .alert-actions {
         flex-direction: column;
+    }
+    
+    .approval-actions button,
+    .payout-actions button,
+    .alert-actions button {
+        width: 100%;
+        min-width: unset;
     }
     
     .modal-content {

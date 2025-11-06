@@ -1,10 +1,8 @@
 package com.evmarketplace.Repository;
 
-// Mục đích: Repository cho DataProvider.
-// Đáp ứng: Cho phép Spring Data JPA truy vấn/persist thực thể DataProvider.
-
-import com.evmarketplace.providers.DataProvider;
 import com.evmarketplace.Pojo.User;
+import com.evmarketplace.data.DataProvider;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

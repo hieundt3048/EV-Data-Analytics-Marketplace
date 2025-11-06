@@ -468,3 +468,113 @@ body {
 .provider-page .tab-content.active {
   display: block;
 }
+
+/* ==============================
+    STATUS BADGES 
+============================== */
+
+.provider-page [class*="status-"] {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.provider-page .status-created {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.provider-page .status-uploading {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.provider-page .status-uploaded {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.provider-page .status-pending_review {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.provider-page .status-approved {
+  background-color: #D1FAE5;
+  color: #047857;
+}
+
+.provider-page .status-rejected {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.provider-page .status-anonymizing {
+  background-color: #E0E7FF;
+  color: #3730A3;
+}
+
+.provider-page .status-anonymized {
+  background-color: #DDD6FE;
+  color: #5B21B6;
+}
+
+.provider-page .status-erased {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+/* ==============================
+    LOADING STATES 
+============================== */
+
+.provider-page button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.provider-page input:disabled,
+.provider-page select:disabled,
+.provider-page textarea:disabled {
+  background-color: #F3F4F6;
+  cursor: not-allowed;
+}
+
+/* ==============================
+    DATASET TABLE STYLES 
+============================== */
+
+.provider-page .table-small {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.provider-page .table-small thead {
+  background-color: #F9FAFB;
+}
+
+.provider-page .table-small th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.provider-page .table-small td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #E5E7EB;
+  color: #6B7280;
+}
+
+.provider-page .table-small tbody tr:hover {
+  background-color: #F9FAFB;
+}

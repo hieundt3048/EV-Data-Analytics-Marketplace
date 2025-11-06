@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.evmarketplace.Repository.ConsumerProfileRepository;
 import com.evmarketplace.Repository.DataProductRepository;
@@ -18,10 +19,10 @@ import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.JwtFilter;
 import com.evmarketplace.data.DataProduct;
+import com.evmarketplace.data.DataProvider;
 import com.evmarketplace.data.DataType;
 import com.evmarketplace.data.Format;
 import com.evmarketplace.data.ProductStatus;
-import com.evmarketplace.providers.DataProvider;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -33,30 +34,29 @@ import java.util.List;
     "com.evmarketplace.Pojo",
     "com.evmarketplace.billing",
     "com.evmarketplace.data",
+    "com.evmarketplace.provider",
     "com.evmarketplace.providers",
-    "com.evmarketplace.marketplace"
+    "com.evmarketplace.marketplace",
+    "com.evmarketplace.dto",        // THÊM package DTO
+    "com.evmarketplace.aspect"      // THÊM package Aspect
 })
-@EnableJpaRepositories(basePackageClasses = {
-    UserRepository.class,
-    RoleRepository.class,
-    ConsumerProfileRepository.class,
-    DatasetMetadataRepository.class,
-    InvoiceRepository.class,
-    DataProviderRepository.class,
-    com.evmarketplace.Repository.DataProductRepository.class,
-    com.evmarketplace.Repository.PurchaseRepository.class,
-    com.evmarketplace.Repository.TransactionRepository.class,
-    com.evmarketplace.Repository.APIKeyRepository.class
-})
+@EnableJpaRepositories(basePackages = "com.evmarketplace.Repository") // SỬA: dùng basePackages thay vì basePackageClasses
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+    
+    // THÊM Bean cho WebClient
+    @Bean
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
     }
 
     @Bean
     public CommandLineRunner seed(UserService userService,
                                  DataProviderRepository dataProviderRepository,
-                                 DataProductRepository dataProductRepository) {
+                                 DataProductRepository dataProductRepository,
+                                 RoleRepository roleRepository) { // THÊM roleRepository
         return args -> {
             // --- TẠO NGƯỜI DÙNG MẪU (DEMO USER) ---
             // Tìm người dùng với email "test@ev.com".
@@ -81,7 +81,7 @@ public class Application {
             userService.assignRoleToUser(providerUser, "Provider");
             providerUser.setProviderApproved(true);
         String providerOrg = providerUser.getOrganization() != null ? providerUser.getOrganization() : "EV Insight Labs";
-        com.evmarketplace.Pojo.User savedProviderUser = userService.updateUser(providerUser.getId(), providerUser.getName(), providerOrg, true, null);
+        com.evmarketplace.Pojo.User savedProviderUser = userService.updateUser(providerUser.getId(), providerUser.getName(), providerOrg, true, Arrays.asList("Provider"));
 
             DataProvider providerEntity = dataProviderRepository.findByUser(savedProviderUser)
                     .orElseGet(() -> {
@@ -108,7 +108,7 @@ public class Application {
                 telemetry.setSizeBytes(1_250_000_000L);
                 telemetry.setRegion("APAC");
                 telemetry.setStartTime(Instant.now().minusSeconds(60L * 60 * 24 * 30));
-                telemetry.setStatus(ProductStatus.PENDING_REVIEW);
+                telemetry.setStatus(ProductStatus.PUBLISHED); // SỬA: thành PUBLISHED để test
                 seeds.add(telemetry);
             }
             if (!hasCharging) {
@@ -121,7 +121,7 @@ public class Application {
                 charging.setSizeBytes(980_000_000L);
                 charging.setRegion("North America");
                 charging.setStartTime(Instant.now().minusSeconds(60L * 60 * 24 * 45));
-                charging.setStatus(ProductStatus.PENDING_REVIEW);
+                charging.setStatus(ProductStatus.PUBLISHED); // SỬA: thành PUBLISHED để test
                 seeds.add(charging);
             }
             if (!hasBattery) {
@@ -134,11 +134,19 @@ public class Application {
                 battery.setSizeBytes(540_000_000L);
                 battery.setRegion("Europe");
                 battery.setStartTime(Instant.now().minusSeconds(60L * 60 * 24 * 60));
-                battery.setStatus(ProductStatus.PENDING_REVIEW);
+                battery.setStatus(ProductStatus.PUBLISHED); // SỬA: thành PUBLISHED để test
                 seeds.add(battery);
             }
 
-            seeds.forEach(dataProductRepository::save);
+            if (!seeds.isEmpty()) {
+                dataProductRepository.saveAll(seeds);
+                System.out.println("Created " + seeds.size() + " sample data products");
+            }
+
+            System.out.println("=== DEMO DATA INITIALIZED ===");
+            System.out.println("Consumer: test@ev.com / password");
+            System.out.println("Admin: admin@ev.com / adminpass");
+            System.out.println("Provider: provider1@example.com / providerpass");
         };
     }
 
