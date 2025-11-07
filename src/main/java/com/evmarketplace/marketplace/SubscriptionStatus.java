@@ -1,7 +1,7 @@
-package com.evmarketplace.marketplace;
+// package com.evmarketplace.marketplace;
 
-public enum SubscriptionStatus {
-    ACTIVE,
-    CANCELLED,
-    EXPIRED
-}
+// public enum SubscriptionStatus {
+//     ACTIVE,
+//     CANCELLED,
+//     EXPIRED
+// }

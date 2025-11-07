@@ -27,10 +27,25 @@ public class Dataset {
     
     @Column(name = "region")
     private String region;  // Thêm field region
-    
+
     @Column(name = "data_type")
     private String dataType;  // Thêm field dataType
-    
+
+    @Column(name = "size")
+    private String size;  // Thêm field size (e.g., "2.4 GB")
+
+    @Column(name = "tags", length = 500)
+    private String tags;  // Thêm field tags (comma-separated)
+
+    @Column(name = "vehicle_type")
+    private String vehicleType;  // Thêm field vehicle_type
+
+    @Column(name = "purchase_count")
+    private Integer purchaseCount;  // Thêm field purchase_count
+
+    @Column(name = "collection_date")
+    private String collectionDate;  // Thêm field collection_date
+
     // === KẾT THÚC THÊM FIELDS ===
 
     public Dataset() {}
@@ -61,11 +76,51 @@ public class Dataset {
         this.region = region; 
     }
     
-    public String getDataType() { 
-        return dataType; 
+    public String getDataType() {
+        return dataType;
     }
-    
-    public void setDataType(String dataType) { 
-        this.dataType = dataType; 
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public Integer getPurchaseCount() {
+        return purchaseCount;
+    }
+
+    public void setPurchaseCount(Integer purchaseCount) {
+        this.purchaseCount = purchaseCount;
+    }
+
+    public String getCollectionDate() {
+        return collectionDate;
+    }
+
+    public void setCollectionDate(String collectionDate) {
+        this.collectionDate = collectionDate;
     }
 }

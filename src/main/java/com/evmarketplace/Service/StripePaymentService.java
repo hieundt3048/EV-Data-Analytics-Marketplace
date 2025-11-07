@@ -53,9 +53,10 @@ public class StripePaymentService {
     }
 
     public String createSubscriptionSession(Long userId, String planId, 
-                                          String productName, Long amount, String currency) throws StripeException {
+                                          String productName, Long amount, String currency,
+                                          Long subscriptionId, Long datasetId) throws StripeException {
         
-        SessionCreateParams params = SessionCreateParams.builder()
+        SessionCreateParams.Builder builder = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setSuccessUrl(successUrl + "?session_id={CHECKOUT_SESSION_ID}&user_id=" + userId + "&type=subscription")
@@ -65,8 +66,12 @@ public class StripePaymentService {
                         .setPrice(planId)
                         .build())
                 .putMetadata("user_id", userId.toString())
-                .putMetadata("product_name", productName)
-                .build();
+                .putMetadata("product_name", productName);
+
+        if (subscriptionId != null) builder.putMetadata("subscription_id", subscriptionId.toString());
+        if (datasetId != null) builder.putMetadata("dataset_id", datasetId.toString());
+
+        SessionCreateParams params = builder.build();
 
         Session session = Session.create(params);
         return session.getId();

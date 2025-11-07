@@ -26,6 +26,16 @@
     line-height: 1.6;
 }
 
+.consumer-error-message {
+    background: #FEE2E2;
+    color: #B91C1C;
+    border: 1px solid #FCA5A5;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
 /* Consumer Navigation Tabs */
 .consumer-tabs {
     background: white;
@@ -846,6 +856,31 @@
 .insight-confidence.low {
     background: #FEE2E2;
     color: #991B1B;
+}
+
+.insights-list {
+    list-style: disc;
+    margin-left: 1.5rem;
+    color: #4B5563;
+    line-height: 1.6;
+}
+
+.insights-list li {
+    margin-bottom: 0.5rem;
+}
+
+.insight-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+.insight-content ul {
+    margin-left: 1.25rem;
+    color: #4B5563;
+    line-height: 1.5;
 }
 
 .insight-content p {

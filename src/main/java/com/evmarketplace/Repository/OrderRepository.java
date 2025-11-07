@@ -24,4 +24,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "FROM Order o WHERE o.providerId = :providerId AND o.status = 'PAID' " +
            "GROUP BY FUNCTION('MONTH', o.orderDate) ORDER BY FUNCTION('MONTH', o.orderDate)")
     List<Object[]> getMonthlyRevenue(@Param("providerId") Long providerId);
+
+    // Lấy danh sách đơn hàng theo buyer
+    List<Order> findByBuyerId(Long buyerId);
 }

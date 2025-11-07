@@ -16,6 +16,8 @@ import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -23,6 +25,7 @@ import java.util.UUID;
 
 @Service
 public class SubscriptionService {
+    private static final Logger logger = LoggerFactory.getLogger(SubscriptionService.class);
     
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
@@ -46,12 +49,28 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public CheckoutResponseDTO createSubscription(SubscriptionRequestDTO subscriptionRequest) {
+    public CheckoutResponseDTO createSubscription(SubscriptionRequestDTO subscriptionRequest, javax.servlet.http.HttpServletRequest httpRequest) {
         try {
-            // Tìm user
-            Optional<User> userOpt = userRepository.findById(Long.valueOf(subscriptionRequest.getConsumerId().toString()));
+            // Thử lấy email từ request (được JwtFilter đặt vào request nếu user đã xác thực)
+            String email = com.evmarketplace.auth.SecurityUtils.getEmailFromRequest(httpRequest);
+            Optional<User> userOpt = Optional.empty();
+            if (email != null) {
+                userOpt = userRepository.findByEmail(email);
+            }
+
+            // Nếu không có user từ principal, fallback sang consumerId từ payload (nếu được gửi)
+            if (userOpt.isEmpty() && subscriptionRequest.getConsumerId() != null) {
+                try {
+                    // Một số client có thể gửi ID numeric trong consumerId (legacy) — thử parse
+                    long id = Long.parseLong(subscriptionRequest.getConsumerId().toString());
+                    userOpt = userRepository.findById(id);
+                } catch (NumberFormatException ignored) {
+                    // Không thể parse — tiếp tục và báo lỗi bên dưới nếu rỗng
+                }
+            }
+
             if (userOpt.isEmpty()) {
-                throw new RuntimeException("User not found with ID: " + subscriptionRequest.getConsumerId());
+                throw new RuntimeException("User not found or unauthenticated; please login before creating a subscription");
             }
 
             User user = userOpt.get();
@@ -59,6 +78,10 @@ public class SubscriptionService {
             // Tạo subscription record
             Subscription subscription = new Subscription();
             subscription.setUser(user);
+            // Gán dataset cho subscription
+            if (subscriptionRequest.getDatasetId() != null) {
+                datasetRepository.findById(subscriptionRequest.getDatasetId()).ifPresent(subscription::setDataset);
+            }
             subscription.setStartAt(LocalDateTime.now());
             subscription.setEndAt(LocalDateTime.now().plusMonths(1));
             subscription.setPrice(subscriptionRequest.getPrice());
@@ -72,7 +95,9 @@ public class SubscriptionService {
                 subscriptionRequest.getStripePlanId(),
                 subscriptionRequest.getProductName(),
                 (long) (subscriptionRequest.getPrice() * 100),
-                "usd"
+                "usd",
+                savedSubscription.getId(),
+                subscriptionRequest.getDatasetId()
             );
 
             String sessionUrl = "https://checkout.stripe.com/pay/" + sessionId;
@@ -105,11 +130,15 @@ public class SubscriptionService {
             subscriptionRepository.save(subscription);
 
             // Cấp quyền truy cập cho user
-            UUID userId = UUID.fromString(subscription.getUser().getId().toString());
-            
-            // TODO: Lấy datasetId từ subscription (cần thêm field datasetId vào Subscription entity)
-            UUID datasetId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-            
+            UUID userId = UUID.nameUUIDFromBytes(String.valueOf(subscription.getUser().getId()).getBytes());
+
+            // Lấy datasetId từ subscription entity (nếu có). Nếu không có, trả lỗi rõ ràng (không dùng fallback cứng).
+            Long dsId = subscription.getDataset() != null ? subscription.getDataset().getId() : null;
+            if (dsId == null) {
+                throw new RuntimeException("Subscription " + subscriptionId + " is not associated with a dataset; cannot grant access");
+            }
+
+            UUID datasetId = UUID.nameUUIDFromBytes(String.valueOf(dsId).getBytes());
             accessControlService.grantSubscriptionAccess(userId, datasetId);
             
         } catch (Exception e) {
@@ -158,12 +187,12 @@ public class SubscriptionService {
             (com.stripe.model.Subscription) event.getDataObjectDeserializer().getObject().get();
         
         // TODO: Xử lý khi subscription được tạo trên Stripe
-        System.out.println("Subscription created on Stripe: " + stripeSubscription.getId());
+        logger.info("Subscription created on Stripe: {}", stripeSubscription.getId());
     }
 
     private void handleInvoicePaymentSucceeded(Event event) {
         // TODO: Xử lý khi thanh toán subscription thành công
-        System.out.println("Subscription payment succeeded");
+        logger.info("Subscription payment succeeded");
     }
 
     private void handleSubscriptionDeleted(Event event) {
@@ -172,7 +201,7 @@ public class SubscriptionService {
             (com.stripe.model.Subscription) event.getDataObjectDeserializer().getObject().get();
         
         // TODO: Xử lý khi subscription bị hủy trên Stripe
-        System.out.println("Subscription cancelled on Stripe: " + stripeSubscription.getId());
+        logger.info("Subscription cancelled on Stripe: {}", stripeSubscription.getId());
     }
 
     // Method có sẵn - giữ nguyên

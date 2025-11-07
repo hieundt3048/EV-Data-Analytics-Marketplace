@@ -4,8 +4,7 @@ import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 public class SubscriptionRequestDTO {
-    
-    @NotNull(message = "Consumer ID is required")
+    // consumerId is now optional — backend will prefer authenticated principal when available.
     private UUID consumerId;
     
     @NotNull(message = "Stripe Plan ID is required")
@@ -16,15 +15,19 @@ public class SubscriptionRequestDTO {
     
     @NotNull(message = "Price is required")
     private Double price;
+    
+    @NotNull(message = "Dataset ID is required")
+    private Long datasetId;
 
     // Constructors, Getters and Setters
     public SubscriptionRequestDTO() {}
 
-    public SubscriptionRequestDTO(UUID consumerId, String stripePlanId, String productName, Double price) {
+    public SubscriptionRequestDTO(UUID consumerId, String stripePlanId, String productName, Double price, Long datasetId) {
         this.consumerId = consumerId;
         this.stripePlanId = stripePlanId;
         this.productName = productName;
         this.price = price;
+        this.datasetId = datasetId;
     }
 
     public UUID getConsumerId() { return consumerId; }
@@ -38,4 +41,7 @@ public class SubscriptionRequestDTO {
     
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
+
+    public Long getDatasetId() { return datasetId; }
+    public void setDatasetId(Long datasetId) { this.datasetId = datasetId; }
 }

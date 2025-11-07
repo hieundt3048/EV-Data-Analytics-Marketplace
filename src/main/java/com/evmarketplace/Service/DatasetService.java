@@ -21,7 +21,9 @@ public class DatasetService {
     }
     
     public List<Dataset> findAll() { 
-        return repo.findAll(); 
+        List<Dataset> datasets = repo.findAll();
+        System.out.println("DatasetService: Found " + datasets.size() + " datasets");
+        return datasets;
     }
     
     public Optional<Dataset> findById(Long id) { 

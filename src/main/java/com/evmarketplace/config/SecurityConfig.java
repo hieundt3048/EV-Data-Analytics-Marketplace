@@ -1,6 +1,6 @@
 package com.evmarketplace.config;
 
-// Nhập các lớp cần thiết.
+import com.evmarketplace.auth.ApiKeyFilter;
 import com.evmarketplace.auth.JwtFilter; // Filter tùy chỉnh để xử lý JWT.
 import org.springframework.beans.factory.annotation.Autowired; // Annotation để tự động tiêm dependency.
 import org.springframework.context.annotation.Bean; // Annotation để khai báo một bean trong Spring context.
@@ -30,6 +30,9 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private ApiKeyFilter apiKeyFilter;
+
     /**
      * Định nghĩa một bean SecurityFilterChain để cấu hình chuỗi filter bảo mật.
      * Đây là nơi chính để thiết lập các quy tắc bảo mật HTTP.
@@ -49,13 +52,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Cho phép tất cả các request đến các đường dẫn bắt đầu bằng "/api/auth/" và "/api/admin/login" mà không cần xác thực.
                         .antMatchers("/api/auth/**", "/api/admin/login").permitAll()
-                        // Cho phép truy cập Provider APIs để test
-                        .antMatchers("/api/provider/**").permitAll()
                         // Yêu cầu xác thực cho tất cả các request khác.
                         .anyRequest().authenticated()
                 )
                 // Cấu hình quản lý session.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Đặt chính sách là STATELESS vì chúng ta đang dùng JWT.
+
+    // Thêm ApiKeyFilter vào chuỗi filter, chạy trước UsernamePasswordAuthenticationFilter.
+    http.addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Thêm JwtFilter của chúng ta vào trước filter UsernamePasswordAuthenticationFilter.
         // Điều này đảm bảo token JWT được xử lý trước khi Spring thử xác thực bằng username/password.

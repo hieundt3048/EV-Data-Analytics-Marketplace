@@ -111,8 +111,8 @@ public class OrderService {
         paymentRepository.save(payment);
 
         accessControlService.grantDatasetAccess(
-            UUID.fromString(order.getBuyerId().toString()),
-            UUID.fromString(order.getDatasetId().toString())
+            UUID.nameUUIDFromBytes(String.valueOf(order.getBuyerId()).getBytes()),
+            UUID.nameUUIDFromBytes(String.valueOf(order.getDatasetId()).getBytes())
         );
     }
 

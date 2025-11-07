@@ -30,6 +30,8 @@ public class AIAnalyticsService {
                 .build();
     }
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AIAnalyticsService.class);
+
     public AISuggestionsDTO getAISuggestions(String datasetId, String analysisType) {
         try {
             // Nếu có AI service thật, gọi API thật
@@ -64,7 +66,7 @@ public class AIAnalyticsService {
             return response != null ? response : generateDemoSuggestions(datasetId, analysisType);
             
         } catch (WebClientResponseException e) {
-            System.err.println("AI Service error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            logger.warn("AI Service error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             return generateDemoSuggestions(datasetId, analysisType);
         }
     }
@@ -180,7 +182,7 @@ public class AIAnalyticsService {
                 .retrieve()
                 .bodyToMono(AISuggestionsDTO.class)
                 .onErrorResume(e -> {
-                    System.err.println("Streaming AI error: " + e.getMessage());
+                    logger.warn("Streaming AI error: {}", e.getMessage());
                     return Mono.just(generateDemoSuggestions(datasetId, analysisType));
                 });
     }

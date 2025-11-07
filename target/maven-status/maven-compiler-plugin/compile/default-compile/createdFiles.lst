@@ -21,7 +21,6 @@ com\evmarketplace\auth\SecurityUtils.class
 com\evmarketplace\auth\AuthRequest.class
 com\evmarketplace\Pojo\ConsumerProfile.class
 com\evmarketplace\Repository\DataProductRepository.class
-com\evmarketplace\marketplace\SubscriptionStatus.class
 com\evmarketplace\Service\DatasetService.class
 com\evmarketplace\Repository\UserRepository.class
 com\evmarketplace\data\ProductStatus.class
@@ -58,7 +57,6 @@ com\evmarketplace\Service\OrderService.class
 com\evmarketplace\dto\DashboardDataDTO$CategoryData.class
 com\evmarketplace\Service\AnonymizationService.class
 com\evmarketplace\privacy\JobStatus.class
-com\evmarketplace\marketplace\Subscription.class
 com\evmarketplace\Pojo\Dashboard.class
 com\evmarketplace\Controller\PaymentController.class
 com\evmarketplace\Repository\ConsumerRepository.class
@@ -92,7 +90,6 @@ com\evmarketplace\auth\AuthResponse.class
 com\evmarketplace\Repository\AccessGrantRepository.class
 com\evmarketplace\config\AsyncConfig.class
 com\evmarketplace\Pojo\ProviderDataset.class
-com\evmarketplace\Controller\SubscriptionController.class
 com\evmarketplace\analytics\RecommendationEngine.class
 com\evmarketplace\privacy\AuditLog.class
 com\evmarketplace\Controller\GDPRController.class

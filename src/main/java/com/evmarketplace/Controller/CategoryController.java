@@ -2,10 +2,12 @@ package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.Category;
 import com.evmarketplace.Service.CategoryService;
+import com.evmarketplace.dto.CategoryDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -18,10 +20,14 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
+    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
         try {
             List<Category> categories = categoryService.findAll();
-            return ResponseEntity.ok(categories);
+            // Chuyển đổi sang DTO để tránh circular reference và giảm kích thước response
+            List<CategoryDTO> categoryDTOs = categories.stream()
+                .map(category -> new CategoryDTO(category.getId(), category.getName()))
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(categoryDTOs);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -29,8 +35,9 @@ public class CategoryController {
     
     // Thêm API để lấy category theo ID (tùy chọn)
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id) {
         return categoryService.findById(id)
+                .map(category -> new CategoryDTO(category.getId(), category.getName()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
