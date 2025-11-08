@@ -872,10 +872,10 @@ const Consumer = () => {
                       onChange={(e) => handleFilterChange('category', e.target.value)}
                     >
                       <option value="">All Categories</option>
-                      <option value="charging_behavior">⚡ Charging Behavior</option>
-                      <option value="battery_health">🔋 Battery Health</option>
-                      <option value="route_optimization">🗺️ Route Optimization</option>
-                      <option value="energy_consumption">🔌 Energy Consumption</option>
+                      <option value="charging_behavior"> Charging Behavior</option>
+                      <option value="battery_health"> Battery Health</option>
+                      <option value="route_optimization"> Route Optimization</option>
+                      <option value="energy_consumption"> Energy Consumption</option>
                     </select>
                   </div>
                   
@@ -892,11 +892,11 @@ const Consumer = () => {
                       onChange={(e) => handleFilterChange('timeRange', e.target.value)}
                     >
                       <option value="">Any Time</option>
-                      <option value="2020-2021">📅 2020-2021</option>
-                      <option value="2021-2022">📅 2021-2022</option>
-                      <option value="2022-2023">📅 2022-2023</option>
-                      <option value="2023-2024">📅 2023-2024</option>
-                      <option value="2024-present">📅 2024-Present</option>
+                      <option value="2020-2021"> 2020-2021</option>
+                      <option value="2021-2022"> 2021-2022</option>
+                      <option value="2022-2023"> 2022-2023</option>
+                      <option value="2023-2024"> 2023-2024</option>
+                      <option value="2024-present"> 2024-Present</option>
                     </select>
                   </div>
                   
@@ -915,10 +915,10 @@ const Consumer = () => {
                       <option value="">All Regions</option>
                       <option value="north_america">🇺🇸 North America</option>
                       <option value="europe">🇪🇺 Europe</option>
-                      <option value="asia">🌏 Asia</option>
+                      <option value="asia"> Asia</option>
                       <option value="australia">🇦🇺 Australia</option>
-                      <option value="africa">🌍 Africa</option>
-                      <option value="south_america">🌎 South America</option>
+                      <option value="africa"> Africa</option>
+                      <option value="south_america"> South America</option>
                     </select>
                   </div>
                   
@@ -935,12 +935,12 @@ const Consumer = () => {
                       onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
                     >
                       <option value="">All Types</option>
-                      <option value="sedan">🚗 Sedan</option>
-                      <option value="suv">🚙 SUV</option>
-                      <option value="truck">🚚 Truck</option>
-                      <option value="bus">🚌 Bus</option>
-                      <option value="motorcycle">🏍️ Motorcycle</option>
-                      <option value="other">🚘 Other</option>
+                      <option value="sedan"> Sedan</option>
+                      <option value="suv"> SUV</option>
+                      <option value="truck"> Truck</option>
+                      <option value="bus"> Bus</option>
+                      <option value="motorcycle"> Motorcycle</option>
+                      <option value="other"> Other</option>
                     </select>
                   </div>
                   
@@ -957,11 +957,11 @@ const Consumer = () => {
                       onChange={(e) => handleFilterChange('batteryType', e.target.value)}
                     >
                       <option value="">All Types</option>
-                      <option value="lithium_ion">🔋 Lithium-Ion</option>
-                      <option value="solid_state">⚡ Solid-State</option>
-                      <option value="nickel_metal_hydride">🔌 Nickel-Metal Hydride</option>
-                      <option value="lead_acid">🔋 Lead-Acid</option>
-                      <option value="other">🔋 Other</option>
+                      <option value="lithium_ion"> Lithium-Ion</option>
+                      <option value="solid_state"> Solid-State</option>
+                      <option value="nickel_metal_hydride"> Nickel-Metal Hydride</option>
+                      <option value="lead_acid"> Lead-Acid</option>
+                      <option value="other"> Other</option>
                     </select>
                   </div>
                   
@@ -978,12 +978,12 @@ const Consumer = () => {
                       onChange={(e) => handleFilterChange('dataFormat', e.target.value)}
                     >
                       <option value="">All Formats</option>
-                      <option value="CSV">📊 CSV</option>
-                      <option value="JSON">📋 JSON</option>
-                      <option value="XML">📄 XML</option>
-                      <option value="Parquet">📦 Parquet</option>
-                      <option value="Excel">📈 Excel</option>
-                      <option value="other">📁 Other</option>
+                      <option value="CSV"> CSV</option>
+                      <option value="JSON"> JSON</option>
+                      <option value="XML"> XML</option>
+                      <option value="Parquet"> Parquet</option>
+                      <option value="Excel"> Excel</option>
+                      <option value="other"> Other</option>
                     </select>
                   </div>
 
@@ -1000,8 +1000,8 @@ const Consumer = () => {
                       onChange={(e) => handleFilterChange('pricingType', e.target.value)}
                     >
                       <option value="">All Models</option>
-                      <option value="per_request">💳 Pay per Download</option>
-                      <option value="subscription">📅 Subscription</option>
+                      <option value="per_request"> Pay per Download</option>
+                      <option value="subscription"> Subscription</option>
                     </select>
                   </div>
 

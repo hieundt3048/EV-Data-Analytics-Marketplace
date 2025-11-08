@@ -2440,3 +2440,25 @@
     width: 100%;
   }
 }
+
+/* ------------------------------------------------------------------
+   Make header/filter/section icons static (no movement)
+   This disables animation/transform only for icons/SVGs so card hover
+   lifts and other UI interactions remain active.
+   ------------------------------------------------------------------ */
+.consumer-container svg,
+.consumer-container img,
+.consumer-container .dataset-icon,
+.consumer-container .icon-badge,
+.consumer-container .section-icon-badge,
+.consumer-container .filter-icon-badge,
+.consumer-container .suggestion-icon,
+.consumer-container .api-info-icon {
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Neutralize specific keyframe animations used on the page so icons stay static */
+@keyframes pulse { 0% { transform: none; } 50% { transform: none; } 100% { transform: none; } }
+@keyframes slideDown { from { opacity: 1; transform: none; } to { opacity: 1; transform: none; } }
