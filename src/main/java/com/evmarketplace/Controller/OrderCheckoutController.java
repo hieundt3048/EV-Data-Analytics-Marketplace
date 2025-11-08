@@ -56,10 +56,9 @@ public class OrderCheckoutController {
             // For now, return all orders (you can filter by user later)
             List<Order> orders = orderRepository.findAll();
 
-            // If no orders exist, return sample data for testing
+            // If no orders exist, return an empty list (removed sample/fake data)
             if (orders.isEmpty()) {
-                List<OrderHistoryDTO> sampleOrders = createSamplePurchaseHistory();
-                return ResponseEntity.ok(sampleOrders);
+                return ResponseEntity.ok(new java.util.ArrayList<>());
             }
 
             // Convert to DTO with dataset information
@@ -108,59 +107,25 @@ public class OrderCheckoutController {
         }
     }
 
-    private List<OrderHistoryDTO> createSamplePurchaseHistory() {
-        List<OrderHistoryDTO> sampleOrders = new java.util.ArrayList<>();
-
-        // Sample order 1
-        sampleOrders.add(new OrderHistoryDTO(
-            1L,
-            101L,
-            "Battery Performance Dataset",
-            49.99,
-            java.time.LocalDateTime.now().minusDays(7),
-            "PAID",
-            "battery_health",
-            "per_request"
-        ));
-
-        // Sample order 2
-        sampleOrders.add(new OrderHistoryDTO(
-            2L,
-            102L,
-            "EV Charging Patterns Data",
-            79.99,
-            java.time.LocalDateTime.now().minusDays(14),
-            "PAID",
-            "charging_behavior",
-            "subscription"
-        ));
-
-        // Sample order 3
-        sampleOrders.add(new OrderHistoryDTO(
-            3L,
-            103L,
-            "Vehicle Telematics Dataset",
-            99.99,
-            java.time.LocalDateTime.now().minusDays(21),
-            "PAID",
-            "route_optimization",
-            "per_request"
-        ));
-
-        // Sample order 4
-        sampleOrders.add(new OrderHistoryDTO(
-            4L,
-            104L,
-            "Energy Consumption Analytics",
-            59.99,
-            java.time.LocalDateTime.now().minusDays(30),
-            "PAID",
-            "energy_consumption",
-            "subscription"
-        ));
-
-        return sampleOrders;
+    /**
+     * Delete an order by id. For simplicity this endpoint performs a delete by id.
+     * In a production system you should verify the authenticated user is the owner
+     * or an admin before allowing deletion.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable Long id) {
+        try {
+            if (!orderRepository.existsById(id)) {
+                return ResponseEntity.notFound().build();
+            }
+            orderRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
+
+    // NOTE: Removed demo/sample purchase generator. Server now returns an empty list when there are no orders.
 
     @PostMapping("/webhook/stripe")
     public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload,
