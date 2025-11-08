@@ -202,17 +202,34 @@ const Provider = () => {
     }
     
     if (remove) {
+      // Double confirmation for Remove PII
+      const firstConfirm = window.confirm(
+        'WARNING: Remove PII will PERMANENTLY ERASE this dataset!\n\n' +
+        'This action:\n' +
+        '- Cannot be undone\n' +
+        '- Will delete all data\n' +
+        '- Removes dataset from marketplace\n\n' +
+        'Are you absolutely sure?'
+      );
+      
+      if (!firstConfirm) {
+        alert('Operation cancelled.');
+        return;
+      }
+      
+      // Second confirmation with custom modal
       const ok = await showConfirm();
       if (ok) {
         try {
           setLoading(true);
           await axiosInstance.delete(`/provider/datasets/${selectedDataset}/erase`);
-          alert('Security settings applied (dataset erased)');
+          alert('Dataset has been permanently erased for PII compliance.');
           fetchDatasets();
+          clearSecurityForm();
           switchTab('data-management');
         } catch (error) {
           console.error('Error erasing dataset:', error);
-          alert('Error applying security settings. Please try again.');
+          alert('Error erasing dataset. Please try again.');
         } finally {
           setLoading(false);
         }
@@ -220,8 +237,49 @@ const Provider = () => {
         alert('Operation cancelled.');
       }
     } else {
-      alert('Security settings applied!');
-      switchTab('data-management');
+      // Apply security settings without erasing
+      try {
+        setLoading(true);
+        
+        // Get form values
+        const methodValue = form.method.value;
+        const accessValue = form.access.value;
+        const auditEnabled = form.audit?.checked || false;
+        const notes = form.notes?.value || '';
+        
+        // Map UI values to backend values
+        const methodMap = {
+          'mask': 'mask',
+          'hash': 'hash',
+          'aggregate': 'aggregate'
+        };
+        
+        const accessMap = {
+          'open': 'open',
+          'whitelist': 'whitelist',
+          'approval_required': 'approval_required'
+        };
+        
+        const payload = {
+          anonymizationMethod: methodMap[methodValue] || methodValue,
+          accessControl: accessMap[accessValue] || accessValue,
+          auditEnabled: auditEnabled,
+          notes: notes
+        };
+        
+        console.log('Sending security settings:', payload);
+        
+        await axiosInstance.put(`/provider/datasets/${selectedDataset}/security`, payload);
+        alert('Security settings updated successfully!');
+        fetchDatasets();
+        clearSecurityForm();
+        switchTab('data-management');
+      } catch (error) {
+        console.error('Error applying security settings:', error);
+        alert('Error updating security settings. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   }
 
@@ -326,15 +384,12 @@ const Provider = () => {
             backgroundColor: '#fff3cd', 
             border: '1px solid #ffc107', 
             borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
+            fontSize: '14px',
+            lineHeight: '1.6'
           }}>
-            <span style={{ fontSize: '24px' }}>⏳</span>
-            <div>
-              <strong>Pending Admin Approval:</strong> You have {datasets.filter(ds => ds.status === 'PENDING_REVIEW').length} dataset(s) 
-              waiting for admin approval. Your datasets will be visible to consumers once approved.
-            </div>
+            <strong style={{ color: '#856404' }}>Pending Admin Approval:</strong>{' '}
+            You have <strong>{datasets.filter(ds => ds.status === 'PENDING_REVIEW').length}</strong> dataset(s) 
+            waiting for admin approval. Your datasets will be visible to consumers once approved.
           </div>
         </div>
       )}
@@ -356,7 +411,7 @@ const Provider = () => {
                     <th>Status</th>
                     <th>Size</th>
                     <th>Price</th>
-                    <th>Pricing Type</th>
+                    <th>Security</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -369,11 +424,11 @@ const Provider = () => {
                         case 'UPLOADING':
                           return { text: 'Uploading...', className: 'status-uploading' };
                         case 'PENDING_REVIEW':
-                          return { text: 'Pending Admin Approval ⏳', className: 'status-pending_review' };
+                          return { text: 'Pending Admin Approval', className: 'status-pending_review' };
                         case 'APPROVED':
-                          return { text: 'Approved ✓ - Live', className: 'status-approved' };
+                          return { text: 'Approved - Live', className: 'status-approved' };
                         case 'REJECTED':
-                          return { text: 'Rejected ✗', className: 'status-rejected' };
+                          return { text: 'Rejected', className: 'status-rejected' };
                         case 'ERASED':
                           return { text: 'Erased', className: 'status-erased' };
                         default:
@@ -381,6 +436,68 @@ const Provider = () => {
                       }
                     };
                     const statusInfo = getStatusInfo(ds.status);
+                    
+                    // Get security info
+                    const getSecurityBadge = () => {
+                      if (!ds.anonymizationMethod && !ds.accessControl) {
+                        return (
+                          <span style={{ 
+                            color: '#dc3545', 
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            backgroundColor: '#ffe6e6',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            display: 'inline-block'
+                          }}>
+                            Not configured
+                          </span>
+                        );
+                      }
+                      return (
+                        <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                          <div style={{ marginBottom: '3px' }}>
+                            <span style={{ 
+                              color: '#6c757d', 
+                              fontWeight: '500',
+                              marginRight: '5px'
+                            }}>
+                              Method:
+                            </span>
+                            <span style={{ 
+                              color: '#2c3e50',
+                              fontWeight: '600'
+                            }}>
+                              {ds.anonymizationMethod || 'N/A'}
+                            </span>
+                          </div>
+                          <div style={{ marginBottom: '3px' }}>
+                            <span style={{ 
+                              color: '#6c757d', 
+                              fontWeight: '500',
+                              marginRight: '5px'
+                            }}>
+                              Access:
+                            </span>
+                            <span style={{ 
+                              color: '#2c3e50',
+                              fontWeight: '600'
+                            }}>
+                              {ds.accessControl || 'N/A'}
+                            </span>
+                          </div>
+                          {ds.auditEnabled && (
+                            <div style={{ 
+                              color: '#28a745',
+                              fontWeight: '500',
+                              fontSize: '11px'
+                            }}>
+                              Audit enabled
+                            </div>
+                          )}
+                        </div>
+                      );
+                    };
                     
                     return (
                       <tr key={ds.id}>
@@ -394,7 +511,7 @@ const Provider = () => {
                         </td>
                         <td>{ds.sizeBytes ? (ds.sizeBytes / 1024 / 1024).toFixed(2) + ' MB' : 'N/A'}</td>
                         <td>{ds.price ? '$' + ds.price : 'Not set'}</td>
-                        <td>{ds.pricingType || 'Not set'}</td>
+                        <td>{getSecurityBadge()}</td>
                         <td>
                           <button 
                             className="btn-delete" 
@@ -411,7 +528,7 @@ const Provider = () => {
                               fontSize: '14px'
                             }}
                           >
-                            🗑️ Delete
+                             Delete
                           </button>
                         </td>
                       </tr>
@@ -428,81 +545,104 @@ const Provider = () => {
           <h3>Upload New Dataset</h3>
           <main className="form-mini">
             <form onSubmit={handleUpload}>
-              <label>Data name:</label>
-              <input name="dataName" type="text" placeholder="Enter the data name..." required disabled={loading} />
+              {/* Full width fields */}
+              <div className="form-group-full">
+                <label>Data name:</label>
+                <input name="dataName" type="text" placeholder="Enter the data name..." required disabled={loading} />
+              </div>
 
-              <label>Describe:</label>
-              <textarea name="describe" placeholder="Enter a short description..." disabled={loading} />
+              <div className="form-group-full">
+                <label>Description:</label>
+                <textarea name="describe" placeholder="Enter a short description..." disabled={loading} rows="3" />
+              </div>
 
-              <label>Category:</label>
-              <select name="category" disabled={loading}>
-                <option value="">-- Select category --</option>
-                <option value="charging_behavior">Charging Behavior</option>
-                <option value="battery_health">Battery Health</option>
-                <option value="route_optimization">Route Optimization</option>
-                <option value="energy_consumption">Energy Consumption</option>
-              </select>
+              {/* Two column layout */}
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label>Category:</label>
+                  <select name="category" disabled={loading}>
+                    <option value="">-- Select category --</option>
+                    <option value="charging_behavior">Charging Behavior</option>
+                    <option value="battery_health">Battery Health</option>
+                    <option value="route_optimization">Route Optimization</option>
+                    <option value="energy_consumption">Energy Consumption</option>
+                  </select>
+                </div>
 
-              <label>Time Range:</label>
-              <select name="timeRange" disabled={loading}>
-                <option value="">-- Select time range --</option>
-                <option value="2020-2021">2020-2021</option>
-                <option value="2021-2022">2021-2022</option>
-                <option value="2022-2023">2022-2023</option>
-                <option value="2023-2024">2023-2024</option>
-                <option value="2024-present">2024-Present</option>
-              </select>
+                <div className="form-group">
+                  <label>Time Range:</label>
+                  <select name="timeRange" disabled={loading}>
+                    <option value="">-- Select time range --</option>
+                    <option value="2020-2021">2020-2021</option>
+                    <option value="2021-2022">2021-2022</option>
+                    <option value="2022-2023">2022-2023</option>
+                    <option value="2023-2024">2023-2024</option>
+                    <option value="2024-present">2024-Present</option>
+                  </select>
+                </div>
 
-              <label>Region:</label>
-              <select name="region" disabled={loading}>
-                <option value="">-- Select region --</option>
-                <option value="north_america">North America</option>
-                <option value="europe">Europe</option>
-                <option value="asia">Asia</option>
-                <option value="australia">Australia</option>
-                <option value="africa">Africa</option>
-                <option value="south_america">South America</option>
-              </select>
+                <div className="form-group">
+                  <label>Region:</label>
+                  <select name="region" disabled={loading}>
+                    <option value="">-- Select region --</option>
+                    <option value="north_america">North America</option>
+                    <option value="europe">Europe</option>
+                    <option value="asia">Asia</option>
+                    <option value="australia">Australia</option>
+                    <option value="africa">Africa</option>
+                    <option value="south_america">South America</option>
+                  </select>
+                </div>
 
-              <label>Vehicle Type:</label>
-              <select name="vehicleType" disabled={loading}>
-                <option value="">-- Select vehicle type --</option>
-                <option value="sedan">Sedan</option>
-                <option value="suv">SUV</option>
-                <option value="truck">Truck</option>
-                <option value="bus">Bus</option>
-                <option value="motorcycle">Motorcycle</option>
-                <option value="other">Other</option>
-              </select>
+                <div className="form-group">
+                  <label>Vehicle Type:</label>
+                  <select name="vehicleType" disabled={loading}>
+                    <option value="">-- Select vehicle type --</option>
+                    <option value="sedan">Sedan</option>
+                    <option value="suv">SUV</option>
+                    <option value="truck">Truck</option>
+                    <option value="bus">Bus</option>
+                    <option value="motorcycle">Motorcycle</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
 
-              <label>Battery Type:</label>
-              <select name="batteryType" disabled={loading}>
-                <option value="">-- Select battery type --</option>
-                <option value="lithium_ion">Lithium-Ion</option>
-                <option value="solid_state">Solid-State</option>
-                <option value="nickel_metal_hydride">Nickel-Metal Hydride</option>
-                <option value="lead_acid">Lead-Acid</option>
-                <option value="other">Other</option>
-              </select>
+                <div className="form-group">
+                  <label>Battery Type:</label>
+                  <select name="batteryType" disabled={loading}>
+                    <option value="">-- Select battery type --</option>
+                    <option value="lithium_ion">Lithium-Ion</option>
+                    <option value="solid_state">Solid-State</option>
+                    <option value="nickel_metal_hydride">Nickel-Metal Hydride</option>
+                    <option value="lead_acid">Lead-Acid</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
 
-              <label>Data Format:</label>
-              <select name="dataFormat" disabled={loading}>
-                <option value="">-- Select format --</option>
-                <option value="CSV">CSV</option>
-                <option value="JSON">JSON</option>
-                <option value="XML">XML</option>
-                <option value="Parquet">Parquet</option>
-                <option value="Excel">Excel</option>
-              </select>
+                <div className="form-group">
+                  <label>Data Format:</label>
+                  <select name="dataFormat" disabled={loading}>
+                    <option value="">-- Select format --</option>
+                    <option value="CSV">CSV</option>
+                    <option value="JSON">JSON</option>
+                    <option value="XML">XML</option>
+                    <option value="Parquet">Parquet</option>
+                    <option value="Excel">Excel</option>
+                  </select>
+                </div>
+              </div>
 
-              <label>Data file:</label>
-              <input name="dataFile" type="file" accept=".csv,.json,.xlsx,.xml,.parquet" required disabled={loading} />
+              {/* Full width file upload */}
+              <div className="form-group-full">
+                <label>Data file:</label>
+                <input name="dataFile" type="file" accept=".csv,.json,.xlsx,.xml,.parquet" required disabled={loading} />
+              </div>
 
               <div className="form-btn-group">
                 <button type="submit" className="btn-p btn-primary" disabled={loading}>
-                  {loading ? '⏳ Uploading...' : '📤 Upload'}
+                  {loading ? 'Uploading...' : 'Upload'}
                 </button>
-                <button type="button" className="btn-back" onClick={clearUploadForm} disabled={loading}>🗑️ Clear Form</button>
+                <button type="button" className="btn-back" onClick={clearUploadForm} disabled={loading}>Clear Form</button>
               </div>
             </form>
           </main>
@@ -512,56 +652,79 @@ const Provider = () => {
         <div id="policy-pricing" className={`tab-content ${activeTab === 'policy-pricing' ? 'active' : ''}`} style={{ display: activeTab === 'policy-pricing' ? 'block' : 'none' }}>
           <main className="form-mini">
             <form onSubmit={handlePolicySubmit}>
-              <label>Select Dataset:</label>
-              <select 
-                name="dataset" 
-                value={selectedDataset || ''}
-                onChange={(e) => setSelectedDataset(e.target.value ? Number(e.target.value) : null)}
-                required
-                disabled={loading}
-              >
-                <option value="">-- Select a dataset --</option>
-                {datasets.map((ds) => (
-                  <option key={ds.id} value={ds.id}>
-                    {ds.name} (ID: {ds.id})
-                  </option>
-                ))}
-              </select>
+              {/* Full width dataset selector */}
+              <div className="form-group-full">
+                <label>Select Dataset:</label>
+                <select 
+                  name="dataset" 
+                  value={selectedDataset || ''}
+                  onChange={(e) => setSelectedDataset(e.target.value ? Number(e.target.value) : null)}
+                  required
+                  disabled={loading}
+                >
+                  <option value="">-- Select a dataset --</option>
+                  {datasets.map((ds) => (
+                    <option key={ds.id} value={ds.id}>
+                      {ds.name} (ID: {ds.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <label>Pricing model:</label>
-              <select name="pricingModel" disabled={loading}>
-                <option>Per download</option>
-                <option>Subscription</option>
-                <option>By data size</option>
-              </select>
+              {/* Two column layout for pricing and license */}
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label>Pricing Model:</label>
+                  <select name="pricingModel" disabled={loading}>
+                    <option>Per download</option>
+                    <option>Subscription</option>
+                    <option>By data size</option>
+                  </select>
+                </div>
 
-              <label>Price (USD):</label>
-              <input name="price" type="number" min="0" step="0.01" defaultValue={99} required disabled={loading} />
+                <div className="form-group">
+                  <label>Price (USD):</label>
+                  <input name="price" type="number" min="0" step="0.01" defaultValue={99} required disabled={loading} />
+                </div>
 
-              <label>License:</label>
-              <select name="license" disabled={loading}>
-                <option>Research / Academic</option>
-                <option>Commercial</option>
-                <option>Internal use only</option>
-              </select>
+                <div className="form-group">
+                  <label>License:</label>
+                  <select name="license" disabled={loading}>
+                    <option>Research / Academic</option>
+                    <option>Commercial</option>
+                    <option>Internal use only</option>
+                  </select>
+                </div>
 
-              <label>Visibility:</label>
-              <select name="visibility" disabled={loading}>
-                <option>Public</option>
-                <option>Restricted</option>
-                <option>Private</option>
-              </select>
+                <div className="form-group">
+                  <label>Visibility:</label>
+                  <select name="visibility" disabled={loading}>
+                    <option>Public</option>
+                    <option>Restricted</option>
+                    <option>Private</option>
+                  </select>
+                </div>
+              </div>
 
-              <label><input type="checkbox" name="freePreview" defaultChecked disabled={loading} /> Allow free preview sample</label>
+              {/* Full width checkbox */}
+              <div className="form-group-full">
+                <label>
+                  <input type="checkbox" name="freePreview" defaultChecked disabled={loading} style={{ width: 'auto', marginRight: '8px' }} />
+                  Allow free preview sample
+                </label>
+              </div>
 
-              <label>Policy description:</label>
-              <textarea name="policyDesc" placeholder="Short description of policy and usage terms..." disabled={loading} />
+              {/* Full width policy description */}
+              <div className="form-group-full">
+                <label>Policy Description:</label>
+                <textarea name="policyDesc" placeholder="Short description of policy and usage terms..." disabled={loading} rows="4" />
+              </div>
 
               <div className="form-btn-group">
                 <button type="submit" className="btn-p btn-primary" disabled={loading}>
-                  {loading ? '⏳ Saving...' : 'Save Policy'}
+                  {loading ? 'Saving...' : 'Save Policy'}
                 </button>
-                <button type="button" className="btn-back" onClick={clearPolicyForm} disabled={loading}>🗑️ Clear Form</button>
+                <button type="button" className="btn-back" onClick={clearPolicyForm} disabled={loading}>Clear Form</button>
               </div>
             </form>
           </main>
@@ -625,50 +788,295 @@ const Provider = () => {
 
         {/* Security & Anonymization */}
         <div id="security-anonymization" className={`tab-content ${activeTab === 'security-anonymization' ? 'active' : ''}`} style={{ display: activeTab === 'security-anonymization' ? 'block' : 'none' }}>
+          {/* Display current security settings */}
+          {selectedDataset && datasets.find(ds => ds.id === selectedDataset) && (
+            <section style={{ 
+              marginBottom: '25px', 
+              padding: '20px', 
+              backgroundColor: '#ffffff', 
+              borderRadius: '10px', 
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ 
+                marginTop: 0, 
+                marginBottom: '20px',
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#2c3e50',
+                borderBottom: '2px solid #64FFDA',
+                paddingBottom: '10px'
+              }}>
+                Current Security Settings
+              </h3>
+              {(() => {
+                const dataset = datasets.find(ds => ds.id === selectedDataset);
+                return (
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr', 
+                    gap: '15px',
+                    fontSize: '14px',
+                    lineHeight: '1.8'
+                  }}>
+                    <div style={{ 
+                      padding: '12px',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '6px',
+                      borderLeft: '3px solid #64FFDA'
+                    }}>
+                      <div style={{ 
+                        fontSize: '12px', 
+                        color: '#6c757d', 
+                        marginBottom: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontWeight: '500'
+                      }}>
+                        Anonymization Method
+                      </div>
+                      <div style={{ 
+                        fontSize: '15px', 
+                        color: '#2c3e50',
+                        fontWeight: '600'
+                      }}>
+                        {dataset.anonymizationMethod || 'Not set'}
+                      </div>
+                    </div>
+                    
+                    <div style={{ 
+                      padding: '12px',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '6px',
+                      borderLeft: '3px solid #64FFDA'
+                    }}>
+                      <div style={{ 
+                        fontSize: '12px', 
+                        color: '#6c757d', 
+                        marginBottom: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontWeight: '500'
+                      }}>
+                        Access Control
+                      </div>
+                      <div style={{ 
+                        fontSize: '15px', 
+                        color: '#2c3e50',
+                        fontWeight: '600'
+                      }}>
+                        {dataset.accessControl || 'Not set'}
+                      </div>
+                    </div>
+                    
+                    <div style={{ 
+                      padding: '12px',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '6px',
+                      borderLeft: '3px solid #64FFDA'
+                    }}>
+                      <div style={{ 
+                        fontSize: '12px', 
+                        color: '#6c757d', 
+                        marginBottom: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontWeight: '500'
+                      }}>
+                        Audit Logging
+                      </div>
+                      <div style={{ 
+                        fontSize: '15px', 
+                        color: dataset.auditEnabled ? '#28a745' : '#dc3545',
+                        fontWeight: '600'
+                      }}>
+                        {dataset.auditEnabled ? 'Enabled' : 'Disabled'}
+                      </div>
+                    </div>
+                    
+                    <div style={{ 
+                      gridColumn: 'span 2',
+                      padding: '12px',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '6px',
+                      borderLeft: '3px solid #64FFDA'
+                    }}>
+                      <div style={{ 
+                        fontSize: '12px', 
+                        color: '#6c757d', 
+                        marginBottom: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontWeight: '500'
+                      }}>
+                        Security Notes
+                      </div>
+                      <div style={{ 
+                        fontSize: '14px', 
+                        color: '#495057',
+                        fontStyle: dataset.securityNotes ? 'normal' : 'italic'
+                      }}>
+                        {dataset.securityNotes || 'No notes'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </section>
+          )}
+
           <main className="form-mini">
             <form onSubmit={handleSecuritySubmit}>
-              <label>Select Dataset:</label>
-              <select 
-                name="dataset"
-                value={selectedDataset || ''}
-                onChange={(e) => setSelectedDataset(e.target.value ? Number(e.target.value) : null)}
-                required
-                disabled={loading}
-              >
-                <option value="">-- Select a dataset --</option>
-                {datasets.map((ds) => (
-                  <option key={ds.id} value={ds.id}>
-                    {ds.name} (ID: {ds.id})
-                  </option>
-                ))}
-              </select>
+              {/* Full width dataset selector */}
+              <div className="form-group-full">
+                <label>Select Dataset:</label>
+                <select 
+                  name="dataset"
+                  value={selectedDataset || ''}
+                  onChange={(e) => setSelectedDataset(e.target.value ? Number(e.target.value) : null)}
+                  required
+                  disabled={loading}
+                >
+                  <option value="">-- Select a dataset --</option>
+                  {datasets.map((ds) => (
+                    <option key={ds.id} value={ds.id}>
+                      {ds.name} (ID: {ds.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <label><input id="removePii" type="checkbox" name="removePii" disabled={loading} /> Remove PII (irreversible - will erase dataset)</label>
+              {/* Remove PII warning box */}
+              <div style={{ 
+                padding: '15px', 
+                backgroundColor: '#fff3cd', 
+                border: '1px solid #ffc107', 
+                borderRadius: '8px', 
+                marginBottom: '15px' 
+              }}>
+                <label style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  gap: '12px', 
+                  marginBottom: 0,
+                  cursor: 'pointer'
+                }}>
+                  <input 
+                    id="removePii" 
+                    type="checkbox" 
+                    name="removePii" 
+                    disabled={loading} 
+                    style={{ 
+                      width: 'auto',
+                      marginTop: '3px',
+                      transform: 'scale(1.2)'
+                    }} 
+                  />
+                  <span>
+                    <strong style={{ color: '#dc3545', fontSize: '15px' }}>Remove PII (IRREVERSIBLE)</strong>
+                    <br />
+                    <small style={{ color: '#856404', fontSize: '13px' }}>
+                      This will permanently erase the dataset. Use with extreme caution!
+                    </small>
+                  </span>
+                </label>
+              </div>
 
-              <label>Anonymization method:</label>
-              <select name="method" disabled={loading}>
-                <option>Mask (replace sensitive fields)</option>
-                <option>Hash (deterministic)</option>
-                <option>Aggregate (roll-up)</option>
-              </select>
+              <hr style={{ margin: '25px 0', border: 'none', borderTop: '2px solid #dee2e6' }} />
+              
+              <h4 style={{ 
+                marginBottom: '20px', 
+                color: '#2c3e50',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}>
+                Security Settings (without removing PII)
+              </h4>
 
-              <label>Access control:</label>
-              <select name="access" disabled={loading}>
-                <option>Open</option>
-                <option>Whitelist</option>
-                <option>Approval required</option>
-              </select>
+              {/* Two column layout for security settings */}
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label>Anonymization Method:</label>
+                  <select name="method" disabled={loading}>
+                    <option value="mask" title="Replace sensitive fields with asterisks">Mask (replace sensitive fields)</option>
+                    <option value="hash" title="Convert data to deterministic hash values">Hash (deterministic)</option>
+                    <option value="aggregate" title="Roll up detailed data into summaries">Aggregate (roll-up)</option>
+                  </select>
+                  <small style={{ 
+                    display: 'block', 
+                    marginTop: '5px', 
+                    color: '#6c757d',
+                    fontSize: '12px',
+                    lineHeight: '1.5',
+                    paddingLeft: '8px',
+                    borderLeft: '3px solid #e9ecef'
+                  }}>
+                    <strong>Mask:</strong> email@example.com → e***@example.com
+                    <br />
+                    <strong>Hash:</strong> email@example.com → 7d4e9f1a...
+                    <br />
+                    <strong>Aggregate:</strong> Individual → Summary
+                  </small>
+                </div>
 
-              <label><input type="checkbox" name="audit" disabled={loading} /> Enable audit logging</label>
+                <div className="form-group">
+                  <label>Access Control:</label>
+                  <select name="access" disabled={loading}>
+                    <option value="open" title="Anyone can see and purchase">Open</option>
+                    <option value="whitelist" title="Only pre-approved consumers can access">Whitelist</option>
+                    <option value="approval_required" title="Consumers must request access">Approval required</option>
+                  </select>
+                  <small style={{ 
+                    display: 'block', 
+                    marginTop: '5px', 
+                    color: '#6c757d',
+                    fontSize: '12px',
+                    lineHeight: '1.5',
+                    paddingLeft: '8px',
+                    borderLeft: '3px solid #e9ecef'
+                  }}>
+                    <strong>Open:</strong> Public marketplace
+                    <br />
+                    <strong>Whitelist:</strong> Specific consumers only
+                    <br />
+                    <strong>Approval required:</strong> Request access
+                  </small>
+                </div>
+              </div>
 
-              <label>Notes / instructions:</label>
-              <textarea name="notes" placeholder="Notes for reviewers or processors..." disabled={loading} />
+              {/* Full width audit checkbox */}
+              <div className="form-group-full">
+                <label>
+                  <input type="checkbox" name="audit" disabled={loading} style={{ width: 'auto', marginRight: '8px' }} />
+                  Enable audit logging
+                </label>
+                <small style={{ 
+                  display: 'block', 
+                  marginTop: '5px', 
+                  color: '#6c757d',
+                  fontSize: '13px'
+                }}>
+                  Track all access and changes to this dataset for compliance
+                </small>
+              </div>
+
+              {/* Full width notes */}
+              <div className="form-group-full">
+                <label>Notes / Instructions:</label>
+                <textarea 
+                  name="notes" 
+                  rows="4" 
+                  placeholder="e.g., This dataset has been anonymized per GDPR requirements. Contact legal@company.com for commercial use." 
+                  disabled={loading}
+                  style={{ resize: 'vertical', minHeight: '100px' }}
+                />
+              </div>
 
               <div className="form-btn-group">
                 <button type="submit" className="btn-p btn-primary" disabled={loading}>
-                  {loading ? '⏳ Processing...' : 'Apply Settings'}
+                  {loading ? 'Processing...' : 'Apply Settings'}
                 </button>
-                <button type="button" className="btn-back" onClick={clearSecurityForm} disabled={loading}>🗑️ Clear Form</button>
+                <button type="button" className="btn-back" onClick={clearSecurityForm} disabled={loading}>Clear Form</button>
               </div>
             </form>
           </main>
@@ -679,11 +1087,104 @@ const Provider = () => {
       {confirmVisible && (
         <div id="confirmModal" className="confirm-modal" aria-hidden={!confirmVisible} style={{ display: 'flex' }}>
           <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-            <h3 id="confirmTitle">Confirm Remove PII</h3>
-            <p>Removing personally identifiable information (PII) is irreversible in this operation. Are you sure you want to proceed?</p>
-            <div className="actions">
-              <button className="btn-back" onClick={() => closeConfirm(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={() => closeConfirm(true)}>Yes, proceed</button>
+            <h3 id="confirmTitle" style={{ 
+              color: '#dc3545', 
+              marginBottom: '20px',
+              fontSize: '20px',
+              fontWeight: '600',
+              borderBottom: '2px solid #dc3545',
+              paddingBottom: '10px'
+            }}>
+              Final Confirmation: Remove PII
+            </h3>
+            <div style={{ 
+              padding: '15px', 
+              backgroundColor: '#fff3cd', 
+              border: '1px solid #ffc107', 
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              <p style={{ 
+                margin: 0, 
+                fontWeight: 'bold', 
+                color: '#856404',
+                fontSize: '15px'
+              }}>
+                This action will PERMANENTLY ERASE the selected dataset!
+              </p>
+            </div>
+            <ul style={{ 
+              textAlign: 'left', 
+              marginBottom: '20px',
+              paddingLeft: '25px',
+              color: '#495057',
+              fontSize: '14px',
+              lineHeight: '2'
+            }}>
+              <li>Cannot be undone</li>
+              <li>All data will be deleted</li>
+              <li>Dataset removed from marketplace</li>
+              <li>Consumers will lose access</li>
+            </ul>
+            <p style={{ 
+              fontWeight: '600', 
+              marginBottom: '15px',
+              fontSize: '14px',
+              color: '#2c3e50'
+            }}>
+              Type the word <span style={{ 
+                color: '#dc3545',
+                backgroundColor: '#ffe6e6',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '15px'
+              }}>"DELETE"</span> to confirm:
+            </p>
+            <input 
+              id="confirmInput" 
+              type="text" 
+              placeholder="Type DELETE" 
+              style={{
+                width: '100%',
+                padding: '12px',
+                marginBottom: '20px',
+                border: '2px solid #dc3545',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontFamily: 'monospace'
+              }}
+            />
+            <div className="actions" style={{ 
+              display: 'flex', 
+              gap: '10px', 
+              justifyContent: 'flex-end' 
+            }}>
+              <button 
+                className="btn-back" 
+                onClick={() => closeConfirm(false)}
+                style={{ padding: '10px 20px' }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary" 
+                style={{ 
+                  backgroundColor: '#dc3545', 
+                  borderColor: '#dc3545',
+                  padding: '10px 20px'
+                }}
+                onClick={() => {
+                  const input = document.getElementById('confirmInput');
+                  if (input && input.value === 'DELETE') {
+                    closeConfirm(true);
+                  } else {
+                    alert('Please type "DELETE" to confirm.');
+                  }
+                }}
+              >
+                Yes, ERASE permanently
+              </button>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.ProviderDataset;
+import com.evmarketplace.dto.SecuritySettingsDTO;
 import com.evmarketplace.Service.AnonymizationService;
 import com.evmarketplace.Service.ProviderDatasetService;
 import com.evmarketplace.Service.S3ProviderService;
@@ -76,6 +77,18 @@ public class ProviderDatasetController {
                 policyUpdate.getPricingType(),
                 policyUpdate.getPrice(),
                 policyUpdate.getUsagePolicy());
+        if (updated == null) return ResponseEntity.status(404).body("Dataset not found");
+        return ResponseEntity.ok(updated);
+    }
+
+    // PUT /api/provider/datasets/{id}/security - Update security settings
+    @PutMapping("/{id}/security")
+    public ResponseEntity<?> updateSecuritySettings(@PathVariable Long id, @RequestBody SecuritySettingsDTO settings) {
+        ProviderDataset updated = datasetService.updateSecuritySettings(id,
+                settings.getAnonymizationMethod(),
+                settings.getAccessControl(),
+                settings.getAuditEnabled(),
+                settings.getNotes());
         if (updated == null) return ResponseEntity.status(404).body("Dataset not found");
         return ResponseEntity.ok(updated);
     }

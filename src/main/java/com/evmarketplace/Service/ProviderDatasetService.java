@@ -53,6 +53,18 @@ public class ProviderDatasetService {
         return repo.save(d);
     }
 
+    public ProviderDataset updateSecuritySettings(Long id, String anonymizationMethod, 
+                                                  String accessControl, Boolean auditEnabled, 
+                                                  String securityNotes) {
+        ProviderDataset d = findById(id);
+        if (d == null) return null;
+        d.setAnonymizationMethod(anonymizationMethod);
+        d.setAccessControl(accessControl);
+        d.setAuditEnabled(auditEnabled != null ? auditEnabled : false);
+        d.setSecurityNotes(securityNotes);
+        return repo.save(d);
+    }
+
     public void markErased(Long id) {
         ProviderDataset d = findById(id);
         if (d != null) {

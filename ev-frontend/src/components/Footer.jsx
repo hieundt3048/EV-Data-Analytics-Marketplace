@@ -12,7 +12,7 @@ const Footer = () => (
           <div className="footer-socials">
             <div className="footer-icon">youtube</div>
             <div className="footer-icon">Twitter</div>
-            <div className="footer-icon">GitHub</div>
+            <a href="https://github.com/hieundt3048/EV-Data-Analytics-Marketplace" target="_blank" rel="noopener noreferrer" className="footer-icon">GitHub</a>
           </div>
         </div>
 

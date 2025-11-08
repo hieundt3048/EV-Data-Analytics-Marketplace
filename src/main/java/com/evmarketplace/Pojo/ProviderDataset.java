@@ -49,6 +49,19 @@ public class ProviderDataset {
     @Column(name = "data_format")
     private String dataFormat; // CSV, JSON, XML, Parquet, other
 
+    // Security & Anonymization fields
+    @Column(name = "anonymization_method", length = 50)
+    private String anonymizationMethod; // mask, hash, aggregate
+    
+    @Column(name = "access_control", length = 50)
+    private String accessControl; // open, whitelist, approval_required
+    
+    @Column(name = "audit_enabled")
+    private Boolean auditEnabled = false;
+    
+    @Column(name = "security_notes", length = 2000)
+    private String securityNotes;
+
     // owner provider id (nullable)
     @Column(name = "provider_id")
     private Long providerId;
@@ -100,6 +113,18 @@ public class ProviderDataset {
 
     public String getDataFormat() { return dataFormat; }
     public void setDataFormat(String dataFormat) { this.dataFormat = dataFormat; }
+
+    public String getAnonymizationMethod() { return anonymizationMethod; }
+    public void setAnonymizationMethod(String anonymizationMethod) { this.anonymizationMethod = anonymizationMethod; }
+    
+    public String getAccessControl() { return accessControl; }
+    public void setAccessControl(String accessControl) { this.accessControl = accessControl; }
+    
+    public Boolean getAuditEnabled() { return auditEnabled; }
+    public void setAuditEnabled(Boolean auditEnabled) { this.auditEnabled = auditEnabled; }
+    
+    public String getSecurityNotes() { return securityNotes; }
+    public void setSecurityNotes(String securityNotes) { this.securityNotes = securityNotes; }
 
     public Long getProviderId() { return providerId; }
     public void setProviderId(Long providerId) { this.providerId = providerId; }
