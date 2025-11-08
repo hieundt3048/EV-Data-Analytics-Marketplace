@@ -16,6 +16,7 @@ import com.evmarketplace.Repository.DatasetMetadataRepository;
 import com.evmarketplace.Repository.InvoiceRepository;
 import com.evmarketplace.Repository.RoleRepository;
 import com.evmarketplace.Repository.UserRepository;
+import com.evmarketplace.Repository.ProviderDatasetRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.JwtFilter;
 import com.evmarketplace.data.DataProduct;
@@ -23,6 +24,7 @@ import com.evmarketplace.data.DataProvider;
 import com.evmarketplace.data.DataType;
 import com.evmarketplace.data.Format;
 import com.evmarketplace.data.ProductStatus;
+import com.evmarketplace.Pojo.ProviderDataset;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -56,7 +58,8 @@ public class Application {
     public CommandLineRunner seed(UserService userService,
                                  DataProviderRepository dataProviderRepository,
                                  DataProductRepository dataProductRepository,
-                                 RoleRepository roleRepository) { // THÊM roleRepository
+                                 ProviderDatasetRepository providerDatasetRepository,
+                                 RoleRepository roleRepository) {
         return args -> {
             // --- TẠO NGƯỜI DÙNG MẪU (DEMO USER) ---
             // Tìm người dùng với email "test@ev.com".
@@ -141,6 +144,60 @@ public class Application {
             if (!seeds.isEmpty()) {
                 dataProductRepository.saveAll(seeds);
                 System.out.println("Created " + seeds.size() + " sample data products");
+            }
+
+            // --- TẠO SAMPLE PROVIDER DATASETS CHO TESTING ---
+            long providerDatasetCount = providerDatasetRepository.count();
+            if (providerDatasetCount == 0) {
+                System.out.println("Creating sample ProviderDatasets for testing...");
+                
+                com.evmarketplace.Pojo.ProviderDataset pd1 = new com.evmarketplace.Pojo.ProviderDataset();
+                pd1.setName("testdata");
+                pd1.setDescription("ngày 7-11");
+                pd1.setCategory("charging_behavior");
+                pd1.setRegion("north_america");
+                pd1.setVehicleType("sedan");
+                pd1.setBatteryType("lithium_ion");
+                pd1.setTimeRange("2024-present");
+                pd1.setDataFormat("CSV");
+                pd1.setPricingType("subscription");
+                pd1.setPrice(9905.00);
+                pd1.setSizeBytes(23200768L); // 22.4 MB
+                pd1.setStatus("APPROVED");
+                pd1.setProviderId(savedProviderUser.getId());
+                
+                com.evmarketplace.Pojo.ProviderDataset pd2 = new com.evmarketplace.Pojo.ProviderDataset();
+                pd2.setName("test 17n 2");
+                pd2.setDescription("ngày 7 - 11");
+                pd2.setCategory("battery_health");
+                pd2.setRegion("australia");
+                pd2.setVehicleType("motorcycle");
+                pd2.setBatteryType("lithium_ion");
+                pd2.setTimeRange("2024-present");
+                pd2.setDataFormat("Excel");
+                pd2.setPricingType(null);
+                pd2.setPrice(null);
+                pd2.setSizeBytes(23900160L); // 23.0 MB
+                pd2.setStatus("APPROVED");
+                pd2.setProviderId(savedProviderUser.getId());
+                
+                com.evmarketplace.Pojo.ProviderDataset pd3 = new com.evmarketplace.Pojo.ProviderDataset();
+                pd3.setName("DEV");
+                pd3.setDescription("ສ្ថិបេទ ស្ថិបេទិន័យ ស្ថិនេន");
+                pd3.setCategory("energy_consumption");
+                pd3.setRegion("south_america");
+                pd3.setVehicleType("motorcycle");
+                pd3.setBatteryType("lithium_ion");
+                pd3.setTimeRange("2024-present");
+                pd3.setDataFormat("CSV");
+                pd3.setPricingType("per_request");
+                pd3.setPrice(99.00);
+                pd3.setSizeBytes(23200768L); // 22.4 MB
+                pd3.setStatus("APPROVED");
+                pd3.setProviderId(savedProviderUser.getId());
+                
+                providerDatasetRepository.saveAll(Arrays.asList(pd1, pd2, pd3));
+                System.out.println("Created 3 sample ProviderDatasets");
             }
 
             System.out.println("=== DEMO DATA INITIALIZED ===");

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/index.css';
 import '../styles/consumer.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Chỉ dùng để hiển thị trong documentation UI
+const API_BASE = 'http://localhost:8080';
 
 const Consumer = () => {
   const navigate = useNavigate();
@@ -21,7 +22,6 @@ const Consumer = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [previewDataset, setPreviewDataset] = useState(null);
   const [showReceipt, setShowReceipt] = useState(null);
-  const [subscriptions, setSubscriptions] = useState([]);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [selectedDatasetId, setSelectedDatasetId] = useState(null);
@@ -44,7 +44,6 @@ const Consumer = () => {
   const [datasetsError, setDatasetsError] = useState(null);
   const [purchaseError, setPurchaseError] = useState(null);
   const [dashboardError, setDashboardError] = useState(null);
-  const [subscriptionsError, setSubscriptionsError] = useState(null);
   const [analyticsError, setAnalyticsError] = useState(null);
   const [aiSuggestionsError, setAiSuggestionsError] = useState(null);
   const [apiKeyError, setApiKeyError] = useState(null);
@@ -72,7 +71,7 @@ const Consumer = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE}${url}`, { ...opts, headers });
+      const response = await fetch(url, { ...opts, headers });
       
       if (!response.ok) {
         // Nếu lỗi 401 (Unauthorized), token có thể đã hết hạn
@@ -86,54 +85,17 @@ const Consumer = () => {
           throw new Error('Session expired. Please login again.');
         }
         // Đọc response text để lấy thông báo lỗi
-        let errorText = '';
-        try {
-          errorText = await response.text();
-        } catch (e) {
-          errorText = `Request failed with status ${response.status}`;
-        }
+        const errorText = await response.text();
         throw new Error(errorText || `Request failed with status ${response.status}`);
       }
       
       if (response.status === 204) return null;
       
-      // Kiểm tra content-type trước
-      const contentType = response.headers.get('content-type') || '';
-      
-      // Đọc response text một lần duy nhất
-      const responseText = await response.text();
-      
-      // Nếu response rỗng, trả về null
-      if (!responseText || responseText.trim() === '') {
-        return null;
-      }
-      
-      // Thử parse JSON (một số API không set content-type đúng)
-      try {
-        const parsed = JSON.parse(responseText);
-        return parsed;
-      } catch (parseError) {
-        // Nếu parse thất bại, log chi tiết để debug
-        console.error('JSON Parse Error for URL:', url);
-        console.error('Parse Error:', parseError.message);
-        console.error('Content-Type:', contentType);
-        console.error('Response text (first 500 chars):', responseText.substring(0, 500));
-        
-        // Nếu content-type là JSON nhưng parse thất bại, đây là lỗi nghiêm trọng
-        if (contentType.includes('application/json')) {
-          throw new Error(`Invalid JSON response from server. ${parseError.message}. Response preview: ${responseText.substring(0, 200)}...`);
-        }
-        
-        // Nếu không phải JSON, trả về null
-        console.warn('Response is not valid JSON, returning null');
-        return null;
-      }
+      // Parse JSON response
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('API Error:', error);
-      // Nếu là lỗi network, không throw lại để tránh crash
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('Network error. Please check your connection.');
-      }
       throw error;
     }
   }, [navigate]);
@@ -152,22 +114,6 @@ const Consumer = () => {
     } catch (error) {
       setCategories([]);
       setCategoriesError(error.message || 'Không thể lấy danh mục dữ liệu.');
-    }
-  }, [fetchWithAuth]);
-
-  const fetchSubscriptions = useCallback(async () => {
-    setSubscriptionsError(null);
-    try {
-      const data = await fetchWithAuth('/api/subscriptions');
-      if (Array.isArray(data)) {
-        setSubscriptions(data);
-      } else {
-        setSubscriptions([]);
-        setSubscriptionsError('Không tìm thấy subscription nào.');
-      }
-    } catch (error) {
-      setSubscriptions([]);
-      setSubscriptionsError(error.message || 'Không thể tải danh sách subscription.');
     }
   }, [fetchWithAuth]);
 
@@ -266,16 +212,21 @@ const Consumer = () => {
   const fetchPurchaseHistory = useCallback(async () => {
     setPurchaseError(null);
     try {
+      console.log('[fetchPurchaseHistory] Fetching from /api/orders/history...');
       const data = await fetchWithAuth('/api/orders/history');
+      console.log('[fetchPurchaseHistory] Received data:', data);
       if (Array.isArray(data)) {
         setPurchaseHistory(data);
+        console.log('[fetchPurchaseHistory] Set purchaseHistory with', data.length, 'items');
       } else {
         setPurchaseHistory([]);
         setPurchaseError('Không có lịch sử mua hàng.');
+        console.warn('[fetchPurchaseHistory] Data is not an array:', data);
       }
     } catch (error) {
       setPurchaseHistory([]);
       setPurchaseError(error.message || 'Không thể tải lịch sử mua hàng.');
+      console.error('[fetchPurchaseHistory] Error:', error);
     }
   }, [fetchWithAuth]);
 
@@ -458,15 +409,22 @@ const Consumer = () => {
     }
 
     try {
-      await fetchWithAuth('/api/orders/checkout', {
+      const response = await fetchWithAuth('/api/orders/checkout', {
         method: 'POST',
         body: JSON.stringify({ datasetId: dataset.id })
       });
-      alert('Mua dataset thành công!');
-      fetchPurchaseHistory();
+      
+      if (response && response.status === 'success') {
+        alert('Mua dataset thành công!');
+        fetchPurchaseHistory();
+      } else {
+        const errorMsg = response?.message || 'Lỗi không xác định từ server.';
+        alert('Lỗi: ' + errorMsg);
+      }
     } catch (e) {
       const message = e.message || 'Không thể hoàn tất giao dịch.';
-      alert(message);
+      console.error('Purchase error:', e);
+      alert('Lỗi: ' + message);
     }
   };
 
@@ -477,7 +435,8 @@ const Consumer = () => {
     }
 
     try {
-      window.open(`${API_BASE}/api/datasets/${id}/download`, '_blank');
+      // Sử dụng relative URL để Vite proxy xử lý
+      window.open(`/api/datasets/${id}/download`, '_blank');
     } catch (e) {
       alert('Không thể bắt đầu tải dataset.');
     }
@@ -575,6 +534,12 @@ const Consumer = () => {
     return ['paid', 'completed', 'success'].includes(status);
   }).length, [purchaseHistory]);
 
+  // Tính số dataset duy nhất đã mua (unique dataset IDs)
+  const uniqueDatasetsPurchased = useMemo(() => {
+    const uniqueIds = new Set(purchaseHistory.map(order => order.datasetId).filter(id => id));
+    return uniqueIds.size;
+  }, [purchaseHistory]);
+
   const selectedDataset = useMemo(
     () => datasets.find((dataset) => String(dataset.id) === String(selectedDatasetId)),
     [datasets, selectedDatasetId]
@@ -617,16 +582,14 @@ const Consumer = () => {
       }
     } else if (activeTab === 'purchases') {
       fetchPurchaseHistory();
-      fetchSubscriptions();
     } else if (activeTab === 'dashboard') {
       fetchDashboard();
-      fetchSubscriptions();
     } else if (activeTab === 'analytics') {
       if (!datasets.length) {
         fetchApprovedDatasets();
       }
     }
-  }, [activeTab, fetchCategories, fetchApprovedDatasets, fetchPurchaseHistory, fetchSubscriptions, fetchDashboard, datasets.length]);
+  }, [activeTab, fetchCategories, fetchApprovedDatasets, fetchPurchaseHistory, fetchDashboard, datasets.length]);
 
   // Initial load
   useEffect(() => {
@@ -634,8 +597,7 @@ const Consumer = () => {
     fetchApprovedDatasets();
     fetchPurchaseHistory();
     fetchDashboard();
-    fetchSubscriptions();
-  }, [fetchCategories, fetchApprovedDatasets, fetchPurchaseHistory, fetchDashboard, fetchSubscriptions]);
+  }, [fetchCategories, fetchApprovedDatasets, fetchPurchaseHistory, fetchDashboard]);
 
   useEffect(() => {
     if (datasets.length > 0 && !selectedDatasetId) {
@@ -693,14 +655,26 @@ const Consumer = () => {
         {/* Consumer Dashboard */}
         <div id="dashboard" className="tab-content">
           <section className="consumer-section">
-            <h2>My Consumer Dashboard</h2>
+            <div className="section-header-enhanced">
+              <div className="section-header-content">
+                <div className="section-icon-badge dashboard">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="section-title-enhanced">My Consumer Dashboard</h2>
+                  <p className="section-description">Overview of your EV data marketplace activities and statistics</p>
+                </div>
+              </div>
+            </div>
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-icon">
                   <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
                 </div>
                 <div className="stat-content">
-                  <h3>{formatNumberValue(dashboardData?.totalDatasets ?? datasets.length)}</h3>
+                  <h3>{uniqueDatasetsPurchased}</h3>
                   <p>Datasets Purchased</p>
                   <span className="stat-change neutral">Tổng số dataset đã mua</span>
                 </div>
@@ -709,16 +683,16 @@ const Consumer = () => {
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.78-1.18 2.73-3.12 3.16z"/></svg></div>
                 <div className="stat-content">
-                  <h3>{formatNumberValue(dashboardData?.totalPurchases ?? purchaseHistory.length)}</h3>
+                  <h3>{purchaseHistory.length}</h3>
                   <p>Total Purchases</p>
-                  <span className="stat-change neutral">{formatNumberValue(successfulPurchases)} giao dịch thành công</span>
+                  <span className="stat-change neutral">{successfulPurchases} giao dịch thành công</span>
                 </div>
               </div>
 
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
                 <div className="stat-content">
-                  <h3>{formatPurchaseAmount(dashboardData?.totalSpending ?? totalSpending)}</h3>
+                  <h3>{formatPurchaseAmount(totalSpending)}</h3>
                   <p>Total Spending</p>
                   <span className="stat-change neutral">Dựa trên lịch sử mua</span>
                 </div>
@@ -727,7 +701,7 @@ const Consumer = () => {
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
                 <div className="stat-content">
-                  <h3>{formatNumberValue(dashboardData?.activeApiKeys ?? (apiKey ? 1 : 0))}</h3>
+                  <h3>{apiKey ? 1 : 0}</h3>
                   <p>Active API Keys</p>
                   <span className="stat-change neutral">Thống kê từ dashboard</span>
                 </div>
@@ -866,126 +840,178 @@ const Consumer = () => {
         <div id="data-discovery" className="tab-content">
           <section className="consumer-section">
             <h2>Search & Discover Data</h2>
-            <div className="consumer-card">
+            <div className="consumer-card filter-card">
               <div className="card-body">
-                <h5>Find the EV Data You Need</h5>
-                <p className="section-description">Browse comprehensive EV datasets including driving behavior, battery performance, charging station usage, and V2G transactions.</p>
+                <div className="filter-header">
+                  <div className="filter-header-content">
+                    <div className="filter-icon-badge">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h5 className="filter-title">Find the EV Data You Need</h5>
+                      <p className="section-description">Browse comprehensive EV datasets including driving behavior, battery performance, charging station usage, and V2G transactions.</p>
+                    </div>
+                  </div>
+                </div>
+                
                 {renderErrorBanner(categoriesError)}
 
                 <div className="search-filters">
                   <div className="filter-group">
-                    <label htmlFor="data-category">Data Category</label>
+                    <label htmlFor="data-category">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                      </svg>
+                      Data Category
+                    </label>
                     <select 
                       id="data-category"
                       value={filters.category}
                       onChange={(e) => handleFilterChange('category', e.target.value)}
                     >
                       <option value="">All Categories</option>
-                      <option value="charging_behavior">Charging Behavior</option>
-                      <option value="battery_health">Battery Health</option>
-                      <option value="route_optimization">Route Optimization</option>
-                      <option value="energy_consumption">Energy Consumption</option>
+                      <option value="charging_behavior">⚡ Charging Behavior</option>
+                      <option value="battery_health">🔋 Battery Health</option>
+                      <option value="route_optimization">🗺️ Route Optimization</option>
+                      <option value="energy_consumption">🔌 Energy Consumption</option>
                     </select>
                   </div>
                   
                   <div className="filter-group">
-                    <label htmlFor="time-range">Time Range</label>
+                    <label htmlFor="time-range">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                      </svg>
+                      Time Range
+                    </label>
                     <select 
                       id="time-range"
                       value={filters.timeRange}
                       onChange={(e) => handleFilterChange('timeRange', e.target.value)}
                     >
                       <option value="">Any Time</option>
-                      <option value="2020-2021">2020-2021</option>
-                      <option value="2021-2022">2021-2022</option>
-                      <option value="2022-2023">2022-2023</option>
-                      <option value="2023-2024">2023-2024</option>
-                      <option value="2024-present">2024-Present</option>
+                      <option value="2020-2021">📅 2020-2021</option>
+                      <option value="2021-2022">📅 2021-2022</option>
+                      <option value="2022-2023">📅 2022-2023</option>
+                      <option value="2023-2024">📅 2023-2024</option>
+                      <option value="2024-present">📅 2024-Present</option>
                     </select>
                   </div>
                   
                   <div className="filter-group">
-                    <label htmlFor="region">Region</label>
+                    <label htmlFor="region">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                      Region
+                    </label>
                     <select 
                       id="region"
                       value={filters.region}
                       onChange={(e) => handleFilterChange('region', e.target.value)}
                     >
                       <option value="">All Regions</option>
-                      <option value="north_america">North America</option>
-                      <option value="europe">Europe</option>
-                      <option value="asia">Asia</option>
-                      <option value="australia">Australia</option>
-                      <option value="africa">Africa</option>
-                      <option value="south_america">South America</option>
+                      <option value="north_america">🇺🇸 North America</option>
+                      <option value="europe">🇪🇺 Europe</option>
+                      <option value="asia">🌏 Asia</option>
+                      <option value="australia">🇦🇺 Australia</option>
+                      <option value="africa">🌍 Africa</option>
+                      <option value="south_america">🌎 South America</option>
                     </select>
                   </div>
                   
                   <div className="filter-group">
-                    <label htmlFor="vehicle-type">Vehicle Type</label>
+                    <label htmlFor="vehicle-type">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+                      </svg>
+                      Vehicle Type
+                    </label>
                     <select 
                       id="vehicle-type"
                       value={filters.vehicleType}
                       onChange={(e) => handleFilterChange('vehicleType', e.target.value)}
                     >
                       <option value="">All Types</option>
-                      <option value="sedan">Sedan</option>
-                      <option value="suv">SUV</option>
-                      <option value="truck">Truck</option>
-                      <option value="bus">Bus</option>
-                      <option value="motorcycle">Motorcycle</option>
-                      <option value="other">Other</option>
+                      <option value="sedan">🚗 Sedan</option>
+                      <option value="suv">🚙 SUV</option>
+                      <option value="truck">🚚 Truck</option>
+                      <option value="bus">🚌 Bus</option>
+                      <option value="motorcycle">🏍️ Motorcycle</option>
+                      <option value="other">🚘 Other</option>
                     </select>
                   </div>
                   
                   <div className="filter-group">
-                    <label htmlFor="battery-type">Battery Type</label>
+                    <label htmlFor="battery-type">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/>
+                      </svg>
+                      Battery Type
+                    </label>
                     <select 
                       id="battery-type"
                       value={filters.batteryType}
                       onChange={(e) => handleFilterChange('batteryType', e.target.value)}
                     >
                       <option value="">All Types</option>
-                      <option value="lithium_ion">Lithium-Ion</option>
-                      <option value="solid_state">Solid-State</option>
-                      <option value="nickel_metal_hydride">Nickel-Metal Hydride</option>
-                      <option value="lead_acid">Lead-Acid</option>
-                      <option value="other">Other</option>
+                      <option value="lithium_ion">🔋 Lithium-Ion</option>
+                      <option value="solid_state">⚡ Solid-State</option>
+                      <option value="nickel_metal_hydride">🔌 Nickel-Metal Hydride</option>
+                      <option value="lead_acid">🔋 Lead-Acid</option>
+                      <option value="other">🔋 Other</option>
                     </select>
                   </div>
                   
                   <div className="filter-group">
-                    <label htmlFor="data-format">Data Format</label>
+                    <label htmlFor="data-format">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                      </svg>
+                      Data Format
+                    </label>
                     <select 
                       id="data-format"
                       value={filters.dataFormat}
                       onChange={(e) => handleFilterChange('dataFormat', e.target.value)}
                     >
                       <option value="">All Formats</option>
-                      <option value="CSV">CSV</option>
-                      <option value="JSON">JSON</option>
-                      <option value="XML">XML</option>
-                      <option value="Parquet">Parquet</option>
-                      <option value="Excel">Excel</option>
-                      <option value="other">Other</option>
+                      <option value="CSV">📊 CSV</option>
+                      <option value="JSON">📋 JSON</option>
+                      <option value="XML">📄 XML</option>
+                      <option value="Parquet">📦 Parquet</option>
+                      <option value="Excel">📈 Excel</option>
+                      <option value="other">📁 Other</option>
                     </select>
                   </div>
 
                   <div className="filter-group">
-                    <label htmlFor="pricing-type">Pricing Model</label>
+                    <label htmlFor="pricing-type">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                      </svg>
+                      Pricing Model
+                    </label>
                     <select 
                       id="pricing-type"
                       value={filters.pricingType}
                       onChange={(e) => handleFilterChange('pricingType', e.target.value)}
                     >
                       <option value="">All Models</option>
-                      <option value="per_request">Pay per Download</option>
-                      <option value="subscription">Subscription</option>
+                      <option value="per_request">💳 Pay per Download</option>
+                      <option value="subscription">📅 Subscription</option>
                     </select>
                   </div>
 
                   <div className="filter-group">
-                    <label htmlFor="min-price">Min Price ($)</label>
+                    <label htmlFor="min-price">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 10l5 5 5-5z"/>
+                      </svg>
+                      Min Price ($)
+                    </label>
                     <input 
                       id="min-price"
                       type="number" 
@@ -998,7 +1024,12 @@ const Consumer = () => {
                   </div>
 
                   <div className="filter-group">
-                    <label htmlFor="max-price">Max Price ($)</label>
+                    <label htmlFor="max-price">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 14l5-5 5 5z"/>
+                      </svg>
+                      Max Price ($)
+                    </label>
                     <input 
                       id="max-price"
                       type="number" 
@@ -1011,7 +1042,12 @@ const Consumer = () => {
                   </div>
 
                   <div className="filter-group full-width">
-                    <label htmlFor="searchQuery">Search Datasets</label>
+                    <label htmlFor="searchQuery">
+                      <svg className="filter-label-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                      </svg>
+                      Search Datasets
+                    </label>
                     <input 
                       id="searchQuery"
                       type="text" 
@@ -1029,7 +1065,10 @@ const Consumer = () => {
                     </svg>
                     {loading ? 'Searching...' : 'Search Datasets'}
                   </button>
-                  <button className="consumer-btn consumer-btn-outline" onClick={clearFilters} disabled={loading}>
+                  <button className="consumer-btn consumer-btn-primary" onClick={clearFilters} disabled={loading}>
+                    <svg className="btn-icon" viewBox="0 0 24 24">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
                     Clear Filters
                   </button>
                 </div>
@@ -1111,8 +1150,18 @@ const Consumer = () => {
         {/* Purchase History */}
         <div id="purchases" className="tab-content">
           <section className="consumer-section">
-            <div className="dashboard-header">
-              <h2>Purchase History & Subscriptions</h2>
+            <div className="section-header-enhanced">
+              <div className="section-header-content">
+                <div className="section-icon-badge purchases">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="section-title-enhanced">Purchase History</h2>
+                  <p className="section-description">Track all your dataset purchases and transactions</p>
+                </div>
+              </div>
               <div className="header-actions">
                 <button
                   className="consumer-btn consumer-btn-outline"
@@ -1124,51 +1173,11 @@ const Consumer = () => {
               </div>
             </div>
 
-            {renderErrorBanner(subscriptionsError)}
             {renderErrorBanner(purchaseError)}
-
-            {/* Subscriptions Section */}
-            {subscriptions && subscriptions.length > 0 && (
-              <section className="consumer-section">
-                <h3>Active Subscriptions</h3>
-                <div className="subscriptions-grid">
-                  {subscriptions.map((subscription) => (
-                    <div className="subscription-card" key={subscription.id}>
-                      <div className="subscription-header">
-                        <h4>{subscription.name || 'EV Data Subscription'}</h4>
-                        <span className={`subscription-status ${subscription.status?.toLowerCase()}`}>
-                          {subscription.status || 'ACTIVE'}
-                        </span>
-                      </div>
-                      <div className="subscription-details">
-                        <p><strong>Plan:</strong> {subscription.planType || 'Monthly'}</p>
-                        <p><strong>Price:</strong> {formatCurrency(subscription.price || 49)}</p>
-                        <p><strong>Next Billing:</strong> {subscription.nextBillingDate || '2024-04-15'}</p>
-                        <p><strong>Data Access:</strong> {subscription.dataAccess || 'Unlimited'}</p>
-                      </div>
-                      <div className="subscription-actions">
-                        <button
-                          className="consumer-btn consumer-btn-outline"
-                          onClick={() => alert('Tính năng quản lý subscription đang được phát triển.')}
-                        >
-                          Manage
-                        </button>
-                        <button
-                          className="consumer-btn consumer-btn-danger"
-                          onClick={() => alert('Tính năng hủy subscription đang được phát triển.')}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* Purchase History Table */}
             <section className="consumer-section">
-              <h3>Data Purchase History</h3>
+              <h3>Your Dataset Purchases</h3>
               <div className="table-container">
                 <div className="table-wrapper">
                   <table className="data-table">
@@ -1263,8 +1272,18 @@ const Consumer = () => {
         {/* Analytics Dashboard */}
         <div id="analytics" className="tab-content">
           <section className="consumer-section">
-            <div className="dashboard-header">
-              <h2>Analytics Dashboard</h2>
+            <div className="section-header-enhanced">
+              <div className="section-header-content">
+                <div className="section-icon-badge analytics">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="section-title-enhanced">Analytics Dashboard</h2>
+                  <p className="section-description">Visualize and analyze your EV data with AI-powered insights</p>
+                </div>
+              </div>
               <div className="header-actions">
                 <button
                   className="consumer-btn consumer-btn-outline"
@@ -1315,14 +1334,29 @@ const Consumer = () => {
                 </div>
 
                 {analyticsData.insights && Object.keys(analyticsData.insights).length > 0 && (
-                  <div className="consumer-card">
+                  <div className="consumer-card insights-card">
                     <div className="card-body">
-                      <h4>Key Insights</h4>
-                      <ul className="insights-list">
+                      <div className="card-header-with-icon">
+                        <div className="icon-badge primary">
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h4>🔍 Key Insights</h4>
+                          <p className="card-subtitle">Important metrics and patterns from your data</p>
+                        </div>
+                      </div>
+                      <ul className="insights-list enhanced">
                         {Object.entries(analyticsData.insights).map(([insightKey, insightValue]) => (
-                          <li key={insightKey}>
-                            <strong>{formatLabel(insightKey)}:</strong>{' '}
-                            {Array.isArray(insightValue) ? insightValue.join(', ') : (insightValue ?? '—')}
+                          <li key={insightKey} className="insight-item">
+                            <span className="insight-icon">📊</span>
+                            <div className="insight-content">
+                              <strong className="insight-label">{formatLabel(insightKey)}:</strong>
+                              <span className="insight-value">
+                                {Array.isArray(insightValue) ? insightValue.join(', ') : (insightValue ?? '—')}
+                              </span>
+                            </div>
                           </li>
                         ))}
                       </ul>
@@ -1340,13 +1374,39 @@ const Consumer = () => {
             )}
 
             {aiSummary && (
-              <div className="consumer-card">
+              <div className="consumer-card ai-summary-card">
                 <div className="card-body">
-                  <h4>AI Analysis Summary</h4>
-                  <p>{aiSummary}</p>
-                  <div className="insight-meta">
-                    {aiConfidence !== null && <span>Confidence: {formatPercentageValue(aiConfidence * 100)}</span>}
-                    {aiGeneratedAt && <span>Generated: {formatDateTime(aiGeneratedAt)}</span>}
+                  <div className="card-header-with-icon">
+                    <div className="icon-badge success">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4>🤖 AI Analysis Summary</h4>
+                      <p className="card-subtitle">Automated insights powered by machine learning</p>
+                    </div>
+                  </div>
+                  <div className="ai-summary-content">
+                    <p className="summary-text">{aiSummary}</p>
+                    <div className="insight-meta enhanced">
+                      {aiConfidence !== null && (
+                        <span className="meta-badge confidence">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2v-2zm0-6h2v4h-2v-4z"/>
+                          </svg>
+                          Confidence: {formatPercentageValue(aiConfidence * 100)}
+                        </span>
+                      )}
+                      {aiGeneratedAt && (
+                        <span className="meta-badge timestamp">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                          </svg>
+                          Generated: {formatDateTime(aiGeneratedAt)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1354,32 +1414,68 @@ const Consumer = () => {
           </section>
 
           {aiSuggestions.length > 0 && (
-            <section className="consumer-section">
-              <h2>AI Suggestions</h2>
-              <div className="insights-grid">
+            <section className="consumer-section ai-suggestions-section">
+              <div className="section-header">
+                <div className="section-title-with-icon">
+                  <div className="icon-badge warning">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2>💡 AI Suggestions</h2>
+                    <p className="section-subtitle">Actionable recommendations to optimize your data usage</p>
+                  </div>
+                </div>
+              </div>
+              <div className="insights-grid enhanced">
                 {aiSuggestions.map((suggestion, index) => {
                   const confidenceLabel = suggestion.confidence != null ? formatPercentageValue(suggestion.confidence * 100) : null;
+                  const impactLevel = (suggestion.impact || '').toLowerCase();
+                  const impactColor = impactLevel === 'high' ? 'error' : impactLevel === 'medium' ? 'warning' : 'info';
+                  
                   return (
-                    <div className="insight-card" key={`${suggestion.type}-${index}`}>
+                    <div className={`insight-card enhanced ${impactLevel}-impact`} key={`${suggestion.type}-${index}`}>
                       <div className="insight-header">
-                        <h4>{suggestion.title || formatLabel(suggestion.type)}</h4>
-                        {confidenceLabel && (
-                          <span className={`insight-confidence ${(suggestion.impact || '').toLowerCase()}`}>
-                            {confidenceLabel}
-                          </span>
-                        )}
+                        <div className="suggestion-icon">
+                          {impactLevel === 'high' && '🔥'}
+                          {impactLevel === 'medium' && '⚡'}
+                          {impactLevel === 'low' && '💡'}
+                          {!impactLevel && '💡'}
+                        </div>
+                        <div className="header-content">
+                          <h4>{suggestion.title || formatLabel(suggestion.type)}</h4>
+                          {confidenceLabel && (
+                            <span className={`insight-confidence ${impactColor}`}>
+                              {confidenceLabel}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="insight-content">
-                        <p>{suggestion.description || '—'}</p>
+                        <p className="suggestion-description">{suggestion.description || '—'}</p>
                         {suggestion.actions && suggestion.actions.length > 0 && (
-                          <ul>
-                            {suggestion.actions.map((action, actionIdx) => (
-                              <li key={actionIdx}>{action}</li>
-                            ))}
-                          </ul>
+                          <div className="action-items">
+                            <strong className="action-title">Recommended Actions:</strong>
+                            <ul className="action-list">
+                              {suggestion.actions.map((action, actionIdx) => (
+                                <li key={actionIdx}>
+                                  <span className="action-bullet">→</span>
+                                  {action}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                         {suggestion.impact && (
-                          <p><strong>Impact:</strong> {formatLabel(suggestion.impact)}</p>
+                          <div className="impact-badge-container">
+                            <span className={`impact-badge ${impactColor}`}>
+                              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                              </svg>
+                              Impact: {formatLabel(suggestion.impact)}
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1393,8 +1489,34 @@ const Consumer = () => {
         {/* API Documentation */}
         <div id="api" className="tab-content">
           <section className="consumer-section">
-            <div className="dashboard-header">
-              <h2>API Documentation & Integration</h2>
+            
+            {/* Information Banner for API Documentation */}
+            <div className="api-info-banner">
+              <div className="api-info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 16v-4M12 8h.01"/>
+                </svg>
+              </div>
+              <div className="api-info-content">
+                <h4>🚀 Developer Integration Hub</h4>
+                <p><strong>API Documentation</strong> is designed for <strong>developers and technical teams</strong> who want to integrate EV data into their own applications, systems, or services via API endpoints.</p>
+                <p>If you're a regular user looking to purchase and view datasets, please use the <strong>"Data Discovery"</strong> and <strong>"Purchases"</strong> tabs instead.</p>
+              </div>
+            </div>
+
+            <div className="section-header-enhanced">
+              <div className="section-header-content">
+                <div className="section-icon-badge api">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="section-title-enhanced">API Documentation & Integration</h2>
+                  <p className="section-description">Integrate EV data into your applications with our RESTful API</p>
+                </div>
+              </div>
               <div className="header-actions">
                 <button className="consumer-btn consumer-btn-primary" onClick={() => setShowApiKeyModal(true)}>
                   <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>

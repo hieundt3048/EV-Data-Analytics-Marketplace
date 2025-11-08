@@ -20,12 +20,12 @@ public class Order {
     @Column(name = "dataset_id", nullable = false)
     private Long datasetId;
 
-    // Người mua
-    @Column(name = "buyer_id", nullable = false)
+    // Người mua - temporarily nullable to avoid FK constraint issues
+    @Column(name = "buyer_id")
     private Long buyerId;
 
-    // Nhà cung cấp dữ liệu
-    @Column(name = "provider_id", nullable = false)
+    // Nhà cung cấp dữ liệu - temporarily nullable to avoid FK constraint issues  
+    @Column(name = "provider_id")
     private Long providerId;
 
     // Số tiền thanh toán

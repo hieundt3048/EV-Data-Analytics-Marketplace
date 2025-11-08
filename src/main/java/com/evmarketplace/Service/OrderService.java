@@ -1,11 +1,13 @@
 package com.evmarketplace.Service;
 
-import com.evmarketplace.Pojo.Dataset;
+import com.evmarketplace.Pojo.ProviderDataset;
 import com.evmarketplace.Pojo.Order;
 import com.evmarketplace.Pojo.Payment;
-import com.evmarketplace.Repository.DatasetRepository;
+import com.evmarketplace.Pojo.User;
+import com.evmarketplace.Repository.ProviderDatasetRepository;
 import com.evmarketplace.Repository.OrderRepository;
 import com.evmarketplace.Repository.PaymentRepository;
+import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.dto.OrderRequestDTO;
 import com.evmarketplace.dto.CheckoutResponseDTO;
 import com.stripe.Stripe;
@@ -14,6 +16,8 @@ import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,68 +29,94 @@ import java.util.UUID;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final DatasetRepository datasetRepository;
+    private final ProviderDatasetRepository providerDatasetRepository;
     private final PaymentRepository paymentRepository;
-    private final StripePaymentService stripePaymentService;
+    private final UserRepository userRepository;
     private final AccessControlService accessControlService;
 
     @Value("${stripe.webhook-secret:whsec_demo}")
     private String webhookSecret;
 
     public OrderService(OrderRepository orderRepository, 
-                       DatasetRepository datasetRepository,
-                       PaymentRepository paymentRepository, 
-                       StripePaymentService stripePaymentService,
+                       ProviderDatasetRepository providerDatasetRepository,
+                       PaymentRepository paymentRepository,
+                       UserRepository userRepository,
                        AccessControlService accessControlService) {
         this.orderRepository = orderRepository;
-        this.datasetRepository = datasetRepository;
+        this.providerDatasetRepository = providerDatasetRepository;
         this.paymentRepository = paymentRepository;
-        this.stripePaymentService = stripePaymentService;
+        this.userRepository = userRepository;
         this.accessControlService = accessControlService;
     }
 
     @Transactional
     public CheckoutResponseDTO createOrderAndCheckout(OrderRequestDTO orderRequest) {
         try {
-            Optional<Dataset> datasetOpt = datasetRepository.findById(
-                Long.valueOf(orderRequest.getDatasetId().toString()));
+            Optional<ProviderDataset> datasetOpt = providerDatasetRepository.findById(orderRequest.getDatasetId());
             
             if (datasetOpt.isEmpty()) {
                 return new CheckoutResponseDTO(null, null, "error", "Dataset not found", null);
             }
 
-            Dataset dataset = datasetOpt.get();
+            ProviderDataset dataset = datasetOpt.get();
 
             Order order = new Order();
             order.setDatasetId(dataset.getId());
-            order.setBuyerId(Long.valueOf(orderRequest.getConsumerId().toString()));
-            order.setProviderId(1L);
-            order.setAmount(dataset.getPrice());
+            
+            // Resolve buyer_id from authenticated user
+            if (orderRequest.getConsumerId() != null) {
+                order.setBuyerId(orderRequest.getConsumerId());
+            } else {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Long buyerId = null;
+                
+                if (auth != null && auth.getName() != null) {
+                    String username = auth.getName();
+                    
+                    // Try to parse as Long first (if principal is user ID)
+                    try {
+                        buyerId = Long.valueOf(username);
+                    } catch (NumberFormatException ex) {
+                        // If not a number, treat as email and lookup user
+                        Optional<User> userOpt = userRepository.findByEmail(username);
+                        if (userOpt.isPresent()) {
+                            buyerId = userOpt.get().getId();
+                        }
+                    }
+                }
+                
+                // If still null, use demo fallback but log warning
+                if (buyerId == null) {
+                    System.err.println("WARNING: Could not resolve buyer_id from authentication, using demo id=1");
+                    buyerId = 1L;
+                }
+                
+                order.setBuyerId(buyerId);
+            }
+            
+            // Set provider_id from dataset, use demo fallback if null
+            Long providerId = dataset.getProviderId();
+            if (providerId == null) {
+                System.err.println("WARNING: Dataset " + dataset.getId() + " has no providerId, using demo id=1");
+                providerId = 1L;
+            }
+            order.setProviderId(providerId);
+            
+            order.setAmount(dataset.getPrice() == null ? 0.0 : dataset.getPrice());
             order.setOrderDate(LocalDateTime.now());
-            order.setStatus("PENDING");
+            order.setStatus("PAID"); // Set to PAID immediately for demo
             
             Order savedOrder = orderRepository.save(order);
 
-            Long amountInCents = (long) (dataset.getPrice() * 100);
-            String sessionId = stripePaymentService.createCheckoutSession(
-                savedOrder.getId(),
-                dataset.getTitle(),
-                amountInCents,
-                "usd"
-            );
-
-            String sessionUrl = "https://checkout.stripe.com/pay/" + sessionId;
-
+            // For demo: skip Stripe and return success immediately
             return new CheckoutResponseDTO(
-                sessionId, 
-                sessionUrl, 
-                "pending", 
-                "Checkout session created successfully", 
+                "demo_session_" + savedOrder.getId(), 
+                "https://demo-checkout.local/success", 
+                "success", 
+                "Order created successfully (demo mode)", 
                 savedOrder.getId()
             );
 
-        } catch (StripeException e) {
-            throw new RuntimeException("Stripe payment error: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("Order creation error: " + e.getMessage(), e);
         }
