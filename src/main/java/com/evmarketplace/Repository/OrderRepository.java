@@ -27,4 +27,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Lấy danh sách đơn hàng theo buyer
     List<Order> findByBuyerId(Long buyerId);
+    
+    // Lấy danh sách đơn hàng theo dataset ID
+    List<Order> findByDatasetId(Long datasetId);
+    
+    // Lấy danh sách đơn hàng theo nhiều dataset IDs
+    List<Order> findByDatasetIdIn(List<Long> datasetIds);
 }

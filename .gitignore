@@ -1,3 +1,9 @@
 target/
 /ev-frontend/public/
 uploads/
+
+# Documentation files (auto-generated)
+FEATURE_ANALYSIS.md
+PROGRESS_REPORT.md
+PROVIDER_REVENUE_REPORT.md
+AI_RECOMMENDATION_REPORT.md

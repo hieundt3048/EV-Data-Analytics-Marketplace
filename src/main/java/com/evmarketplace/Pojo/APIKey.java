@@ -48,16 +48,22 @@ public class APIKey {
     private int rateLimit;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "expires_at")
     private Date expiresAt;
 
     protected APIKey() {
         // Bắt buộc cho JPA
+        this.createdAt = new Date();
     }
 
     public APIKey(UUID consumerId, String key) {
         this.consumerId = consumerId;
         this.key = key;
+        this.createdAt = new Date();
     }
 
     public UUID getId() {
@@ -96,11 +102,24 @@ public class APIKey {
         this.rateLimit = rateLimit;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
     public Date getExpiresAt() {
         return expiresAt;
     }
 
     public void setExpiresAt(Date expiresAt) {
         this.expiresAt = expiresAt;
+    }
+    
+    // Alias methods for compatibility
+    public Date getExpiryDate() {
+        return expiresAt;
+    }
+    
+    public void setExpiryDate(Date expiryDate) {
+        this.expiresAt = expiryDate;
     }
 }

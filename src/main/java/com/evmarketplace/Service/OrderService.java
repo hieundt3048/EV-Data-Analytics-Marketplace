@@ -1,9 +1,11 @@
 package com.evmarketplace.Service;
 
+import com.evmarketplace.Pojo.Consumer;
 import com.evmarketplace.Pojo.ProviderDataset;
 import com.evmarketplace.Pojo.Order;
 import com.evmarketplace.Pojo.Payment;
 import com.evmarketplace.Pojo.User;
+import com.evmarketplace.Repository.ConsumerRepository;
 import com.evmarketplace.Repository.ProviderDatasetRepository;
 import com.evmarketplace.Repository.OrderRepository;
 import com.evmarketplace.Repository.PaymentRepository;
@@ -32,6 +34,7 @@ public class OrderService {
     private final ProviderDatasetRepository providerDatasetRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final ConsumerRepository consumerRepository;
     private final AccessControlService accessControlService;
 
     @Value("${stripe.webhook-secret:whsec_demo}")
@@ -41,11 +44,13 @@ public class OrderService {
                        ProviderDatasetRepository providerDatasetRepository,
                        PaymentRepository paymentRepository,
                        UserRepository userRepository,
+                       ConsumerRepository consumerRepository,
                        AccessControlService accessControlService) {
         this.orderRepository = orderRepository;
         this.providerDatasetRepository = providerDatasetRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
+        this.consumerRepository = consumerRepository;
         this.accessControlService = accessControlService;
     }
 
@@ -60,39 +65,43 @@ public class OrderService {
 
             ProviderDataset dataset = datasetOpt.get();
 
+            // Get authenticated user
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            User user = null;
+            
+            if (auth != null && auth.getName() != null) {
+                String username = auth.getName();
+                
+                // Try to parse as Long first (if principal is user ID)
+                try {
+                    Long userId = Long.valueOf(username);
+                    user = userRepository.findById(userId).orElse(null);
+                } catch (NumberFormatException ex) {
+                    // If not a number, treat as email and lookup user
+                    user = userRepository.findByEmail(username).orElse(null);
+                }
+            }
+            
+            if (user == null) {
+                return new CheckoutResponseDTO(null, null, "error", "User not authenticated", null);
+            }
+
+            // Find or create Consumer record for this user
+            Consumer consumer = consumerRepository.findByEmail(user.getEmail()).orElse(null);
+            
+            if (consumer == null) {
+                // Create new Consumer from User
+                consumer = new Consumer();
+                consumer.setEmail(user.getEmail());
+                consumer.setName(user.getName());
+                consumer.setOrganization(user.getOrganization());
+                consumer = consumerRepository.save(consumer);
+                System.out.println("Created new Consumer for user: " + user.getEmail() + " with id: " + consumer.getId());
+            }
+
             Order order = new Order();
             order.setDatasetId(dataset.getId());
-            
-            // Resolve buyer_id from authenticated user
-            if (orderRequest.getConsumerId() != null) {
-                order.setBuyerId(orderRequest.getConsumerId());
-            } else {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                Long buyerId = null;
-                
-                if (auth != null && auth.getName() != null) {
-                    String username = auth.getName();
-                    
-                    // Try to parse as Long first (if principal is user ID)
-                    try {
-                        buyerId = Long.valueOf(username);
-                    } catch (NumberFormatException ex) {
-                        // If not a number, treat as email and lookup user
-                        Optional<User> userOpt = userRepository.findByEmail(username);
-                        if (userOpt.isPresent()) {
-                            buyerId = userOpt.get().getId();
-                        }
-                    }
-                }
-                
-                // If still null, use demo fallback but log warning
-                if (buyerId == null) {
-                    System.err.println("WARNING: Could not resolve buyer_id from authentication, using demo id=1");
-                    buyerId = 1L;
-                }
-                
-                order.setBuyerId(buyerId);
-            }
+            order.setBuyerId(consumer.getId()); // Use Consumer ID, not User ID
             
             // Set provider_id from dataset, use demo fallback if null
             Long providerId = dataset.getProviderId();
