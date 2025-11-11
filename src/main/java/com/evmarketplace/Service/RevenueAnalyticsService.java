@@ -214,11 +214,35 @@ public class RevenueAnalyticsService {
             ));
         demographics.setByOrganization(byOrganization);
         
-        // By region (placeholder - would need actual region data)
-        demographics.setByRegion(new HashMap<>());
+        // By region
+        Map<String, Integer> byRegion = consumers.stream()
+            .filter(c -> c.getRegion() != null && !c.getRegion().isEmpty())
+            .collect(Collectors.groupingBy(
+                Consumer::getRegion,
+                Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+            ));
+        if (byRegion.isEmpty()) {
+            // Fallback to default regions if no data
+            byRegion.put("North America", 0);
+            byRegion.put("Europe", 0);
+            byRegion.put("Asia", 0);
+        }
+        demographics.setByRegion(byRegion);
         
-        // By industry (placeholder - would need actual industry data)
-        demographics.setByIndustry(new HashMap<>());
+        // By industry
+        Map<String, Integer> byIndustry = consumers.stream()
+            .filter(c -> c.getIndustry() != null && !c.getIndustry().isEmpty())
+            .collect(Collectors.groupingBy(
+                Consumer::getIndustry,
+                Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+            ));
+        if (byIndustry.isEmpty()) {
+            // Fallback to default industries if no data
+            byIndustry.put("OEM", 0);
+            byIndustry.put("Research", 0);
+            byIndustry.put("Startup", 0);
+        }
+        demographics.setByIndustry(byIndustry);
         
         // Top buyers
         Map<Long, List<Order>> ordersByBuyer = orders.stream()

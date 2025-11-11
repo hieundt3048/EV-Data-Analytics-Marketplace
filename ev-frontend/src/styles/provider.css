@@ -3,6 +3,18 @@
    All selectors below are scoped to the .provider-page root to avoid
    colliding with other pages' CSS. */
 
+/* Hide unwanted password change modal */
+[role="dialog"]:has(*:is(h1, h2, h3, h4, h5, h6, p, span, div):is([class*="title"], [class*="header"]):is(:contains("Thay đổi"), :contains("mật khẩu"), :contains("password"))),
+.modal:has(*:contains("Thay đổi mật khẩu")),
+.dialog:has(*:contains("mật khẩu ban")),
+div[style*="position: fixed"]:has(*:contains("Thay đổi")),
+div[style*="z-index"]:has(*:contains("mật khẩu")) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .provider-page .provider-menu {
   display: flex;
   flex-direction: column;

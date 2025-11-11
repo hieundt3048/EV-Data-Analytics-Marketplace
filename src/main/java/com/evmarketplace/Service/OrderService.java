@@ -99,6 +99,24 @@ public class OrderService {
                 System.out.println("Created new Consumer for user: " + user.getEmail() + " with id: " + consumer.getId());
             }
 
+            // CHECK IF ALREADY PURCHASED - Store IDs in final variables for lambda
+            final Long finalConsumerId = consumer.getId();
+            final Long finalDatasetId = orderRequest.getDatasetId();
+            boolean alreadyPurchased = orderRepository.findAll().stream()
+                .anyMatch(o -> o.getBuyerId().equals(finalConsumerId) 
+                    && o.getDatasetId().equals(finalDatasetId)
+                    && "PAID".equals(o.getStatus()));
+            
+            if (alreadyPurchased) {
+                return new CheckoutResponseDTO(
+                    null, 
+                    null, 
+                    "error", 
+                    "You have already purchased this dataset", 
+                    null
+                );
+            }
+
             Order order = new Order();
             order.setDatasetId(dataset.getId());
             order.setBuyerId(consumer.getId()); // Use Consumer ID, not User ID

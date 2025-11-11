@@ -2,6 +2,10 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import '../styles/index.css';
 import '../styles/consumer.css';
+import ApiKeyManagement from '../components/ApiKeyManagement';
+import RecommendationsSection from '../components/RecommendationsSection';
+import ErrorBoundary from '../components/ErrorBoundary';
+import ConsumerProfile from './ConsumerProfile';
 
 // Chỉ dùng để hiển thị trong documentation UI
 const API_BASE = 'http://localhost:8080';
@@ -109,11 +113,11 @@ const Consumer = () => {
         setCategories(data);
       } else {
         setCategories([]);
-        setCategoriesError('Không thể lấy danh mục dữ liệu.');
+        setCategoriesError('Unable to load data categories.');
       }
     } catch (error) {
       setCategories([]);
-      setCategoriesError(error.message || 'Không thể lấy danh mục dữ liệu.');
+      setCategoriesError(error.message || 'Unable to load data categories.');
     }
   }, [fetchWithAuth]);
 
@@ -126,11 +130,11 @@ const Consumer = () => {
         setAnalyticsData(data);
       } else {
         setAnalyticsData(null);
-        setAnalyticsError('Không có dữ liệu phân tích cho bộ dữ liệu này.');
+        setAnalyticsError('No analytics data available for this dataset.');
       }
     } catch (error) {
       setAnalyticsData(null);
-      setAnalyticsError(error.message || 'Không thể tải dữ liệu phân tích.');
+      setAnalyticsError(error.message || 'Unable to load analytics data.');
       throw error;
     }
   }, [fetchWithAuth]);
@@ -161,14 +165,14 @@ const Consumer = () => {
         setAiSummary('');
         setAiConfidence(null);
         setAiGeneratedAt('');
-        setAiSuggestionsError('Không có gợi ý AI cho bộ dữ liệu này.');
+        setAiSuggestionsError('No AI suggestions available for this dataset.');
       }
     } catch (error) {
       setAiSuggestions([]);
       setAiSummary('');
       setAiConfidence(null);
       setAiGeneratedAt('');
-      setAiSuggestionsError(error.message || 'Không thể tải gợi ý AI.');
+      setAiSuggestionsError(error.message || 'Unable to load AI suggestions.');
       throw error;
     }
   }, [fetchWithAuth]);
@@ -186,23 +190,23 @@ const Consumer = () => {
           setSelectedDatasetId((current) => current ?? String(response[0].id));
         }
       } else if (response === null) {
-        // Response rỗng hoặc không phải JSON
+        // Empty or non-JSON response
         setDatasets([]);
         setFilteredDatasets([]);
-        setDatasetsError('Không có dataset nào được tìm thấy.');
+        setDatasetsError('No datasets found.');
       } else {
         setDatasets([]);
         setFilteredDatasets([]);
-        setDatasetsError('Không nhận được danh sách dataset hợp lệ từ server.');
+        setDatasetsError('Invalid dataset list received from server.');
       }
     } catch (error) {
       console.error('Error fetching approved datasets:', error);
       setDatasets([]);
       setFilteredDatasets([]);
-      // Hiển thị error message rõ ràng hơn
-      const errorMsg = error.message || 'Không thể tải danh sách dataset.';
+      // Display clear error message
+      const errorMsg = error.message || 'Unable to load dataset list.';
       setDatasetsError(errorMsg.includes('JSON') 
-        ? 'Lỗi định dạng dữ liệu từ server. Vui lòng thử lại sau.' 
+        ? 'Invalid data format from server. Please try again later.' 
         : errorMsg);
     } finally {
       setLoading(false);
@@ -220,12 +224,12 @@ const Consumer = () => {
         console.log('[fetchPurchaseHistory] Set purchaseHistory with', data.length, 'items');
       } else {
         setPurchaseHistory([]);
-        setPurchaseError('Không có lịch sử mua hàng.');
+        setPurchaseError('No purchase history available.');
         console.warn('[fetchPurchaseHistory] Data is not an array:', data);
       }
     } catch (error) {
       setPurchaseHistory([]);
-      setPurchaseError(error.message || 'Không thể tải lịch sử mua hàng.');
+      setPurchaseError(error.message || 'Unable to load purchase history.');
       console.error('[fetchPurchaseHistory] Error:', error);
     }
   }, [fetchWithAuth]);
@@ -238,11 +242,11 @@ const Consumer = () => {
         setDashboardData(data);
       } else {
         setDashboardData(null);
-        setDashboardError('Không có dữ liệu dashboard.');
+        setDashboardError('No dashboard data available.');
       }
     } catch (error) {
       setDashboardData(null);
-      setDashboardError(error.message || 'Không thể tải dữ liệu dashboard.');
+      setDashboardError(error.message || 'Unable to load dashboard data.');
     }
   }, [fetchWithAuth]);
 
@@ -360,13 +364,13 @@ const Consumer = () => {
         setApiKey(data.key);
         alert('API key generated successfully!');
       } else {
-        const message = data?.message || 'Máy chủ không trả về API key.';
+        const message = data?.message || 'Server did not return API key.';
         setApiKey('');
         setApiKeyError(message);
         alert(message);
       }
     } catch (e) {
-      const message = e.message || 'Không thể tạo API key.';
+      const message = e.message || 'Unable to generate API key.';
       setApiKey('');
       setApiKeyError(message);
       alert(message);
@@ -375,7 +379,7 @@ const Consumer = () => {
 
   const copyApiKey = async () => {
     if (!apiKey) {
-      alert('Không có API key để sao chép');
+      alert('No API key to copy');
       return;
     }
     try {
@@ -396,7 +400,7 @@ const Consumer = () => {
   // Purchase functions
   const purchaseDataset = async (dataset) => {
     if (!dataset?.id) {
-      alert('Không xác định được dataset để mua.');
+      alert('Unable to identify dataset to purchase.');
       return;
     }
 
@@ -404,7 +408,7 @@ const Consumer = () => {
       ? '—'
       : formatPurchaseAmount(dataset.price);
 
-    if (!window.confirm(`Bạn có chắc muốn mua "${dataset.name || 'Dataset'}" với giá ${priceLabel}?`)) {
+    if (!window.confirm(`Are you sure you want to purchase "${dataset.name || 'Dataset'}" for ${priceLabel}?`)) {
       return;
     }
 
@@ -415,49 +419,49 @@ const Consumer = () => {
       });
       
       if (response && response.status === 'success') {
-        alert('Mua dataset thành công!');
+        alert('Dataset purchased successfully!');
         fetchPurchaseHistory();
       } else {
-        const errorMsg = response?.message || 'Lỗi không xác định từ server.';
-        alert('Lỗi: ' + errorMsg);
+        const errorMsg = response?.message || 'Unknown error from server.';
+        alert('Error: ' + errorMsg);
       }
     } catch (e) {
-      const message = e.message || 'Không thể hoàn tất giao dịch.';
+      const message = e.message || 'Unable to complete transaction.';
       console.error('Purchase error:', e);
-      alert('Lỗi: ' + message);
+      alert('Error: ' + message);
     }
   };
 
   const downloadDataset = async (id) => {
     if (!id) {
-      alert('Không tìm thấy mã dataset để tải.');
+      alert('Dataset ID not found for download.');
       return;
     }
 
     try {
-      // Sử dụng relative URL để Vite proxy xử lý
+      // Use relative URL for Vite proxy
       window.open(`/api/datasets/${id}/download`, '_blank');
     } catch (e) {
-      alert('Không thể bắt đầu tải dataset.');
+      alert('Unable to start dataset download.');
     }
   };
 
   const deletePurchase = async (purchaseId) => {
     if (!purchaseId) {
-      alert('Không tìm thấy ID giao dịch để xóa.');
+      alert('Transaction ID not found for deletion.');
       return;
     }
-    if (!window.confirm('Bạn có chắc muốn xóa giao dịch này? Hành động này không thể hoàn tác.')) return;
+    if (!window.confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) return;
 
     try {
       const res = await fetchWithAuth(`/api/orders/${purchaseId}`, { method: 'DELETE' });
       // Some servers return null for 204, so treat as success if no exception was thrown
       // Refresh local history
       fetchPurchaseHistory();
-      alert('Giao dịch đã được xóa.');
+      alert('Transaction deleted successfully.');
     } catch (e) {
       console.error('Delete purchase error', e);
-      alert('Không thể xóa giao dịch: ' + (e.message || e));
+      alert('Unable to delete transaction: ' + (e.message || e));
     }
   };
 
@@ -666,6 +670,7 @@ const Consumer = () => {
             <button className="tab-btn" data-tab="purchases" onClick={() => setActiveTab('purchases')}>Purchase History</button>
             <button className="tab-btn" data-tab="analytics" onClick={() => setActiveTab('analytics')}>Analytics Dashboard</button>
             <button className="tab-btn" data-tab="api" onClick={() => setActiveTab('api')}>API Documentation</button>
+            <button className="tab-btn" data-tab="profile" onClick={() => setActiveTab('profile')}>My Profile</button>
           </div>
         </div>
       </div>
@@ -764,6 +769,11 @@ const Consumer = () => {
                 </div>
               </div>
             </section>
+
+            {/* AI Recommendations */}
+            <ErrorBoundary>
+              <RecommendationsSection fetchWithAuth={fetchWithAuth} />
+            </ErrorBoundary>
 
             {/* Recent Activity */}
             <section className="consumer-section">
@@ -1368,14 +1378,14 @@ const Consumer = () => {
                           </svg>
                         </div>
                         <div>
-                          <h4>🔍 Key Insights</h4>
+                          <h4>Key Insights</h4>
                           <p className="card-subtitle">Important metrics and patterns from your data</p>
                         </div>
                       </div>
                       <ul className="insights-list enhanced">
                         {Object.entries(analyticsData.insights).map(([insightKey, insightValue]) => (
                           <li key={insightKey} className="insight-item">
-                            <span className="insight-icon">📊</span>
+                            <span className="insight-icon"></span>
                             <div className="insight-content">
                               <strong className="insight-label">{formatLabel(insightKey)}:</strong>
                               <span className="insight-value">
@@ -1408,7 +1418,7 @@ const Consumer = () => {
                       </svg>
                     </div>
                     <div>
-                      <h4>🤖 AI Analysis Summary</h4>
+                      <h4>AI Analysis Summary</h4>
                       <p className="card-subtitle">Automated insights powered by machine learning</p>
                     </div>
                   </div>
@@ -1448,7 +1458,7 @@ const Consumer = () => {
                     </svg>
                   </div>
                   <div>
-                    <h2>💡 AI Suggestions</h2>
+                    <h2>AI Suggestions</h2>
                     <p className="section-subtitle">Actionable recommendations to optimize your data usage</p>
                   </div>
                 </div>
@@ -1462,12 +1472,6 @@ const Consumer = () => {
                   return (
                     <div className={`insight-card enhanced ${impactLevel}-impact`} key={`${suggestion.type}-${index}`}>
                       <div className="insight-header">
-                        <div className="suggestion-icon">
-                          {impactLevel === 'high' && '🔥'}
-                          {impactLevel === 'medium' && '⚡'}
-                          {impactLevel === 'low' && '💡'}
-                          {!impactLevel && '💡'}
-                        </div>
                         <div className="header-content">
                           <h4>{suggestion.title || formatLabel(suggestion.type)}</h4>
                           {confidenceLabel && (
@@ -1513,105 +1517,16 @@ const Consumer = () => {
 
         {/* API Documentation */}
         <div id="api" className="tab-content">
-          <section className="consumer-section">
-            
-            {/* Information Banner for API Documentation */}
-            <div className="api-info-banner">
-              <div className="api-info-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4M12 8h.01"/>
-                </svg>
-              </div>
-              <div className="api-info-content">
-                <h4>🚀 Developer Integration Hub</h4>
-                <p><strong>API Documentation</strong> is designed for <strong>developers and technical teams</strong> who want to integrate EV data into their own applications, systems, or services via API endpoints.</p>
-                <p>If you're a regular user looking to purchase and view datasets, please use the <strong>"Data Discovery"</strong> and <strong>"Purchases"</strong> tabs instead.</p>
-              </div>
-            </div>
+          <ErrorBoundary>
+            <ApiKeyManagement fetchWithAuth={fetchWithAuth} />
+          </ErrorBoundary>
+        </div>
 
-            <div className="section-header-enhanced">
-              <div className="section-header-content">
-                <div className="section-icon-badge api">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="section-title-enhanced">API Documentation & Integration</h2>
-                  <p className="section-description">Integrate EV data into your applications with our RESTful API</p>
-                </div>
-              </div>
-              <div className="header-actions">
-                <button className="consumer-btn consumer-btn-primary" onClick={() => setShowApiKeyModal(true)}>
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                  Generate API Key
-                </button>
-                <button
-                  className="consumer-btn consumer-btn-outline"
-                  onClick={() => alert('Gói SDK sẽ sớm được cung cấp.')}
-                >
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                  Download SDK
-                </button>
-              </div>
-            </div>
-
-            {renderErrorBanner(apiKeyError)}
-
-            {/* API Key display */}
-            {apiKey && (
-              <div className="consumer-card" style={{ marginBottom: '20px' }}>
-                <div className="card-body">
-                  <h5>Your API Key</h5>
-                  <div className="api-key-display">
-                    <div className="api-key-box" ref={apiKeyRef}>
-                      <strong>Key:</strong> {apiKey}
-                    </div>
-                    <button className="consumer-btn consumer-btn-outline" onClick={copyApiKey}>
-                      Copy
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="api-quickstart">
-              <h3>Quick Start Guide</h3>
-              <div className="quickstart-steps">
-                <div className="step"><div className="step-number">1</div><div className="step-content"><h4>Get Your API Key</h4><p>Generate an API key from your dashboard with appropriate permissions for third-party integration</p></div></div>
-                <div className="step"><div className="step-number">2</div><div className="step-content"><h4>Make Your First Request</h4><p>Use the API key to authenticate and make requests to our endpoints</p></div></div>
-                <div className="step"><div className="step-number">3</div><div className="step-content"><h4>Integrate & Scale</h4><p>Implement the API in your applications and scale as needed with real-time data streams</p></div></div>
-              </div>
-            </div>
-
-            <div className="api-section">
-              <h3>Core API Endpoints</h3>
-              <div className="api-card">
-                <div className="api-header"><h4>Get Battery Health Data</h4><span className="api-method get">GET</span></div>
-                <div className="api-content">
-                  <div className="endpoint-url"><code>GET {API_BASE}/api/v1/battery/health</code></div>
-                  <p>Retrieve battery state of health (SoH) and state of charge (SoC) data for insurance and fleet management applications.</p>
-                </div>
-              </div>
-
-              <div className="api-card">
-                <div className="api-header"><h4>Get Charging Sessions</h4><span className="api-method get">GET</span></div>
-                <div className="api-content">
-                  <div className="endpoint-url"><code>GET {API_BASE}/api/v1/charging/sessions</code></div>
-                  <p>Retrieve detailed charging session data including duration, energy consumed, and charger types for smart city planning.</p>
-                </div>
-              </div>
-
-              <div className="api-card">
-                <div className="api-header"><h4>Get Driving Patterns</h4><span className="api-method get">GET</span></div>
-                <div className="api-content">
-                  <div className="endpoint-url"><code>GET {API_BASE}/api/v1/driving/patterns</code></div>
-                  <p>Access driving pattern data including mileage, speed profiles, and route efficiency for insurance risk assessment.</p>
-                </div>
-              </div>
-            </div>
-          </section>
+        {/* My Profile */}
+        <div id="profile" className="tab-content">
+          <ErrorBoundary>
+            <ConsumerProfile fetchWithAuth={fetchWithAuth} />
+          </ErrorBoundary>
         </div>
       </main>
 

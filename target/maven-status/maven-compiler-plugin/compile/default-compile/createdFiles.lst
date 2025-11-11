@@ -4,6 +4,7 @@ com\evmarketplace\Pojo\ProviderProfile.class
 com\evmarketplace\Service\AuditLogService.class
 com\evmarketplace\data\DataAsset.class
 com\evmarketplace\Controller\APIKeyController.class
+com\evmarketplace\Service\PayoutService$PayoutBreakdown$Builder.class
 com\evmarketplace\Service\SubscriptionService.class
 com\evmarketplace\data\DataProduct.class
 com\evmarketplace\Repository\CategoryRepository.class
@@ -13,14 +14,17 @@ com\evmarketplace\Service\CategoryService.class
 com\evmarketplace\Pojo\ApiUsageLog.class
 com\evmarketplace\Repository\ProviderProfileRepository.class
 com\evmarketplace\Service\impl\S3StorageServiceImpl.class
+com\evmarketplace\Controller\RecommendationController.class
 com\evmarketplace\data\DataProvider.class
 com\evmarketplace\admin\ModerationRequest.class
 com\evmarketplace\dto\ProviderRevenueDTO$RevenueTrend.class
 com\evmarketplace\marketplace\AccessType.class
 com\evmarketplace\admin\AdminAuthController.class
 com\evmarketplace\Controller\ConsumerDashboardController.class
+com\evmarketplace\Service\RecommendationService.class
 com\evmarketplace\Service\S3ProviderService.class
 com\evmarketplace\Service\MetricsService.class
+com\evmarketplace\Controller\AdminPaymentController.class
 com\evmarketplace\dto\CategoryDTO.class
 com\evmarketplace\Repository\ApiUsageLogRepository.class
 com\evmarketplace\utils\Utils.class
@@ -29,6 +33,7 @@ com\evmarketplace\auth\AuthRequest.class
 com\evmarketplace\Pojo\ConsumerProfile.class
 com\evmarketplace\Repository\DataProductRepository.class
 com\evmarketplace\Service\DatasetService.class
+com\evmarketplace\Controller\ReportController.class
 com\evmarketplace\Repository\UserRepository.class
 com\evmarketplace\data\ProductStatus.class
 com\evmarketplace\Repository\TransactionRepository.class
@@ -38,6 +43,7 @@ com\evmarketplace\Controller\DatasetRevenueController.class
 com\evmarketplace\Repository\APIKeyRepository.class
 com\evmarketplace\Pojo\RevenueReportDTO$MonthlyRevenue.class
 com\evmarketplace\dto\SecuritySettingsDTO.class
+com\evmarketplace\Controller\ConsumerProfileController.class
 com\evmarketplace\Service\RevenueAnalyticsService.class
 com\evmarketplace\billing\PaymentStatus.class
 com\evmarketplace\Repository\DataProviderRepository.class
@@ -79,6 +85,7 @@ com\evmarketplace\Repository\ConsumerRepository.class
 com\evmarketplace\Service\RevenueService.class
 com\evmarketplace\dto\APIKeyResponseDTO.class
 com\evmarketplace\Service\AIAnalyticsService.class
+com\evmarketplace\Service\PayoutService.class
 com\evmarketplace\aspect\AccessControlAspect.class
 com\evmarketplace\billing\PaymentMethod.class
 com\evmarketplace\dto\AISuggestionsDTO$Suggestion.class
@@ -100,6 +107,7 @@ com\evmarketplace\dto\DashboardDataDTO.class
 com\evmarketplace\auth\AuthController.class
 com\evmarketplace\Repository\RoleRepository.class
 com\evmarketplace\dto\AISuggestionsDTO.class
+com\evmarketplace\dto\RecommendationDTO.class
 com\evmarketplace\dto\APIKeyRequestDTO.class
 com\evmarketplace\Controller\ConsumerController.class
 com\evmarketplace\dto\DashboardDataDTO$TimeSeriesData.class
@@ -128,6 +136,7 @@ com\evmarketplace\auth\JwtUtil.class
 com\evmarketplace\dto\ProviderRevenueDTO$DatasetRevenue.class
 com\evmarketplace\Pojo\Role.class
 com\evmarketplace\Service\UserService.class
+com\evmarketplace\Service\PayoutService$PayoutBreakdown.class
 com\evmarketplace\Repository\SubscriptionRepository.class
 com\evmarketplace\dto\ProviderRevenueDTO$TopBuyer.class
 com\evmarketplace\aspect\RequiresDatasetAccess.class
@@ -154,6 +163,7 @@ com\evmarketplace\Controller\CategoryController.class
 com\evmarketplace\Repository\DataAssetRepository.class
 com\evmarketplace\admin\RevenueReport.class
 com\evmarketplace\marketplace\Purchase.class
+com\evmarketplace\scripts\SeedConsumerDemographics.class
 com\evmarketplace\Service\impl\PutObjectRequest.class
 com\evmarketplace\config\SecurityConfig.class
 com\evmarketplace\Controller\AIAnalyticsController.class

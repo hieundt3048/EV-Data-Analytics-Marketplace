@@ -15,6 +15,19 @@ public class Consumer {
     private String organization;
     private String role;
 
+    // Buyer demographics fields
+    @Column(name = "industry")
+    private String industry; // OEM, Startup, Research, Fleet, Energy, Insurance, Government, Other
+    
+    @Column(name = "region")
+    private String region; // North America, Europe, Asia, etc.
+    
+    @Column(name = "company_size")
+    private String companySize; // Small (1-50), Medium (51-500), Large (501+)
+    
+    @Column(name = "use_case_type")
+    private String useCaseType; // Research, Development, Analytics, Operations, etc.
+
     @OneToMany
     @JoinColumn(name = "buyer_id")
     private List<Order> orders;
@@ -38,6 +51,18 @@ public class Consumer {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getIndustry() { return industry; }
+    public void setIndustry(String industry) { this.industry = industry; }
+
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
+
+    public String getCompanySize() { return companySize; }
+    public void setCompanySize(String companySize) { this.companySize = companySize; }
+
+    public String getUseCaseType() { return useCaseType; }
+    public void setUseCaseType(String useCaseType) { this.useCaseType = useCaseType; }
 
     public List<Order> getOrders() { return orders; }
     public void setOrders(List<Order> orders) { this.orders = orders; }

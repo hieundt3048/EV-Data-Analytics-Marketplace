@@ -42,13 +42,13 @@ const AdminLogin = () => {
       return res.json(); // Nếu thành công, chuyển đổi response sang JSON
     }).then(data => {
       // Sau khi nhận được dữ liệu từ backend
-      auth.login(data.token); // Gọi hàm login từ AuthContext để lưu token
-      navigate('/admin'); // Chuyển hướng thẳng đến trang admin
+      auth.login(data.token); // Call login from AuthContext to save token
+      navigate('/admin'); // Redirect to admin page
     }).catch(err => {
-      // Xử lý nếu có lỗi trong quá trình fetch
+      // Handle fetch errors
       console.error('Admin Login error', err);
-      setError('Đăng nhập thất bại. Vui lòng kiểm tra email/mật khẩu.'); // Hiển thị lỗi cho người dùng
-    }).finally(() => setLoading(false)); // Kết thúc trạng thái loading
+      setError('Login failed. Please check your email/password.'); // Display error to user
+    }).finally(() => setLoading(false)); // End loading state
   };
 
   // Các state cục bộ cho UI

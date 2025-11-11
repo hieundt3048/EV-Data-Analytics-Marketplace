@@ -40,6 +40,10 @@ public class Order {
     @Column(nullable = false, length = 20)
     private String status;
 
+    // Ngày thanh toán cho provider
+    @Column(name = "payout_date")
+    private LocalDateTime payoutDate;
+
     // --- Constructors ---
     public Order() {}
 
@@ -73,4 +77,7 @@ public class Order {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public LocalDateTime getPayoutDate() { return payoutDate; }
+    public void setPayoutDate(LocalDateTime payoutDate) { this.payoutDate = payoutDate; }
 }

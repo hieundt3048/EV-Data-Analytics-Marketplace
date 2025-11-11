@@ -63,7 +63,7 @@
 //         dataset.setStatus(ProductStatus.PENDING_REVIEW);
 
 //         dataProductRepository.save(dataset);
-//         return ResponseEntity.ok("✅ Dataset metadata uploaded successfully, awaiting admin review");
+//         return ResponseEntity.ok("Dataset metadata uploaded successfully, awaiting admin review");
 //     }
 
 //     // ------------------- API PUT: Định nghĩa chính sách dataset -------------------
@@ -121,6 +121,6 @@
 //         dataset.setStatus(ProductStatus.PENDING_REVIEW);
 //         dataProductRepository.save(dataset);
 
-//         return ResponseEntity.ok("✅ Policy updated successfully and awaiting admin review");
+//         return ResponseEntity.ok("Policy updated successfully and awaiting admin review");
 //     }
 // }

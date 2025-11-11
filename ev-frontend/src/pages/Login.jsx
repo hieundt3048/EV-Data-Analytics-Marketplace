@@ -68,15 +68,15 @@ const Login = () => {
           }
         }
       } catch (e) {
-        console.warn('Failed to parse JWT for roles', e); // Ghi log nếu có lỗi giải mã token
+        console.warn('Failed to parse JWT for roles', e); // Log if JWT decode error
       }
-      // Nếu không có vai trò cụ thể, điều hướng về trang chủ
+      // If no specific role, navigate to home page
       navigate('/');
     }).catch(err => {
-      // Xử lý nếu có lỗi trong quá trình fetch
+      // Handle fetch errors
       console.error('Login error', err);
-      setError('Đăng nhập thất bại. Vui lòng kiểm tra email/mật khẩu.'); // Hiển thị lỗi cho người dùng
-    }).finally(() => setLoading(false)); // Kết thúc trạng thái loading
+      setError('Login failed. Please check your email/password.'); // Display error to user
+    }).finally(() => setLoading(false)); // End loading state
   };
 
   // Các state cục bộ cho UI

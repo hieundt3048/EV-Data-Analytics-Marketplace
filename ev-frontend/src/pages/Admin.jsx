@@ -15,6 +15,8 @@ const Admin = () => {
   const [transactions, setTransactions] = useState([]);
   const [revenueShare, setRevenueShare] = useState({});
   const [apiKeys, setApiKeys] = useState([]);
+  const [paymentStats, setPaymentStats] = useState(null);
+  const [providerPayouts, setProviderPayouts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const roleOptions = ['Admin', 'Provider', 'Consumer', 'Partner'];
@@ -57,13 +59,15 @@ const Admin = () => {
     try {
       setLoading(true);
       setError(null);
-      const [analyticsRes, usersRes, pendingRes, transactionsRes, revenueRes, apiKeyRes] = await Promise.all([
+      const [analyticsRes, usersRes, pendingRes, transactionsRes, revenueRes, apiKeyRes, paymentStatsRes, payoutsRes] = await Promise.all([
         fetchWithAuth('/api/admin/analytics/overview'),
         fetchWithAuth('/api/admin/users'),
         fetchWithAuth('/api/admin/provider-datasets/pending'),
-        fetchWithAuth('/api/admin/payments/transactions'),
-        fetchWithAuth('/api/admin/payments/revenue-share'),
-        fetchWithAuth('/api/admin/security/apikeys')
+        fetchWithAuth('/api/admin/payments/transactions').catch(() => []),
+        fetchWithAuth('/api/admin/payments/revenue-share').catch(() => ({})),
+        fetchWithAuth('/api/admin/security/apikeys').catch(() => []),
+        fetchWithAuth('/api/admin/payments/revenue-stats').catch(() => null),
+        fetchWithAuth('/api/admin/payments/provider-payouts').catch(() => [])
       ]);
       setAnalytics(analyticsRes);
       setUsers(usersRes || []);
@@ -71,8 +75,10 @@ const Admin = () => {
       setTransactions(transactionsRes || []);
       setRevenueShare(revenueRes || {});
       setApiKeys(apiKeyRes || []);
+      setPaymentStats(paymentStatsRes);
+      setProviderPayouts(payoutsRes || []);
     } catch (err) {
-      setError(err.message || 'Không thể tải dữ liệu admin');
+      setError(err.message || 'Unable to load admin data');
     } finally {
       setLoading(false);
     }
@@ -105,7 +111,7 @@ const Admin = () => {
       await fetchWithAuth(`/api/admin/providers/${userId}/approve`, { method: 'POST' });
       refreshAll();
     } catch (err) {
-      setError(`Không thể phê duyệt provider: ${err.message}`);
+      setError(`Unable to approve provider: ${err.message}`);
     }
   };
 
@@ -114,12 +120,12 @@ const Admin = () => {
       await fetchWithAuth(`/api/admin/provider-datasets/${id}/approve`, { method: 'PUT' });
       refreshAll();
     } catch (err) {
-      setError(`Không thể phê duyệt dataset: ${err.message}`);
+      setError(`Unable to approve dataset: ${err.message}`);
     }
   };
 
   const rejectDataset = async (id) => {
-    const reason = window.prompt('Lý do từ chối (optional):');
+    const reason = window.prompt('Rejection reason (optional):');
     try {
       await fetchWithAuth(`/api/admin/provider-datasets/${id}/reject`, { 
         method: 'PUT',
@@ -127,7 +133,7 @@ const Admin = () => {
       });
       refreshAll();
     } catch (err) {
-      setError(`Không thể từ chối dataset: ${err.message}`);
+      setError(`Unable to reject dataset: ${err.message}`);
     }
   };
 
@@ -136,7 +142,18 @@ const Admin = () => {
       await fetchWithAuth(`/api/admin/security/apikeys/${id}/revoke`, { method: 'PUT' });
       refreshAll();
     } catch (err) {
-      setError(`Không thể thu hồi API key: ${err.message}`);
+      setError(`Unable to revoke API key: ${err.message}`);
+    }
+  };
+
+  const processPayout = async (providerId) => {
+    if (!window.confirm(`Process payout for Provider ${providerId}? This will mark all pending orders as paid.`)) return;
+    try {
+      const result = await fetchWithAuth(`/api/admin/payments/provider/${providerId}/process`, { method: 'POST' });
+      alert(result.message || 'Payout processed successfully');
+      refreshAll();
+    } catch (err) {
+      setError(`Unable to process payout: ${err.message}`);
     }
   };
 
@@ -185,18 +202,18 @@ const Admin = () => {
       closeEditUserModal();
       refreshAll();
     } catch (err) {
-      setError(`Không thể cập nhật người dùng: ${err.message}`);
+      setError(`Unable to update user: ${err.message}`);
     }
   };
 
   const deleteUser = async (user) => {
     if (!user) return;
-    if (!window.confirm(`Bạn có chắc muốn xóa ${user.email}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete ${user.email}?`)) return;
     try {
       await fetchWithAuth(`/api/admin/users/${user.id}`, { method: 'DELETE' });
       refreshAll();
     } catch (err) {
-      setError(`Không thể xóa người dùng: ${err.message}`);
+      setError(`Unable to delete user: ${err.message}`);
     }
   };
 
@@ -579,7 +596,7 @@ const Admin = () => {
                     })}
                     {processedUsers.length === 0 && (
                       <tr>
-                        <td colSpan={7} style={{ textAlign: 'center', padding: '16px' }}>Chưa có người dùng nào.</td>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '16px' }}>No users yet.</td>
                       </tr>
                     )}
                   </tbody>
@@ -704,7 +721,7 @@ const Admin = () => {
               <div className="stat-card">
                 <div className="stat-icon">💰</div>
                 <div className="stat-content">
-                  <h3>{formatCurrency(totalRevenue)}</h3>
+                  <h3>{paymentStats ? formatCurrency(paymentStats.totalRevenue || 0) : formatCurrency(totalRevenue)}</h3>
                   <p>Total Revenue</p>
                   <span className="stat-change neutral">Live</span>
                 </div>
@@ -712,25 +729,25 @@ const Admin = () => {
               <div className="stat-card">
                 <div className="stat-icon">🧾</div>
                 <div className="stat-content">
-                  <h3>{formatNumber(totalTransactions)}</h3>
+                  <h3>{paymentStats ? formatNumber(paymentStats.totalTransactions || 0) : formatNumber(totalTransactions)}</h3>
                   <p>Transactions</p>
-                  <span className="stat-change neutral">{formatNumber(successfulTransactions)} success</span>
+                  <span className="stat-change neutral">{paymentStats ? formatNumber(paymentStats.totalTransactions || 0) : formatNumber(successfulTransactions)} completed</span>
                 </div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon">💸</div>
                 <div className="stat-content">
-                  <h3>{formatCurrency(totalPayout)}</h3>
+                  <h3>{paymentStats ? formatCurrency(paymentStats.providerPayouts || 0) : formatCurrency(totalPayout)}</h3>
                   <p>Provider Payouts</p>
-                  <span className="stat-change neutral">Live</span>
+                  <span className="stat-change neutral">{paymentStats ? formatNumber(paymentStats.pendingPayouts || 0) : '0'} pending</span>
                 </div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon">📈</div>
                 <div className="stat-content">
-                  <h3>{formatCurrency(platformRevenue)}</h3>
-                  <p>Platform Revenue</p>
-                  <span className="stat-change neutral">Live</span>
+                  <h3>{paymentStats ? formatCurrency(paymentStats.platformCommissions || 0) : formatCurrency(platformRevenue)}</h3>
+                  <p>Platform Revenue ({paymentStats?.commissionRate || '20%'})</p>
+                  <span className="stat-change neutral">Commission</span>
                 </div>
               </div>
             </div>
@@ -772,7 +789,7 @@ const Admin = () => {
                       ))}
                       {sortedTransactions.length === 0 && (
                         <tr>
-                          <td colSpan={8} style={{ textAlign: 'center', padding: '16px' }}>Chưa có giao dịch nào.</td>
+                          <td colSpan={8} style={{ textAlign: 'center', padding: '16px' }}>No transactions yet.</td>
                         </tr>
                       )}
                     </tbody>
@@ -784,10 +801,33 @@ const Admin = () => {
             <section className="admin-section">
               <h2>Provider Payouts</h2>
               <div className="payouts-grid">
-                {revenueShareEntries.length === 0 && (
-                  <div className="empty-state">Chưa có doanh thu chia sẻ cho nhà cung cấp.</div>
+                {providerPayouts.length === 0 && revenueShareEntries.length === 0 && (
+                  <div className="empty-state">No revenue share data for providers yet.</div>
                 )}
-                {revenueShareEntries.map(([providerId, amount]) => (
+                {providerPayouts.map((payout) => (
+                  <div className="payout-card" key={payout.providerId}>
+                    <div className="payout-header">
+                      <h4>{payout.providerName || `Provider ${shortId(payout.providerId)}`}</h4>
+                      <span className="payout-amount">{formatCurrency(numberFrom(payout.netRevenue))}</span>
+                    </div>
+                    <div className="payout-info">
+                      <div className="info-item"><span className="label">Provider ID:</span><span className="value">{payout.providerId}</span></div>
+                      <div className="info-item"><span className="label">Email:</span><span className="value">{payout.contactEmail || '—'}</span></div>
+                      <div className="info-item"><span className="label">Total Revenue:</span><span className="value">{formatCurrency(numberFrom(payout.totalRevenue))}</span></div>
+                      <div className="info-item"><span className="label">Platform Commission:</span><span className="value">{formatCurrency(numberFrom(payout.platformCommissions))}</span></div>
+                      <div className="info-item"><span className="label">Net Payout:</span><span className="value" style={{fontWeight: 'bold', color: '#10B981'}}>{formatCurrency(numberFrom(payout.netRevenue))}</span></div>
+                      <div className="info-item"><span className="label">Pending Orders:</span><span className="value">{numberFrom(payout.pendingPayouts)}</span></div>
+                    </div>
+                    <div className="payout-actions">
+                      <button className="admin-btn admin-btn-primary" onClick={() => processPayout(payout.providerId)}>
+                        Process Payout ({formatCurrency(numberFrom(payout.netRevenue))})
+                      </button>
+                      <button className="admin-btn admin-btn-outline" onClick={noopAlert(`View payout details for ${payout.providerId}`)}>View Details</button>
+                    </div>
+                  </div>
+                ))}
+                {/* Fallback to old revenue share data if new API not available */}
+                {providerPayouts.length === 0 && revenueShareEntries.map(([providerId, amount]) => (
                   <div className="payout-card" key={providerId}>
                     <div className="payout-header">
                       <h4>{`Provider ${shortId(providerId)}`}</h4>
@@ -799,7 +839,7 @@ const Admin = () => {
                       <div className="info-item"><span className="label">Last Updated:</span><span className="value">—</span></div>
                     </div>
                     <div className="payout-actions">
-                      <button className="admin-btn admin-btn-primary" onClick={noopAlert(`Process payout for ${providerId}`)}>Process Payout</button>
+                      <button className="admin-btn admin-btn-primary" onClick={() => processPayout(providerId)}>Process Payout</button>
                       <button className="admin-btn admin-btn-outline" onClick={noopAlert(`View payout details for ${providerId}`)}>View Details</button>
                     </div>
                   </div>
@@ -891,7 +931,7 @@ const Admin = () => {
                       })}
                       {apiKeys.length === 0 && (
                         <tr>
-                          <td colSpan={7} style={{ textAlign: 'center', padding: '16px' }}>Chưa có API key nào.</td>
+                          <td colSpan={7} style={{ textAlign: 'center', padding: '16px' }}>No API keys yet.</td>
                         </tr>
                       )}
                     </tbody>

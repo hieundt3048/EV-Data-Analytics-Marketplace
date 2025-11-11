@@ -27,7 +27,8 @@ public class PaymentController {
     // Giữ lại API cũ cho tương thích
     @PostMapping("/checkout")
     public Payment checkout(@RequestBody Order order) {
-        return paymentService.createDemoPayment(order, order.getAmount() == null ? 0.0 : order.getAmount());
+        double amount = (order.getAmount() != null) ? order.getAmount() : 0.0;
+        return paymentService.createDemoPayment(order, amount);
     }
 
     // Thêm API mới cho Stripe checkout

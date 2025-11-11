@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -33,4 +34,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     
     // Lấy danh sách đơn hàng theo nhiều dataset IDs
     List<Order> findByDatasetIdIn(List<Long> datasetIds);
+    
+    // NEW: For PayoutService - Get orders by provider ID
+    List<Order> findByProviderId(Long providerId);
+    
+    // NEW: For PayoutService - Get orders by provider ID and status
+    List<Order> findByProviderIdAndStatus(Long providerId, String status);
+    
+    // NEW: For PayoutService - Get orders within date range
+    List<Order> findByOrderDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 }
+

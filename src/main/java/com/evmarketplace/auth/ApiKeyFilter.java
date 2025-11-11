@@ -45,8 +45,8 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Optional<APIKey> found = Optional.ofNullable(apiKeyRepository.findByKey(key));
-            if (found.isEmpty()) {
+            Optional<APIKey> found = apiKeyRepository.findByKey(key);
+            if (!found.isPresent()) {
                 logger.debug("Invalid API key for path {}", path);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid API key");
                 return;

@@ -1,9 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosConfig';
 import '../styles/index.css';
 import '../styles/provider.css';
+import ProviderRevenueDashboard from '../components/ProviderRevenueDashboard';
 
 const API_BASE_URL = ''; // Empty since axiosInstance already has baseURL
+const API_BASE = 'http://localhost:8080';
 
 const TITLE_MAP = {
   'data-management': 'Register & Manage Data Sources',
@@ -13,6 +16,8 @@ const TITLE_MAP = {
 };
 
 const Provider = () => {
+  const navigate = useNavigate();
+  const redirectingRef = useRef(false);
   const [activeTab, setActiveTab] = useState('data-management');
   const [title, setTitle] = useState(TITLE_MAP['data-management']);
   const [stats, setStats] = useState({ totalRevenue: '$0', downloads: '0', buyers: '0' });
@@ -27,11 +32,179 @@ const Provider = () => {
   const pendingConfirmRef = useRef(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
+  // Block unwanted password change popups
   useEffect(() => {
+    const originalAlert = window.alert;
+    const originalConfirm = window.confirm;
+    
+    // Override alert
+    window.alert = function(message) {
+      // Block password-related alerts
+      if (typeof message === 'string' && 
+          (message.includes('Thay đổi') || 
+           message.includes('mật khẩu') || 
+           message.includes('Mật khẩu') ||
+           message.includes('password') ||
+           message.includes('ban đầu'))) {
+        console.log('Blocked password popup:', message);
+        return; // Don't show the alert
+      }
+      // Allow other alerts
+      originalAlert.call(window, message);
+    };
+    
+    // Override confirm
+    window.confirm = function(message) {
+      if (typeof message === 'string' && 
+          (message.includes('Thay đổi') || 
+           message.includes('mật khẩu') || 
+           message.includes('Mật khẩu') ||
+           message.includes('password') ||
+           message.includes('ban đầu'))) {
+        console.log('Blocked password confirm:', message);
+        return false;
+      }
+      return originalConfirm.call(window, message);
+    };
+
+    return () => {
+      window.alert = originalAlert;
+      window.confirm = originalConfirm;
+    };
+  }, []);
+
+  // Helper function for authenticated API calls
+  const fetchWithAuth = useCallback(async (url, opts = {}) => {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      console.warn('No auth token found, redirecting to login');
+      localStorage.removeItem('authToken');
+      navigate('/login');
+      throw new Error('Authentication required');
+    }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(opts.headers || {}),
+      Authorization: `Bearer ${token}`,
+    };
+
+    try {
+      const response = await fetch(url, { ...opts, headers });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          if (!redirectingRef.current) {
+            redirectingRef.current = true;
+            console.warn('Token expired or invalid, redirecting to login');
+            localStorage.removeItem('authToken');
+            navigate('/login');
+          }
+          throw new Error('Session expired. Please login again.');
+        }
+        const errorText = await response.text();
+        throw new Error(errorText || `Request failed with status ${response.status}`);
+      }
+      
+      if (response.status === 204) return null;
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    // Remove any password change modals that might appear on login
+    const removePasswordModal = () => {
+      // Find and remove any modals with Vietnamese text about password
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach(element => {
+        const text = element.textContent || '';
+        const innerHTML = element.innerHTML || '';
+        
+        // Check if element contains password-related text
+        if ((text.includes('Thay đổi mật khẩu') || 
+             text.includes('mật khẩu ban') ||
+             text.includes('Mật khẩu ban') ||
+             innerHTML.includes('Thay đổi mật khẩu')) &&
+            element.offsetParent !== null) { // Only visible elements
+          
+          console.log('Found password modal, removing:', element);
+          
+          // Remove the element and its parents up to 3 levels
+          let current = element;
+          for (let i = 0; i < 3; i++) {
+            if (current && current.parentElement && current.parentElement !== document.body) {
+              const parent = current.parentElement;
+              console.log('Removing parent:', parent);
+              parent.style.display = 'none';
+              parent.remove();
+              current = parent.parentElement;
+            } else {
+              current.style.display = 'none';
+              current.remove();
+              break;
+            }
+          }
+          
+          // Also remove backdrop
+          const backdrop = document.querySelector('.modal-backdrop, [class*="backdrop"], [style*="position: fixed"]');
+          if (backdrop) {
+            console.log('Removing backdrop:', backdrop);
+            backdrop.remove();
+          }
+        }
+      });
+      
+      // Also try to hide by checking all fixed position elements
+      const fixedElements = document.querySelectorAll('[style*="position: fixed"], [style*="position:fixed"]');
+      fixedElements.forEach(el => {
+        if (el.textContent && 
+            (el.textContent.includes('Thay đổi') || 
+             el.textContent.includes('mật khẩu') ||
+             el.textContent.includes('password'))) {
+          console.log('Hiding fixed element:', el);
+          el.style.display = 'none';
+          el.remove();
+        }
+      });
+    };
+
+    // Remove immediately
+    removePasswordModal();
+    
+    // Check multiple times to catch delayed modals
+    const timers = [50, 100, 200, 300, 500, 800, 1000, 1500, 2000, 3000].map(delay => 
+      setTimeout(removePasswordModal, delay)
+    );
+    
+    // Use MutationObserver to watch for new modals being added
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length > 0) {
+          setTimeout(removePasswordModal, 10);
+        }
+      });
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
     // init stats and load data
     fetchRevenueStats();
     fetchDatasets();
     renderMiniChart(revFilter);
+    
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+      observer.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -352,6 +525,22 @@ const Provider = () => {
 
   return (
     <div className="provider-page">
+      {/* Inline style to hide password modal */}
+      <style>{`
+        /* Hide any modal/dialog containing password change text */
+        body > div[style*="position: fixed"],
+        body > div[style*="z-index"] {
+          display: none !important;
+        }
+        
+        /* Show only our intended modals */
+        .provider-page div[style*="position: fixed"],
+        .provider-page div[style*="z-index"],
+        #confirmModal {
+          display: block !important;
+        }
+      `}</style>
+      
       <section className="page-heading">
         <div className="container">
           <div className="row">
@@ -732,58 +921,7 @@ const Provider = () => {
 
         {/* Revenue Tracking */}
         <div id="revenue-tracking" className={`tab-content ${activeTab === 'revenue-tracking' ? 'active' : ''}`} style={{ display: activeTab === 'revenue-tracking' ? 'block' : 'none' }}>
-          <div className="stat-grid" style={{ marginTop: 12 + 'px' }}>
-            <div className="stat-box">
-              <div className="num" id="stat-total-revenue">{stats.totalRevenue}</div>
-              <div className="label">Total revenue</div>
-            </div>
-            <div className="stat-box">
-              <div className="num" id="stat-downloads">{stats.downloads}</div>
-              <div className="label">Downloads</div>
-            </div>
-            <div className="stat-box">
-              <div className="num" id="stat-buyers">{stats.buyers}</div>
-              <div className="label">Unique buyers</div>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 8 + 'px' }}>
-            <label htmlFor="revMonth">Filter month:</label>
-            <select id="revMonth" value={revFilter} onChange={e => { setRevFilter(e.target.value); renderMiniChart(e.target.value); }}>
-              <option value="all">Last 12 months</option>
-              <option value="6">Last 6 months</option>
-              <option value="3">Last 3 months</option>
-            </select>
-          </div>
-
-          <div style={{ marginTop: 12 + 'px' }} id="chartArea">
-            <div className="mini-chart" id="miniChartContainer">
-              {miniCols.map((h, i) => (
-                <div key={i} className="col" style={{ height: h }} />
-              ))}
-            </div>
-          </div>
-
-          <div style={{ marginTop: 14 + 'px' }}>
-            <h4>Recent downloads</h4>
-            <table className="table-small">
-              <thead>
-                <tr><th>Dataset</th><th>User</th><th>Date</th><th>Revenue</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Battery Health - 2025</td><td>Acme Labs</td><td>2025-09-12</td><td>$299</td></tr>
-                <tr><td>Charging Sessions - Q1</td><td>GridCo</td><td>2025-09-02</td><td>$199</td></tr>
-                <tr><td>Driving Patterns - Sample</td><td>DriveAI</td><td>2025-08-21</td><td>$149</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="form-mini" style={{ marginTop: 12 + 'px' }}>
-            <div className="form-btn-group">
-              <button type="button" className="btn-p btn-primary" onClick={exportCsv}>Export CSV</button>
-              <button type="button" className="btn-back" onClick={() => switchTab('data-management')}>⬅ Back to Datasets</button>
-            </div>
-          </div>
+          <ProviderRevenueDashboard fetchWithAuth={fetchWithAuth} />
         </div>
 
         {/* Security & Anonymization */}
