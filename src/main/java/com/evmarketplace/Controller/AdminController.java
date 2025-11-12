@@ -6,10 +6,13 @@ package com.evmarketplace.Controller;
 import com.evmarketplace.Pojo.APIKey;
 import com.evmarketplace.Pojo.User;
 import com.evmarketplace.Pojo.ProviderDataset;
+import com.evmarketplace.Pojo.Order;
 import com.evmarketplace.Repository.APIKeyRepository;
 import com.evmarketplace.Repository.TransactionRepository;
+import com.evmarketplace.Repository.OrderRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.Service.ProviderDatasetService;
+import com.evmarketplace.Service.OrderService;
 import com.evmarketplace.data.DataProduct;
 import com.evmarketplace.data.ProductStatus;
 import com.evmarketplace.marketplace.Purchase;
@@ -30,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Comparator;
 
 import java.util.stream.Collectors;
 
@@ -44,6 +48,8 @@ public class AdminController {
     private final TransactionRepository transactionRepository;
     private final APIKeyRepository apiKeyRepository;
     private final ProviderDatasetService providerDatasetService;
+    private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     public AdminController(
             UserService userService,
@@ -51,7 +57,9 @@ public class AdminController {
             PurchaseRepository purchaseRepository,
             TransactionRepository transactionRepository,
             APIKeyRepository apiKeyRepository,
-            ProviderDatasetService providerDatasetService
+            ProviderDatasetService providerDatasetService,
+            OrderService orderService,
+            OrderRepository orderRepository
     ) {
         this.userService = userService;
         this.dataProductRepository = dataProductRepository;
@@ -59,6 +67,8 @@ public class AdminController {
         this.transactionRepository = transactionRepository;
         this.apiKeyRepository = apiKeyRepository;
         this.providerDatasetService = providerDatasetService;
+        this.orderService = orderService;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -167,6 +177,36 @@ public class AdminController {
     @GetMapping("/payments/transactions")
     public ResponseEntity<?> listTransactions() {
         return ResponseEntity.ok(transactionRepository.findAll());
+    }
+
+    /**
+     * Lấy danh sách tất cả orders (giao dịch mua dataset)
+     * Hiển thị trong "Recent Transactions" của Admin
+     */
+    @GetMapping("/orders")
+    public ResponseEntity<?> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        
+        // Map to DTO với đầy đủ thông tin
+        List<Map<String, Object>> ordersDTO = orders.stream()
+            .sorted(Comparator.comparing(Order::getOrderDate).reversed())
+            .map(order -> {
+                Map<String, Object> dto = new HashMap<>();
+                dto.put("id", order.getId());
+                dto.put("datasetId", order.getDatasetId());
+                dto.put("buyerId", order.getBuyerId());
+                dto.put("providerId", order.getProviderId());
+                dto.put("amount", order.getAmount());
+                dto.put("platformRevenue", order.getPlatformRevenue());
+                dto.put("providerRevenue", order.getProviderRevenue());
+                dto.put("status", order.getStatus());
+                dto.put("orderDate", order.getOrderDate());
+                dto.put("payoutDate", order.getPayoutDate());
+                return dto;
+            })
+            .collect(Collectors.toList());
+            
+        return ResponseEntity.ok(ordersDTO);
     }
 
     @GetMapping("/payments/revenue-share")
@@ -313,6 +353,38 @@ public class AdminController {
 
         public void setRoles(List<String> roles) {
             this.roles = roles;
+        }
+    }
+
+    /**
+     * Endpoint để Admin duyệt giao dịch (transaction/order)
+     * Khi duyệt sẽ phân chia doanh thu: 30% nền tảng, 70% provider
+     * 
+     * @param orderId ID của order cần duyệt
+     * @return Order đã được duyệt với thông tin revenue split
+     */
+    @PostMapping("/transactions/{orderId}/approve")
+    public ResponseEntity<?> approveTransaction(@PathVariable Long orderId) {
+        try {
+            Order approvedOrder = orderService.approveTransaction(orderId);
+            
+            // Tạo response với thông tin chi tiết
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Transaction approved successfully");
+            response.put("orderId", approvedOrder.getId());
+            response.put("totalAmount", approvedOrder.getAmount());
+            response.put("platformRevenue", approvedOrder.getPlatformRevenue());
+            response.put("providerRevenue", approvedOrder.getProviderRevenue());
+            response.put("status", approvedOrder.getStatus());
+            response.put("payoutDate", approvedOrder.getPayoutDate());
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 }

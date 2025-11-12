@@ -44,6 +44,14 @@ public class Order {
     @Column(name = "payout_date")
     private LocalDateTime payoutDate;
 
+    // Doanh thu của nền tảng (30%)
+    @Column(name = "platform_revenue")
+    private Double platformRevenue;
+
+    // Doanh thu của provider (70%)
+    @Column(name = "provider_revenue")
+    private Double providerRevenue;
+
     // --- Constructors ---
     public Order() {}
 
@@ -80,4 +88,10 @@ public class Order {
 
     public LocalDateTime getPayoutDate() { return payoutDate; }
     public void setPayoutDate(LocalDateTime payoutDate) { this.payoutDate = payoutDate; }
+
+    public Double getPlatformRevenue() { return platformRevenue; }
+    public void setPlatformRevenue(Double platformRevenue) { this.platformRevenue = platformRevenue; }
+
+    public Double getProviderRevenue() { return providerRevenue; }
+    public void setProviderRevenue(Double providerRevenue) { this.providerRevenue = providerRevenue; }
 }

@@ -9,98 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-RXf+QSDCUQs6Q0Cqkw9bXnh6N9M8wZy1Ry+jS/8Y0SzBW3ja7ZB1r4Hu2k0F0CqS/i80RRyqq6Qq8vyF8z+MUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- Hide all modals globally with CSS -->
-    <style>
-      /* Hide SweetAlert and similar modals */
-      .swal2-container,
-      .swal-overlay,
-      .sweet-alert,
-      [class*="sweet-alert"],
-      [class*="swal"],
-      div[style*="z-index: 9999"],
-      div[style*="z-index: 10000"],
-      div[style*="z-index: 99999"],
-      body > div[style*="position: fixed"][style*="z-index"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-    </style>
-    
-    <!-- Block password modal early -->
-    <script>
-      (function() {
-        // Override alert immediately
-        const originalAlert = window.alert;
-        window.alert = function(message) {
-          console.log('Alert called with:', message);
-          if (typeof message === 'string' && 
-              (message.includes('Thay đổi') || 
-               message.includes('mật khẩu') || 
-               message.includes('Mật khẩu') ||
-               message.includes('password') ||
-               message.includes('ban đầu'))) {
-            console.log('🚫 BLOCKED password alert:', message);
-            return;
-          }
-          originalAlert.call(window, message);
-        };
-        
-        // Watch for DOM mutations early
-        document.addEventListener('DOMContentLoaded', function() {
-          const removeModal = function() {
-            const body = document.body;
-            if (!body) return;
-            
-            const allDivs = body.querySelectorAll('div');
-            allDivs.forEach(div => {
-              const text = div.textContent || '';
-              if (text.includes('Thay đổi mật khẩu') || text.includes('mật khẩu ban')) {
-                console.log('🚫 Found and removing password modal:', div);
-                let parent = div;
-                for (let i = 0; i < 5; i++) {
-                  if (parent && parent.parentElement) {
-                    parent.style.display = 'none';
-                    parent = parent.parentElement;
-                  }
-                }
-                div.remove();
-              }
-            });
-          };
-          
-          // Run immediately and repeatedly
-          removeModal();
-          for (let i = 0; i < 20; i++) {
-            setTimeout(removeModal, i * 200);
-          }
-          
-          // Auto-click OK button if modal appears
-          setInterval(function() {
-            // Try to find and click OK button
-            const okButtons = document.querySelectorAll('button, [role="button"], a');
-            okButtons.forEach(btn => {
-              const text = (btn.textContent || '').trim().toUpperCase();
-              if (text === 'OK' || text === 'ĐỒNG Ý' || text === 'XÁC NHẬN') {
-                const parent = btn.closest('div[style*="position: fixed"], [role="dialog"], .modal, .swal2-container');
-                if (parent) {
-                  console.log('🤖 Auto-clicking OK button:', btn);
-                  btn.click();
-                }
-              }
-            });
-          }, 100);
-          
-          // Watch for new elements
-          const observer = new MutationObserver(removeModal);
-          observer.observe(document.body, { childList: true, subtree: true });
-        });
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="../src/main.jsx"></script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

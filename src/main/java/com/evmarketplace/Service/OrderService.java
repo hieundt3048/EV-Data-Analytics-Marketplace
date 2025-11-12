@@ -131,7 +131,7 @@ public class OrderService {
             
             order.setAmount(dataset.getPrice() == null ? 0.0 : dataset.getPrice());
             order.setOrderDate(LocalDateTime.now());
-            order.setStatus("PAID"); // Set to PAID immediately for demo
+            order.setStatus("PENDING"); // Chờ admin duyệt
             
             Order savedOrder = orderRepository.save(order);
 
@@ -140,7 +140,7 @@ public class OrderService {
                 "demo_session_" + savedOrder.getId(), 
                 "https://demo-checkout.local/success", 
                 "success", 
-                "Order created successfully (demo mode)", 
+                "Order created successfully, waiting for admin approval", 
                 savedOrder.getId()
             );
 
@@ -192,5 +192,32 @@ public class OrderService {
 
     public Optional<Order> getOrderById(Long id) {
         return orderRepository.findById(id);
+    }
+
+    /**
+     * Admin duyệt giao dịch - Phân chia doanh thu: 30% platform, 70% provider
+     */
+    @Transactional
+    public Order approveTransaction(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+        
+        // Kiểm tra nếu đã duyệt rồi thì không duyệt lại
+        if ("APPROVED".equals(order.getStatus())) {
+            throw new RuntimeException("Order already approved");
+        }
+        
+        // Tính toán revenue split: 30% platform, 70% provider
+        Double totalAmount = order.getAmount();
+        Double platformRevenue = totalAmount * 0.30; // 30% cho nền tảng
+        Double providerRevenue = totalAmount * 0.70; // 70% cho provider
+        
+        // Cập nhật order
+        order.setStatus("APPROVED");
+        order.setPlatformRevenue(platformRevenue);
+        order.setProviderRevenue(providerRevenue);
+        order.setPayoutDate(LocalDateTime.now());
+        
+        return orderRepository.save(order);
     }
 }

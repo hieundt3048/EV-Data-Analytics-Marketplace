@@ -31,17 +31,18 @@ public class PayoutService {
     }
 
     public List<Map<String, Object>> getPendingPayouts(Long providerId) {
-        List<Order> paidOrders = orderRepository.findByProviderIdAndStatus(providerId, "PAID");
-        return paidOrders.stream().map(order -> {
-            PayoutBreakdown breakdown = calculatePayoutBreakdown(order);
+        // Lay orders da APPROVED cua provider (da duyet nhung chua chuyen tien)
+        List<Order> approvedOrders = orderRepository.findByProviderIdAndStatus(providerId, "APPROVED");
+        
+        return approvedOrders.stream().map(order -> {
             Map<String, Object> payout = new HashMap<>();
             payout.put("orderId", order.getId());
             payout.put("orderDate", order.getOrderDate());
             payout.put("buyerId", order.getBuyerId());
             payout.put("datasetId", order.getDatasetId());
-            payout.put("totalAmount", breakdown.getTotalAmount());
-            payout.put("platformCommission", breakdown.getPlatformCommission());
-            payout.put("providerPayout", breakdown.getProviderPayout());
+            payout.put("totalAmount", order.getAmount());
+            payout.put("platformCommission", order.getPlatformRevenue());
+            payout.put("providerPayout", order.getProviderRevenue());
             payout.put("status", order.getStatus());
             return payout;
         }).collect(Collectors.toList());
@@ -49,20 +50,30 @@ public class PayoutService {
 
     public Map<String, Object> getProviderRevenueSummary(Long providerId) {
         List<Order> allOrders = orderRepository.findByProviderId(providerId);
-        List<Order> paidOrders = allOrders.stream().filter(o -> "PAID".equals(o.getStatus()) || "PAYOUT_COMPLETED".equals(o.getStatus())).collect(Collectors.toList());
+        // Chi tinh orders da duoc APPROVED (admin da duyet)
+        List<Order> approvedOrders = allOrders.stream()
+            .filter(o -> "APPROVED".equals(o.getStatus()))
+            .collect(Collectors.toList());
+        
         BigDecimal totalRevenue = BigDecimal.ZERO;
         BigDecimal totalCommission = BigDecimal.ZERO;
         BigDecimal totalNetPayout = BigDecimal.ZERO;
-        int pendingPayoutsCount = 0;
-        for (Order order : paidOrders) {
-            PayoutBreakdown breakdown = calculatePayoutBreakdown(order);
-            totalRevenue = totalRevenue.add(breakdown.getTotalAmount());
-            totalCommission = totalCommission.add(breakdown.getPlatformCommission());
-            totalNetPayout = totalNetPayout.add(breakdown.getProviderPayout());
-            if ("PAID".equals(order.getStatus())) {
-                pendingPayoutsCount++;
-            }
+        
+        for (Order order : approvedOrders) {
+            // Dung providerRevenue va platformRevenue da duoc tinh khi admin approve
+            Double amount = order.getAmount() != null ? order.getAmount() : 0.0;
+            Double providerRev = order.getProviderRevenue() != null ? order.getProviderRevenue() : 0.0;
+            Double platformRev = order.getPlatformRevenue() != null ? order.getPlatformRevenue() : 0.0;
+            
+            totalRevenue = totalRevenue.add(BigDecimal.valueOf(amount));
+            totalCommission = totalCommission.add(BigDecimal.valueOf(platformRev));
+            totalNetPayout = totalNetPayout.add(BigDecimal.valueOf(providerRev));
         }
+        
+        // Dem orders PENDING (chua duyet)
+        int pendingPayoutsCount = (int) allOrders.stream()
+            .filter(o -> "PENDING".equals(o.getStatus()))
+            .count();
         
         Map<String, Object> summary = new HashMap<>();
         summary.put("providerId", providerId);
@@ -72,29 +83,45 @@ public class PayoutService {
         summary.put("totalCommission", totalCommission);
         summary.put("totalNetPayout", totalNetPayout);
         summary.put("pendingPayoutsCount", pendingPayoutsCount);
-        summary.put("totalOrdersCount", paidOrders.size());
+        summary.put("totalOrdersCount", approvedOrders.size());
         return summary;
     }
 
     public Map<String, Object> getPlatformRevenueStats(LocalDateTime startDate, LocalDateTime endDate) {
-        List<Order> orders = orderRepository.findByOrderDateBetween(startDate, endDate);
-        List<Order> paidOrders = orders.stream().filter(o -> "PAID".equals(o.getStatus()) || "PAYOUT_COMPLETED".equals(o.getStatus())).collect(Collectors.toList());
+        // Neu khong co filter date thi lay tat ca orders
+        List<Order> orders;
+        if (startDate != null && endDate != null) {
+            orders = orderRepository.findByOrderDateBetween(startDate, endDate);
+        } else {
+            orders = orderRepository.findAll();
+        }
+        
+        // Chi tinh orders da APPROVED
+        List<Order> approvedOrders = orders.stream()
+            .filter(o -> "APPROVED".equals(o.getStatus()))
+            .collect(Collectors.toList());
+        
         BigDecimal totalRevenue = BigDecimal.ZERO;
         BigDecimal totalCommission = BigDecimal.ZERO;
         BigDecimal totalProviderPayouts = BigDecimal.ZERO;
-        for (Order order : paidOrders) {
-            PayoutBreakdown breakdown = calculatePayoutBreakdown(order);
-            totalRevenue = totalRevenue.add(breakdown.getTotalAmount());
-            totalCommission = totalCommission.add(breakdown.getPlatformCommission());
-            totalProviderPayouts = totalProviderPayouts.add(breakdown.getProviderPayout());
+        
+        for (Order order : approvedOrders) {
+            Double amount = order.getAmount() != null ? order.getAmount() : 0.0;
+            Double providerRev = order.getProviderRevenue() != null ? order.getProviderRevenue() : 0.0;
+            Double platformRev = order.getPlatformRevenue() != null ? order.getPlatformRevenue() : 0.0;
+            
+            totalRevenue = totalRevenue.add(BigDecimal.valueOf(amount));
+            totalCommission = totalCommission.add(BigDecimal.valueOf(platformRev));
+            totalProviderPayouts = totalProviderPayouts.add(BigDecimal.valueOf(providerRev));
         }
+        
         Map<String, Object> stats = new HashMap<>();
         stats.put("startDate", startDate);
         stats.put("endDate", endDate);
         stats.put("totalRevenue", totalRevenue);
         stats.put("platformCommission", totalCommission);
         stats.put("providerPayouts", totalProviderPayouts);
-        stats.put("totalOrders", paidOrders.size());
+        stats.put("totalOrders", approvedOrders.size());
         stats.put("commissionRate", PLATFORM_COMMISSION_RATE);
         return stats;
     }
@@ -107,29 +134,32 @@ public class PayoutService {
             .distinct()
             .collect(Collectors.toList());
         
-        return providerIds.stream().map(providerId -> {
-            Map<String, Object> summary = getProviderRevenueSummary(providerId);
-            int pendingCount = (int) summary.get("pendingPayoutsCount");
-            if (pendingCount > 0) {
-                return summary;
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        // Tra ve tat ca providers, bao gom ca pending va completed
+        return providerIds.stream()
+            .map(this::getProviderRevenueSummary)
+            .collect(Collectors.toList());
     }
 
     @Transactional
     public Map<String, Object> processPayouts(Long providerId) {
-        List<Order> paidOrders = orderRepository.findByProviderIdAndStatus(providerId, "PAID");
+        // Lay tat ca orders da APPROVED (admin da duyet) cua provider nay
+        List<Order> approvedOrders = orderRepository.findByProviderIdAndStatus(providerId, "APPROVED");
+        
         BigDecimal totalPayout = BigDecimal.ZERO;
         int processedCount = 0;
-        for (Order order : paidOrders) {
-            PayoutBreakdown breakdown = calculatePayoutBreakdown(order);
-            totalPayout = totalPayout.add(breakdown.getProviderPayout());
+        
+        for (Order order : approvedOrders) {
+            // Dung providerRevenue da duoc tinh khi admin approve
+            Double providerRev = order.getProviderRevenue() != null ? order.getProviderRevenue() : 0.0;
+            totalPayout = totalPayout.add(BigDecimal.valueOf(providerRev));
+            
+            // Danh dau da thanh toan cho provider
             order.setStatus("PAYOUT_COMPLETED");
             order.setPayoutDate(LocalDateTime.now());
             orderRepository.save(order);
             processedCount++;
         }
+        
         Map<String, Object> result = new HashMap<>();
         result.put("providerId", providerId);
         result.put("processedOrders", processedCount);

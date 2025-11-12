@@ -47,8 +47,9 @@ public class RevenueAnalyticsService {
         
         // Get all orders for these datasets
         List<Order> allOrders = orderRepository.findByDatasetIdIn(datasetIds);
+        // Include APPROVED and PAYOUT_COMPLETED orders (after admin approval)
         List<Order> paidOrders = allOrders.stream()
-            .filter(o -> "PAID".equals(o.getStatus()))
+            .filter(o -> "APPROVED".equals(o.getStatus()) || "PAYOUT_COMPLETED".equals(o.getStatus()))
             .collect(Collectors.toList());
         
         // Filter by date range if provided
@@ -84,17 +85,22 @@ public class RevenueAnalyticsService {
      * Calculate summary metrics
      */
     private void calculateSummaryMetrics(ProviderRevenueDTO dto, List<Order> allOrders, List<Order> filteredOrders) {
-        // Total revenue (all time)
-        double totalRevenue = allOrders.stream()
-            .mapToDouble(Order::getAmount)
+        // Include APPROVED and PAYOUT_COMPLETED orders (after admin approval)
+        List<Order> approvedOrders = allOrders.stream()
+            .filter(o -> "APPROVED".equals(o.getStatus()) || "PAYOUT_COMPLETED".equals(o.getStatus()))
+            .collect(Collectors.toList());
+        
+        // Total revenue (all time) - Use providerRevenue (70%), not full amount
+        double totalRevenue = approvedOrders.stream()
+            .mapToDouble(o -> o.getProviderRevenue() != null ? o.getProviderRevenue() : 0.0)
             .sum();
         dto.setTotalRevenue(Math.round(totalRevenue * 100.0) / 100.0);
         
         // Monthly revenue (last 30 days)
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
-        double monthlyRevenue = allOrders.stream()
+        double monthlyRevenue = approvedOrders.stream()
             .filter(o -> o.getOrderDate().isAfter(thirtyDaysAgo))
-            .mapToDouble(Order::getAmount)
+            .mapToDouble(o -> o.getProviderRevenue() != null ? o.getProviderRevenue() : 0.0)
             .sum();
         dto.setMonthlyRevenue(Math.round(monthlyRevenue * 100.0) / 100.0);
         

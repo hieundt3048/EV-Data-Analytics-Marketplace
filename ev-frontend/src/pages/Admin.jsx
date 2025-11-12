@@ -63,7 +63,7 @@ const Admin = () => {
         fetchWithAuth('/api/admin/analytics/overview'),
         fetchWithAuth('/api/admin/users'),
         fetchWithAuth('/api/admin/provider-datasets/pending'),
-        fetchWithAuth('/api/admin/payments/transactions').catch(() => []),
+        fetchWithAuth('/api/admin/orders').catch(() => []),
         fetchWithAuth('/api/admin/payments/revenue-share').catch(() => ({})),
         fetchWithAuth('/api/admin/security/apikeys').catch(() => []),
         fetchWithAuth('/api/admin/payments/revenue-stats').catch(() => null),
@@ -235,6 +235,17 @@ const Admin = () => {
   // small helpers used by action buttons in the template
   const noopAlert = (msg) => () => alert(msg);
 
+  const approveTransaction = async (orderId) => {
+    if (!window.confirm(`Approve transaction #${orderId}? This will split revenue: 70% provider, 30% platform.`)) return;
+    try {
+      const result = await fetchWithAuth(`/api/admin/transactions/${orderId}/approve`, { method: 'POST' });
+      alert(`Transaction approved successfully!\nTotal: $${result.totalAmount}\nProvider gets: $${result.providerRevenue} (70%)\nPlatform gets: $${result.platformRevenue} (30%)`);
+      refreshAll();
+    } catch (err) {
+      setError(`Unable to approve transaction: ${err.message}`);
+    }
+  };
+
   const providerUsers = users.filter((u) => hasRole(u, 'Provider'));
   const consumerUsers = users.filter((u) => hasRole(u, 'Consumer'));
   const partnerUsers = users.filter((u) => hasRole(u, 'Partner'));
@@ -253,16 +264,16 @@ const Admin = () => {
     return Number.isNaN(parsed) ? 0 : parsed;
   };
   const totalRevenue = transactions.reduce((sum, t) => sum + numberFrom(t.amount), 0);
-  const totalPayout = transactions.reduce((sum, t) => sum + numberFrom(t.providerShare), 0);
-  const platformRevenue = transactions.reduce((sum, t) => sum + numberFrom(t.platformFee), 0);
+  const totalPayout = transactions.reduce((sum, t) => sum + numberFrom(t.providerRevenue), 0);
+  const platformRevenue = transactions.reduce((sum, t) => sum + numberFrom(t.platformRevenue), 0);
   const formatNumber = (value) => new Intl.NumberFormat().format(Math.round(value || 0));
   const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value || 0);
   const totalTransactions = transactions.length;
-  const successfulTransactions = transactions.filter((t) => (t?.status || '').toLowerCase() === 'success').length;
+  const successfulTransactions = transactions.filter((t) => (t?.status || '').toLowerCase() === 'approved').length;
   const revenueShareEntries = Object.entries(revenueShare || {});
   const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateA = a?.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const dateB = b?.timestamp ? new Date(b.timestamp).getTime() : 0;
+    const dateA = a?.orderDate ? new Date(a.orderDate).getTime() : 0;
+    const dateB = b?.orderDate ? new Date(b.orderDate).getTime() : 0;
     return dateB - dateA;
   });
   const formatDateTime = (value) => {
@@ -772,24 +783,39 @@ const Admin = () => {
                         <th>Platform Fee</th>
                         <th>Date</th>
                         <th>Status</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sortedTransactions.map((tx) => (
                         <tr key={tx.id}>
-                          <td>#{shortId(tx.id)}</td>
-                          <td>{tx.purchaseId ? `Purchase ${shortId(tx.purchaseId)}` : tx.subscriptionId ? `Subscription ${shortId(tx.subscriptionId)}` : '—'}</td>
-                          <td>{paymentMethodLabel(tx.method)}</td>
+                          <td>TX-{tx.id}</td>
+                          <td>{tx.datasetId ? `Dataset #${tx.datasetId}` : '-'}</td>
+                          <td>Direct</td>
                           <td>{formatCurrency(numberFrom(tx.amount))}</td>
-                          <td>{formatCurrency(numberFrom(tx.providerShare))}</td>
-                          <td>{formatCurrency(numberFrom(tx.platformFee))}</td>
-                          <td>{formatDateTime(tx.timestamp)}</td>
-                          <td><span className={`status-badge ${paymentStatusClass(tx.status)}`}>{paymentStatusLabel(tx.status)}</span></td>
+                          <td>{tx.providerRevenue ? formatCurrency(numberFrom(tx.providerRevenue)) : '-'}</td>
+                          <td>{tx.platformRevenue ? formatCurrency(numberFrom(tx.platformRevenue)) : '-'}</td>
+                          <td>{formatDateTime(tx.orderDate)}</td>
+                          <td><span className={`status-badge ${tx.status === 'APPROVED' ? 'success' : tx.status === 'PENDING' ? 'warning' : 'neutral'}`}>{tx.status}</span></td>
+                          <td>
+                            {tx.status === 'PENDING' && (
+                              <button 
+                                className="admin-btn admin-btn-primary" 
+                                style={{padding: '6px 12px', fontSize: '0.875rem'}}
+                                onClick={() => approveTransaction(tx.id)}
+                              >
+                                Approve
+                              </button>
+                            )}
+                            {tx.status === 'APPROVED' && (
+                              <span style={{color: '#10B981', fontSize: '0.875rem'}}>Approved</span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                       {sortedTransactions.length === 0 && (
                         <tr>
-                          <td colSpan={8} style={{ textAlign: 'center', padding: '16px' }}>No transactions yet.</td>
+                          <td colSpan={9} style={{ textAlign: 'center', padding: '16px' }}>No transactions yet.</td>
                         </tr>
                       )}
                     </tbody>
@@ -808,19 +834,19 @@ const Admin = () => {
                   <div className="payout-card" key={payout.providerId}>
                     <div className="payout-header">
                       <h4>{payout.providerName || `Provider ${shortId(payout.providerId)}`}</h4>
-                      <span className="payout-amount">{formatCurrency(numberFrom(payout.netRevenue))}</span>
+                      <span className="payout-amount">{formatCurrency(numberFrom(payout.totalNetPayout))}</span>
                     </div>
                     <div className="payout-info">
                       <div className="info-item"><span className="label">Provider ID:</span><span className="value">{payout.providerId}</span></div>
-                      <div className="info-item"><span className="label">Email:</span><span className="value">{payout.contactEmail || '—'}</span></div>
+                      <div className="info-item"><span className="label">Email:</span><span className="value">{payout.providerEmail || '—'}</span></div>
                       <div className="info-item"><span className="label">Total Revenue:</span><span className="value">{formatCurrency(numberFrom(payout.totalRevenue))}</span></div>
-                      <div className="info-item"><span className="label">Platform Commission:</span><span className="value">{formatCurrency(numberFrom(payout.platformCommissions))}</span></div>
-                      <div className="info-item"><span className="label">Net Payout:</span><span className="value" style={{fontWeight: 'bold', color: '#10B981'}}>{formatCurrency(numberFrom(payout.netRevenue))}</span></div>
-                      <div className="info-item"><span className="label">Pending Orders:</span><span className="value">{numberFrom(payout.pendingPayouts)}</span></div>
+                      <div className="info-item"><span className="label">Platform Commission:</span><span className="value">{formatCurrency(numberFrom(payout.totalCommission))}</span></div>
+                      <div className="info-item"><span className="label">Net Payout:</span><span className="value" style={{fontWeight: 'bold', color: '#10B981'}}>{formatCurrency(numberFrom(payout.totalNetPayout))}</span></div>
+                      <div className="info-item"><span className="label">Pending Orders:</span><span className="value">{numberFrom(payout.pendingPayoutsCount)}</span></div>
                     </div>
                     <div className="payout-actions">
                       <button className="admin-btn admin-btn-primary" onClick={() => processPayout(payout.providerId)}>
-                        Process Payout ({formatCurrency(numberFrom(payout.netRevenue))})
+                        Process Payout ({formatCurrency(numberFrom(payout.totalNetPayout))})
                       </button>
                       <button className="admin-btn admin-btn-outline" onClick={noopAlert(`View payout details for ${payout.providerId}`)}>View Details</button>
                     </div>

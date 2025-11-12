@@ -116,14 +116,14 @@ public class DashboardAnalyticsService {
                 .filter(order -> order.getDatasetId().equals(datasetId))
                 .collect(Collectors.toList());
 
-        // Tính toán metrics
+        // Tinh toan metrics chi tu orders da APPROVED
         double totalRevenue = datasetOrders.stream()
-                .filter(order -> "PAID".equals(order.getStatus()))
+                .filter(order -> "APPROVED".equals(order.getStatus()))
                 .mapToDouble(Order::getAmount)
                 .sum();
 
         long totalOrders = datasetOrders.stream()
-                .filter(order -> "PAID".equals(order.getStatus()))
+                .filter(order -> "APPROVED".equals(order.getStatus()))
                 .count();
 
         double averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;

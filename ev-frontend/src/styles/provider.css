@@ -3,16 +3,33 @@
    All selectors below are scoped to the .provider-page root to avoid
    colliding with other pages' CSS. */
 
-/* Hide unwanted password change modal */
-[role="dialog"]:has(*:is(h1, h2, h3, h4, h5, h6, p, span, div):is([class*="title"], [class*="header"]):is(:contains("Thay đổi"), :contains("mật khẩu"), :contains("password"))),
-.modal:has(*:contains("Thay đổi mật khẩu")),
-.dialog:has(*:contains("mật khẩu ban")),
-div[style*="position: fixed"]:has(*:contains("Thay đổi")),
-div[style*="z-index"]:has(*:contains("mật khẩu")) {
+/* NUCLEAR OPTION: Hide ALL fixed/absolute positioned high z-index elements */
+body > div[style*="position: fixed"],
+body > div[style*="position:fixed"],
+body > div[style*="z-index"],
+body > section[style*="position: fixed"],
+body > aside[style*="position: fixed"],
+div[style*="position: fixed"][style*="z-index"],
+div[style*="z-index: 999"],
+div[style*="z-index: 9999"],
+div[style*="z-index:999"],
+div[style*="z-index:9999"],
+[role="dialog"],
+[role="alertdialog"],
+.swal2-container,
+.swal-overlay,
+.sweet-alert,
+.modal-backdrop,
+[class*="modal"],
+[class*="dialog"],
+[class*="popup"],
+[class*="overlay"],
+[class*="alert-wrapper"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+  z-index: -9999 !important;
 }
 
 .provider-page .provider-menu {

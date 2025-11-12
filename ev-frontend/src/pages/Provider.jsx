@@ -224,23 +224,57 @@ const Provider = () => {
   // Fetch revenue statistics
   const fetchRevenueStats = async () => {
     try {
+      console.log('[Provider Revenue] Fetching revenue stats...');
+      console.log('[Provider Revenue] Auth token:', localStorage.getItem('authToken') ? 'EXISTS' : 'MISSING');
+      
       // Mock providerId = 1, in production get from auth context
       const response = await axiosInstance.get('/provider/revenue/report?providerId=1');
       const data = response.data;
-      setStats({
-        totalRevenue: `$${data.totalRevenue?.toFixed(2) || '0.00'}`,
-        downloads: data.totalOrders?.toString() || '0',
-        buyers: '86' // Mock, would need separate API
-      });
       
-      // Update monthly revenue data
-      if (data.monthlyRevenue && data.monthlyRevenue.length > 0) {
-        const monthlyData = data.monthlyRevenue.map(m => m.revenue || 0);
-        revenueDataRef.current = monthlyData;
-        renderMiniChart(revFilter);
+      console.log('[Provider Revenue] API Response:', data);
+      console.log('[Provider Revenue] Total Revenue:', data.totalRevenue);
+      console.log('[Provider Revenue] Total Orders:', data.totalOrders);
+      
+      // Handle case where backend returns valid response
+      if (data && typeof data.totalRevenue !== 'undefined') {
+        const formattedStats = {
+          totalRevenue: `$${data.totalRevenue?.toFixed(2) || '0.00'}`,
+          downloads: data.totalOrders?.toString() || '0',
+          buyers: '86' // Mock, would need separate API
+        };
+        
+        console.log('[Provider Revenue] Setting stats:', formattedStats);
+        setStats(formattedStats);
+        
+        // Update monthly revenue data
+        if (data.monthlyRevenue && data.monthlyRevenue.length > 0) {
+          const monthlyData = data.monthlyRevenue.map(m => m.revenue || 0);
+          revenueDataRef.current = monthlyData;
+          renderMiniChart(revFilter);
+        }
+        
+        console.log('[Provider Revenue] ✓ Revenue stats updated successfully');
+      } else {
+        console.warn('[Provider Revenue] Invalid API response format:', data);
+        setStats({ totalRevenue: '$0.00', downloads: '0', buyers: '0' });
       }
     } catch (error) {
-      console.error('Error fetching revenue stats:', error);
+      console.error('[Provider Revenue] ✗ Error fetching revenue stats:', error);
+      console.error('[Provider Revenue] Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // If 401 unauthorized, prompt re-login
+      if (error.response?.status === 401) {
+        console.warn('[Provider Revenue] Authentication failed - token may be expired');
+        alert('Your session has expired. Please log in again.');
+        localStorage.removeItem('authToken');
+        navigate('/login');
+        return;
+      }
+      
       // Keep default stats on error
       setStats({ totalRevenue: '$0.00', downloads: '0', buyers: '0' });
     }
