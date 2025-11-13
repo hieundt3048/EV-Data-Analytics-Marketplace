@@ -713,24 +713,11 @@ const Admin = () => {
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>Revenue Overview</h2>
-              <div className="header-actions">
-                <select id="timePeriod" defaultValue="week">
-                  <option value="today">Today</option>
-                  <option value="week">This Week</option>
-                  <option value="month">This Month</option>
-                  <option value="quarter">This Quarter</option>
-                  <option value="year">This Year</option>
-                </select>
-                <button className="admin-btn admin-btn-outline" onClick={noopAlert('Export report')}>
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                  Export Report
-                </button>
-              </div>
             </div>
 
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon">💰</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
                 <div className="stat-content">
                   <h3>{paymentStats ? formatCurrency(paymentStats.totalRevenue || 0) : formatCurrency(totalRevenue)}</h3>
                   <p>Total Revenue</p>
@@ -738,7 +725,7 @@ const Admin = () => {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">🧾</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
                 <div className="stat-content">
                   <h3>{paymentStats ? formatNumber(paymentStats.totalTransactions || 0) : formatNumber(totalTransactions)}</h3>
                   <p>Transactions</p>
@@ -746,7 +733,7 @@ const Admin = () => {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">💸</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div>
                 <div className="stat-content">
                   <h3>{paymentStats ? formatCurrency(paymentStats.providerPayouts || 0) : formatCurrency(totalPayout)}</h3>
                   <p>Provider Payouts</p>
@@ -754,18 +741,13 @@ const Admin = () => {
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">📈</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>
                 <div className="stat-content">
                   <h3>{paymentStats ? formatCurrency(paymentStats.platformCommissions || 0) : formatCurrency(platformRevenue)}</h3>
                   <p>Platform Revenue ({paymentStats?.commissionRate || '20%'})</p>
                   <span className="stat-change neutral">Commission</span>
                 </div>
               </div>
-            </div>
-
-            <div className="chart-container">
-              <div className="chart-header"><h3>Revenue Trends</h3></div>
-              <div className="chart-placeholder">(Revenue chart placeholder)</div>
             </div>
 
             <section className="admin-section">
@@ -880,23 +862,13 @@ const Admin = () => {
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>Security Overview</h2>
-              <div className="header-actions">
-                <button className="admin-btn admin-btn-primary" onClick={noopAlert('Security scan initiated (demo)')}>
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                  Run Security Scan
-                </button>
-                <button className="admin-btn admin-btn-outline" onClick={noopAlert('Export logs (demo)')}>
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                  Export Logs
-                </button>
-              </div>
             </div>
 
             <div className="stats-grid">
-              <div className="stat-card"><div className="stat-icon security"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div className="stat-content"><h3>98.2%</h3><p>System Uptime</p><span className="stat-change positive">+2.1%</span></div></div>
-              <div className="stat-card"><div className="stat-icon security"><svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/></svg></div><div className="stat-content"><h3>{formatNumber(activeApiKeyCount)}</h3><p>Active API Keys</p><span className="stat-change neutral">Live</span></div></div>
-              <div className="stat-card"><div className="stat-icon security"><svg viewBox="0 0 24 24"><path d="M20 8h-3V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></div><div className="stat-content"><h3>3</h3><p>Security Alerts</p><span className="stat-change negative">+1</span></div></div>
-              <div className="stat-card"><div className="stat-icon security"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 8c0 1.1-.9 2-2 2h-2v2h4v2H9v-4c0-1.1.9-2 2-2h2V9H9V7h4c1.1 0 2 .9 2 2v2z"/></svg></div><div className="stat-content"><h3>100%</h3><p>GDPR Compliance</p><span className="stat-change positive">+5%</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div className="stat-content"><h3>98.2%</h3><p>System Uptime</p><span className="stat-change positive">+2.1%</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/></svg></div><div className="stat-content"><h3>{formatNumber(activeApiKeyCount)}</h3><p>Active API Keys</p><span className="stat-change neutral">Live</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M20 8h-3V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></div><div className="stat-content"><h3>3</h3><p>Security Alerts</p><span className="stat-change negative">+1</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 8c0 1.1-.9 2-2 2h-2v2h4v2H9v-4c0-1.1.9-2 2-2h2V9H9V7h4c1.1 0 2 .9 2 2v2z"/></svg></div><div className="stat-content"><h3>100%</h3><p>GDPR Compliance</p><span className="stat-change positive">+5%</span></div></div>
             </div>
 
             <div className="alerts-container">
@@ -967,14 +939,6 @@ const Admin = () => {
             </section>
 
             <section className="admin-section">
-              <h2>Data Access Logs</h2>
-              <div className="table-container">
-                <div className="table-header"><h3>Recent Access Events</h3><div className="table-filters"><select id="logType"><option value="">All Events</option><option value="login">Login</option><option value="data_access">Data Access</option><option value="api_call">API Call</option><option value="export">Data Export</option></select><select id="logStatus"><option value="">All Status</option><option value="success">Success</option><option value="failed">Failed</option></select></div></div>
-                <div className="table-wrapper"><table className="user-table"><thead><tr><th>Timestamp</th><th>User</th><th>Event Type</th><th>IP Address</th><th>Resource</th><th>Status</th><th>Details</th></tr></thead><tbody><tr><td>2024-03-15 14:30:15</td><td><div className="user-info"><div className="user-avatar">JD</div><div><div className="user-name">John Doe</div></div></div></td><td><span className="event-badge data_access">Data Access</span></td><td>192.168.1.100</td><td>/api/v1/datasets/7842</td><td><span className="status-badge completed">Success</span></td><td><button className="admin-btn admin-btn-outline" onClick={noopAlert('View log details 1')}>View Details</button></td></tr><tr><td>2024-03-15 14:28:03</td><td><div className="user-info"><div className="user-avatar">SJ</div><div><div className="user-name">Sarah Johnson</div></div></div></td><td><span className="event-badge api_call">API Call</span></td><td>203.0.113.45</td><td>/api/v1/analytics/battery-health</td><td><span className="status-badge completed">Success</span></td><td><button className="admin-btn admin-btn-outline" onClick={noopAlert('View log details 2')}>View Details</button></td></tr><tr><td>2024-03-15 14:25:47</td><td><div className="user-info"><div className="user-avatar">-</div><div><div className="user-name">Unknown</div></div></div></td><td><span className="event-badge login">Login</span></td><td>198.51.100.23</td><td>/login</td><td><span className="status-badge failed">Failed</span></td><td><button className="admin-btn admin-btn-outline" onClick={noopAlert('View log details 3')}>View Details</button></td></tr></tbody></table></div>
-              </div>
-            </section>
-
-            <section className="admin-section">
               <h2>Compliance Status</h2>
               <div className="compliance-grid"><div className="compliance-card"><div className="compliance-header"><h4>GDPR Compliance</h4><span className="compliance-score excellent">100%</span></div><div className="compliance-progress"><div className="progress-bar"><div className="progress-fill" style={{width: '100%'}}></div></div></div><div className="compliance-details"><div className="detail-item"><span className="label">Data Anonymization:</span><span className="value compliant">Compliant</span></div><div className="detail-item"><span className="label">Right to Erasure:</span><span className="value compliant">Compliant</span></div><div className="detail-item"><span className="label">Data Portability:</span><span className="value compliant">Compliant</span></div></div></div>
 
@@ -989,35 +953,23 @@ const Admin = () => {
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>Platform Performance</h2>
-              <div className="header-actions">
-                <select id="analyticsPeriod">
-                  <option value="week">Last 7 Days</option>
-                  <option value="month">Last 30 Days</option>
-                  <option value="quarter">Last 90 Days</option>
-                  <option value="year">Last 12 Months</option>
-                </select>
-                <button className="admin-btn admin-btn-outline" onClick={noopAlert('Export analytics')}>
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                  Export Report
-                </button>
-              </div>
             </div>
 
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon">📈</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>
                 <div className="stat-content"><h3>1,247</h3><p>Active Users</p><span className="stat-change positive">+15.3%</span></div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">📊</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg></div>
                 <div className="stat-content"><h3>568</h3><p>Datasets Available</p><span className="stat-change positive">+8.7%</span></div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">💰</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
                 <div className="stat-content"><h3>$42,850</h3><p>Monthly Revenue</p><span className="stat-change positive">+12.5%</span></div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon">🔌</div>
+                <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
                 <div className="stat-content"><h3>3,842</h3><p>API Requests</p><span className="stat-change positive">+22.1%</span></div>
               </div>
             </div>
@@ -1063,25 +1015,6 @@ const Admin = () => {
                     <div className="legend-item"><div className="legend-color" style={{background: '#10B981'}} /> <span>Driving (20%)</span></div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="admin-section">
-            <h2>Most Popular Datasets</h2>
-            <div className="table-container">
-              <div className="table-header"><h3>Top Performing Datasets</h3></div>
-              <div className="table-wrapper">
-                <table className="user-table">
-                  <thead>
-                    <tr><th>Dataset</th><th>Category</th><th>Provider</th><th>Downloads</th><th>Revenue</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>Battery Health (SOH)</td><td>Battery Data</td><td>Sarah Johnson</td><td>247</td><td>$7,410</td></tr>
-                    <tr><td>Charging Behavior</td><td>Charging Data</td><td>EV Research Lab</td><td>189</td><td>$5,670</td></tr>
-                    <tr><td>Driving Patterns</td><td>Driving Data</td><td>Mike Rodriguez</td><td>156</td><td>$4,680</td></tr>
-                  </tbody>
-                </table>
               </div>
             </div>
           </section>

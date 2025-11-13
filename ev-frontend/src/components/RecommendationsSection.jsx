@@ -170,6 +170,11 @@ const RecommendationsSection = ({ fetchWithAuth }) => {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 30px;
+          flex-wrap: wrap;
+          gap: 15px;
+        }
+        .section-header h2 {
+          margin: 0;
         }
         .view-toggle {
           display: flex;
@@ -191,15 +196,19 @@ const RecommendationsSection = ({ fetchWithAuth }) => {
         }
         .recommendations-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
           gap: 20px;
         }
         .recommendation-card {
           background: white;
           border: 1px solid #ddd;
           border-radius: 12px;
-          padding: 20px;
+          padding: 16px;
           transition: transform 0.2s, box-shadow 0.2s;
+          display: flex;
+          flex-direction: column;
+          min-height: 300px;
+          overflow: hidden;
         }
         .recommendation-card:hover {
           transform: translateY(-5px);
@@ -209,63 +218,96 @@ const RecommendationsSection = ({ fetchWithAuth }) => {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
+          gap: 10px;
+        }
+        .dataset-info {
+          flex: 1;
+          min-width: 0;
         }
         .dataset-info h3 {
-          margin: 0 0 8px 0;
-          font-size: 18px;
+          margin: 0 0 6px 0;
+          font-size: 16px;
           color: #333;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          line-height: 1.3;
         }
         .category-badge {
           display: inline-block;
-          padding: 4px 8px;
+          padding: 3px 8px;
           background: #e9ecef;
           border-radius: 4px;
-          font-size: 12px;
+          font-size: 11px;
           color: #666;
+          white-space: nowrap;
         }
         .recommendation-score {
-          padding: 8px 12px;
+          padding: 6px 10px;
           border-radius: 8px;
           color: white;
           font-weight: bold;
-          font-size: 16px;
+          font-size: 14px;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
         .dataset-description {
           color: #666;
-          font-size: 14px;
-          margin-bottom: 15px;
-          line-height: 1.5;
+          font-size: 13px;
+          margin-bottom: 12px;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .recommendation-meta {
           display: flex;
           flex-direction: column;
-          gap: 8px;
-          margin-bottom: 15px;
-          padding-top: 15px;
+          gap: 6px;
+          margin-bottom: 12px;
+          padding-top: 12px;
           border-top: 1px solid #eee;
+          flex-grow: 1;
         }
         .meta-item {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 14px;
+          gap: 6px;
+          font-size: 13px;
           color: #666;
         }
         .meta-icon {
-          font-size: 18px;
+          font-size: 16px;
+          flex-shrink: 0;
+        }
+        .meta-text {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
         .card-footer {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding-top: 15px;
+          padding-top: 12px;
           border-top: 1px solid #eee;
+          margin-top: auto;
+          gap: 10px;
         }
         .price {
-          font-size: 24px;
+          font-size: 18px;
           font-weight: bold;
           color: #28a745;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .consumer-btn-sm {
+          font-size: 0.8125rem;
+          padding: 0.5rem 0.875rem;
+          white-space: nowrap;
+          flex-shrink: 0;
+          min-width: fit-content;
         }
         .loading-spinner {
           display: flex;
@@ -300,6 +342,22 @@ const RecommendationsSection = ({ fetchWithAuth }) => {
           background: #f8d7da;
           color: #721c24;
           border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+          .recommendations-grid {
+            grid-template-columns: 1fr;
+          }
+          .section-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .view-toggle {
+            width: 100%;
+          }
+          .toggle-btn {
+            flex: 1;
+          }
         }
       `}</style>
     </div>
