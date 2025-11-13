@@ -1,8 +1,4 @@
 com\evmarketplace\Controller\ProviderDatasetController.class
-com\evmarketplace\privacy\AnonymizationJob.class
 com\evmarketplace\Controller\OrderCheckoutController.class
-com\evmarketplace\admin\AdminManager.class
-com\evmarketplace\Service\DatasetIngestService.class
 com\evmarketplace\config\DataInitializer.class
 com\evmarketplace\Controller\DashboardAnalyticsController.class
-com\evmarketplace\admin\RevenueReport.class

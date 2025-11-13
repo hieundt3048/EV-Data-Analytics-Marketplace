@@ -721,15 +721,19 @@ const Admin = () => {
                 <div className="stat-content">
                   <h3>{paymentStats ? formatCurrency(paymentStats.totalRevenue || 0) : formatCurrency(totalRevenue)}</h3>
                   <p>Total Revenue</p>
-                  <span className="stat-change neutral">Live</span>
+                  <span className="stat-change positive">
+                    {paymentStats ? `${formatNumber(paymentStats.completedTransactions || 0)} completed` : 'Live'}
+                  </span>
                 </div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
                 <div className="stat-content">
-                  <h3>{paymentStats ? formatNumber(paymentStats.totalTransactions || 0) : formatNumber(totalTransactions)}</h3>
+                  <h3>{paymentStats ? formatNumber(paymentStats.completedTransactions || 0) : formatNumber(successfulTransactions)}</h3>
                   <p>Transactions</p>
-                  <span className="stat-change neutral">{paymentStats ? formatNumber(paymentStats.totalTransactions || 0) : formatNumber(successfulTransactions)} completed</span>
+                  <span className="stat-change neutral">
+                    {paymentStats ? `${formatNumber(paymentStats.totalTransactions || 0)} total` : `${formatNumber(totalTransactions)} total`}
+                  </span>
                 </div>
               </div>
               <div className="stat-card">
@@ -744,8 +748,8 @@ const Admin = () => {
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>
                 <div className="stat-content">
                   <h3>{paymentStats ? formatCurrency(paymentStats.platformCommissions || 0) : formatCurrency(platformRevenue)}</h3>
-                  <p>Platform Revenue ({paymentStats?.commissionRate || '20%'})</p>
-                  <span className="stat-change neutral">Commission</span>
+                  <p>Platform Revenue (30%)</p>
+                  <span className="stat-change positive">Commission</span>
                 </div>
               </div>
             </div>

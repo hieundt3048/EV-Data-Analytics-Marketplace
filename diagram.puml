@@ -1,385 +1,1281 @@
-@startuml
-' EV Data Analytics Marketplace - Class Diagram (fixed)
+@startuml EV-Data-Analytics-Marketplace-Backend
 
-skinparam classAttributeIconSize 0
+' ========== ENTITIES (POJO & DOMAIN MODELS) ==========
 
-' --------------------
-' Domain / Auth
-' --------------------
-package auth {
-  class User {
-    + id : UUID
-    + name : String
-    + email : String
-    + passwordHash : String
-    + roles : String
-    + organization : String
-    + register()
-    + authenticate()
-    + updateProfile()
-  }
+package "com.evmarketplace.Pojo" {
+    class User {
+        - Long id
+        - String name
+        - String email
+        - String passwordHash
+        - String organization
+        - Set<Role> roles
+        + User()
+        + User(String, String, String)
+        + getId(): Long
+        + setId(Long): void
+        + getName(): String
+        + setName(String): void
+        + getEmail(): String
+        + setEmail(String): void
+        + getPasswordHash(): String
+        + setPasswordHash(String): void
+        + getOrganization(): String
+        + setOrganization(String): void
+        + getRoles(): Set<Role>
+        + setRoles(Set<Role>): void
+    }
 
-  class ProviderProfile {
-    + id : UUID
-    + userId : UUID
-    + providerName : String
-    + description : String
-    + bankAccount : String
-    + rating : Double
-    + uploadDataset()
-    + setPricingPolicy()
-  }
+    class Role {
+        - Long id
+        - String name
+        + Role()
+        + Role(String)
+        + getId(): Long
+        + setId(Long): void
+        + getName(): String
+        + setName(String): void
+    }
 
-  class ConsumerProfile {
-    + id : UUID
-    + userId : UUID
-    + companyName : String
-    + industry : String
-    + contactEmail : String
-    + contactPhone : String
-    + preferredDataFormat : String
-    + apiRateLimitPerMinute : Integer
-    + billingAccount : String
-    + vatNumber : String
-    + notes : String
-  }
+    class Dataset {
+        - Long id
+        - String title
+        - String description
+        - Double price
+        - Boolean isSubscription
+        - LocalDateTime createdAt
+        - Category category
+        - String region
+        - String dataType
+        - String size
+        - String tags
+        - String vehicleType
+        - Integer purchaseCount
+        - String collectionDate
+        + Dataset()
+        + getId(): Long
+        + setId(Long): void
+        + getTitle(): String
+        + setTitle(String): void
+        + getDescription(): String
+        + setDescription(String): void
+        + getPrice(): Double
+        + setPrice(Double): void
+        + getCategory(): Category
+        + setCategory(Category): void
+        + getRegion(): String
+        + setRegion(String): void
+    }
 
-  class APIKey {
-    + id : UUID
-    + consumerId : UUID
-    + keyValue : String
-    + scopes : String
-    + rateLimit : int
-    + expiresAt : Date
-    + revoke()
-  }
+    class Category {
+        - Long id
+        - String name
+        + Category()
+        + getId(): Long
+        + setId(Long): void
+        + getName(): String
+        + setName(String): void
+    }
+
+    class Order {
+        - Long id
+        - Long datasetId
+        - Long buyerId
+        - Long providerId
+        - Double amount
+        - LocalDateTime orderDate
+        - String status
+        - LocalDateTime payoutDate
+        - Double platformRevenue
+        - Double providerRevenue
+        + Order()
+        + Order(Long, Long, Long, Double, LocalDateTime, String)
+        + getId(): Long
+        + setId(Long): void
+        + getDatasetId(): Long
+        + setDatasetId(Long): void
+        + getBuyerId(): Long
+        + setBuyerId(Long): void
+        + getProviderId(): Long
+        + setProviderId(Long): void
+        + getAmount(): Double
+        + setAmount(Double): void
+        + getOrderDate(): LocalDateTime
+        + setOrderDate(LocalDateTime): void
+        + getStatus(): String
+        + setStatus(String): void
+    }
+
+    class Payment {
+        - Long id
+        - String provider
+        - String providerPaymentId
+        - Double amount
+        - String currency
+        - String status
+        - LocalDateTime paidAt
+        - Order order
+        + Payment()
+        + getId(): Long
+        + setId(Long): void
+        + getProvider(): String
+        + setProvider(String): void
+        + getAmount(): Double
+        + setAmount(Double): void
+        + getStatus(): String
+        + setStatus(String): void
+    }
+
+    class Consumer {
+        - Long id
+        - String name
+        - String email
+        - String organization
+        - String role
+        - String industry
+        - String region
+        - String companySize
+        - String useCaseType
+        - List<Order> orders
+        - List<Subscription> subscriptions
+        + Consumer()
+        + getId(): Long
+        + setId(Long): void
+        + getName(): String
+        + setName(String): void
+        + getEmail(): String
+        + setEmail(String): void
+    }
+
+    class Subscription {
+        - Long id
+        - String planName
+        - Double price
+        - LocalDateTime startDate
+        - LocalDateTime endDate
+        - String status
+        + Subscription()
+        + getId(): Long
+        + setId(Long): void
+        + getPlanName(): String
+        + setPlanName(String): void
+        + getPrice(): Double
+        + setPrice(Double): void
+    }
+
+    class ProviderDataset {
+        - Long id
+        - Long userId
+        - String datasetName
+        - String filePath
+        - LocalDateTime uploadedAt
+        + ProviderDataset()
+        + getId(): Long
+        + setId(Long): void
+        + getUserId(): Long
+        + setUserId(Long): void
+        + getDatasetName(): String
+        + setDatasetName(String): void
+    }
+
+    class Dashboard {
+        - Long id
+        - String name
+        - String configuration
+        + Dashboard()
+        + getId(): Long
+        + setId(Long): void
+        + getName(): String
+        + setName(String): void
+    }
+
+    class APIKey {
+        - UUID id
+        - UUID consumerId
+        - String key
+        - List<String> scopes
+        - int rateLimit
+        - Date createdAt
+        - Date expiresAt
+        + APIKey()
+        + APIKey(UUID, String)
+        + getId(): UUID
+        + getConsumerId(): UUID
+        + setConsumerId(UUID): void
+        + getKey(): String
+        + setKey(String): void
+        + getScopes(): List<String>
+        + setScopes(List<String>): void
+        + getRateLimit(): int
+        + setRateLimit(int): void
+    }
+
+    class ApiUsageLog {
+        - Long id
+        - UUID apiKeyId
+        - String endpoint
+        - LocalDateTime timestamp
+        - int responseStatus
+        + ApiUsageLog()
+        + getId(): Long
+        + setId(Long): void
+        + getApiKeyId(): UUID
+        + setApiKeyId(UUID): void
+    }
+
+    class ConsumerProfile {
+        - UUID id
+        - UUID userId
+        - String organization
+        - String contactInfo
+        - String paymentInfo
+        + ConsumerProfile()
+        + getId(): UUID
+        + setId(UUID): void
+        + getUserId(): UUID
+        + setUserId(UUID): void
+    }
+
+    class ProviderProfile {
+        - UUID id
+        - UUID userId
+        - String providerName
+        - String description
+        - String bankAccount
+        - Double rating
+        + ProviderProfile()
+        + getId(): UUID
+        + setId(UUID): void
+        + getUserId(): UUID
+        + setUserId(UUID): void
+        + getProviderName(): String
+        + setProviderName(String): void
+        + getRating(): Double
+        + setRating(Double): void
+    }
+
+    class RevenueReportDTO {
+        - Double totalRevenue
+        - Double platformRevenue
+        - Double providerRevenue
+        - List<MonthlyRevenue> monthlyBreakdown
+        + getTotalRevenue(): Double
+        + setTotalRevenue(Double): void
+    }
 }
 
-' --------------------
-' Data models
-' --------------------
-package data {
-  enum DataType {
-    TELEMETRY
-    BATTERY
-    CHARGING
-    V2G
-    TRANSACTION
-  }
+package "com.evmarketplace.data" {
+    class DataProvider {
+        - UUID id
+        - User user
+        - String providerName
+        - String description
+        - String contactEmail
+        - boolean approved
+        + DataProvider()
+        + DataProvider(User, String)
+        + getId(): UUID
+        + getUser(): User
+        + setUser(User): void
+        + getProviderName(): String
+        + setProviderName(String): void
+        + isApproved(): boolean
+        + setApproved(boolean): void
+    }
 
-  enum Format {
-    CSV
-    JSON
-    PARQUET
-    API
-  }
+    class DataProduct {
+        - UUID id
+        - DataProvider provider
+        - String title
+        - String description
+        - List<String> categories
+        - List<String> tags
+        - DataType dataType
+        - Format format
+        - long sizeBytes
+        - String region
+        - Instant startTime
+        - Instant endTime
+        - ProductStatus status
+        - Map<String, String> attributes
+        + DataProduct()
+        + DataProduct(DataProvider, String)
+        + getId(): UUID
+        + getProvider(): DataProvider
+        + setProvider(DataProvider): void
+        + getTitle(): String
+        + setTitle(String): void
+        + getStatus(): ProductStatus
+        + setStatus(ProductStatus): void
+    }
 
-  enum ProductStatus {
-    DRAFT
-    PENDING_REVIEW
-    PUBLISHED
-    ARCHIVED
-  }
+    class DataAsset {
+        - UUID id
+        - String name
+        - String description
+        - String assetType
+        + DataAsset()
+        + getId(): UUID
+        + setId(UUID): void
+        + getName(): String
+        + setName(String): void
+    }
 
-  class DataProduct {
-    + id : UUID
-    + providerId : UUID
-    + title : String
-    + description : String
-    + categories : String
-    + tags : String
-    + dataType : String
-    + format : String
-    + sizeBytes : long
-    + region : String
-    + startTime : Date
-    + endTime : Date
-    + status : String
-    + publish()
-    + requestReview()
-    + anonymize()
-  }
+    class DatasetMetadata {
+        - UUID id
+        - String title
+        - String description
+        - Map<String, String> metadata
+        + DatasetMetadata()
+        + getId(): UUID
+        + setId(UUID): void
+        + getTitle(): String
+        + setTitle(String): void
+    }
 
-  class DataAsset {
-    + id : UUID
-    + productId : UUID
-    + storageUri : String
-    + fileName : String
-    + sizeBytes : long
-    + checksum : String
-    + mimeType : String
-    + version : String
-  }
+    enum DataType {
+        RAW
+        PROCESSED
+        AGGREGATED
+    }
 
-  class DatasetMetadata {
-    + id : UUID
-    + productId : UUID
-    + keyValues : String
-  }
+    enum Format {
+        CSV
+        JSON
+        PARQUET
+        XML
+    }
+
+    enum ProductStatus {
+        DRAFT
+        PENDING_REVIEW
+        PUBLISHED
+        ARCHIVED
+    }
 }
 
-' --------------------
-' Marketplace
-' --------------------
-package marketplace {
-  enum PricingModel {
-    PER_DOWNLOAD
-    SUBSCRIPTION
-    API_ACCESS
-  }
+package "com.evmarketplace.marketplace" {
+    class Purchase {
+        - UUID id
+        - UUID consumerId
+        - UUID productId
+        - UUID pricingPolicyId
+        - BigDecimal amount
+        - String currency
+        - PurchaseStatus status
+        - Date createdAt
+        + Purchase()
+        + Purchase(UUID, UUID)
+        + getId(): UUID
+        + getConsumerId(): UUID
+        + setConsumerId(UUID): void
+        + getProductId(): UUID
+        + setProductId(UUID): void
+        + getStatus(): PurchaseStatus
+        + setStatus(PurchaseStatus): void
+    }
 
-  enum AllowedUse {
-    RESEARCH
-    COMMERCIAL
-    OPEN
-  }
+    class PricingPolicy {
+        - UUID id
+        - PricingModel model
+        - BigDecimal basePrice
+        - String currency
+        - String pricingUnit
+        + PricingPolicy()
+        + getId(): UUID
+        + setId(UUID): void
+        + getModel(): PricingModel
+        + setModel(PricingModel): void
+        + getBasePrice(): BigDecimal
+        + setBasePrice(BigDecimal): void
+    }
 
-  class PricingPolicy {
-    + id : UUID
-    + productId : UUID
-    + model : String
-    + price : String
-    + currency : String
-    + billingUnit : String
-    + calculatePrice()
-  }
+    class UsagePolicy {
+        - UUID id
+        - AllowedUse allowedUse
+        - String restrictions
+        + UsagePolicy()
+        + getId(): UUID
+        + setId(UUID): void
+        + getAllowedUse(): AllowedUse
+        + setAllowedUse(AllowedUse): void
+    }
 
-  class UsagePolicy {
-    + id : UUID
-    + productId : UUID
-    + allowedUse : String
-    + restrictions : String
-  }
+    class AccessGrant {
+        - UUID id
+        - UUID consumerId
+        - UUID productId
+        - AccessType accessType
+        - Date grantedAt
+        - Date expiresAt
+        + AccessGrant()
+        + getId(): UUID
+        + getConsumerId(): UUID
+        + setConsumerId(UUID): void
+        + getAccessType(): AccessType
+        + setAccessType(AccessType): void
+    }
 
-  class Purchase {
-    + id : UUID
-    + consumerId : UUID
-    + productId : UUID
-    + pricingPolicyId : UUID
-    + amount : String
-    + currency : String
-    + status : String
-    + createdAt : Date
-    + completePurchase()
-  }
+    enum PurchaseStatus {
+        INITIATED
+        COMPLETED
+        FAILED
+        REFUNDED
+    }
 
-  class Subscription {
-    + id : UUID
-    + consumerId : UUID
-    + planId : UUID
-    + startDate : Date
-    + endDate : Date
-    + recurringFee : String
-    + status : String
-  }
+    enum PricingModel {
+        PAY_PER_USE
+        SUBSCRIPTION
+        ONE_TIME
+    }
 
-  class AccessGrant {
-    + id : UUID
-    + consumerId : UUID
-    + productId : UUID
-    + accessType : String
-    + grantedAt : Date
-    + expiresAt : Date
-    + revoke()
-  }
+    enum AllowedUse {
+        COMMERCIAL
+        RESEARCH
+        INTERNAL
+    }
+
+    enum AccessType {
+        FULL
+        LIMITED
+        READ_ONLY
+    }
 }
 
-' --------------------
-' Billing
-' --------------------
-package billing {
-  enum PaymentMethod {
-    CARD
-    BANK_TRANSFER
-    WALLET
-  }
+package "com.evmarketplace.billing" {
+    class Transaction {
+        - UUID id
+        - UUID purchaseId
+        - UUID subscriptionId
+        - BigDecimal amount
+        - BigDecimal providerShare
+        - BigDecimal platformFee
+        - PaymentMethod method
+        - PaymentStatus status
+        - Date timestamp
+        + Transaction()
+        + Transaction(UUID, BigDecimal)
+        + getId(): UUID
+        + getPurchaseId(): UUID
+        + setPurchaseId(UUID): void
+        + getAmount(): BigDecimal
+        + setAmount(BigDecimal): void
+        + getStatus(): PaymentStatus
+        + setStatus(PaymentStatus): void
+    }
 
-  enum PaymentStatus {
-    PENDING
-    SUCCESS
-    FAILED
-    REFUNDED
-  }
+    class Invoice {
+        - UUID id
+        - UUID transactionId
+        - String pdfUrl
+        + Invoice()
+        + getId(): UUID
+        + setId(UUID): void
+        + getTransactionId(): UUID
+        + setTransactionId(UUID): void
+        + getPdfUrl(): String
+        + setPdfUrl(String): void
+    }
 
-  class Transaction {
-    + id : UUID
-    + purchaseId : UUID
-    + subscriptionId : UUID
-    + amount : String
-    + providerShare : String
-    + platformFee : String
-    + method : String
-    + status : String
-    + timestamp : Date
-  }
+    enum PaymentMethod {
+        CREDIT_CARD
+        BANK_TRANSFER
+        PAYPAL
+        STRIPE
+    }
 
-  class Invoice {
-    + id : UUID
-    + transactionId : UUID
-    + pdfUrl : String
-    + generatePdf()
-  }
+    enum PaymentStatus {
+        PENDING
+        COMPLETED
+        FAILED
+        REFUNDED
+    }
 }
 
-' --------------------
-' Privacy & Compliance
-' --------------------
-package privacy {
-  enum JobStatus {
-    QUEUED
-    RUNNING
-    COMPLETED
-    FAILED
-  }
+package "com.evmarketplace.privacy" {
+    class Consent {
+        - UUID id
+        - UUID userId
+        - boolean granted
+        - Date consentDate
+        + Consent()
+        + getId(): UUID
+        + setId(UUID): void
+        + isGranted(): boolean
+        + setGranted(boolean): void
+    }
 
-  class AnonymizationJob {
-    + id : UUID
-    + productId : UUID
-    + rules : String
-    + status : String
-    + startedAt : Date
-    + finishedAt : Date
-    + run()
-  }
+    class AuditLog {
+        - UUID id
+        - String action
+        - String userId
+        - Date timestamp
+        + AuditLog()
+        + getId(): UUID
+        + setId(UUID): void
+        + getAction(): String
+        + setAction(String): void
+    }
 
-  class Consent {
-    + id : UUID
-    + subjectId : UUID
-    + consentText : String
-    + grantedAt : Date
-    + revokedAt : Date
-  }
+    class AnonymizationJob {
+        - UUID id
+        - UUID datasetId
+        - JobStatus status
+        - Date startedAt
+        - Date completedAt
+        + AnonymizationJob()
+        + getId(): UUID
+        + setId(UUID): void
+        + getStatus(): JobStatus
+        + setStatus(JobStatus): void
+    }
 
-  class AuditLog {
-    + id : UUID
-    + eventType : String
-    + actorId : UUID
-    + details : String
-    + timestamp : Date
-  }
-}
-
-' --------------------
-' Admin & Analytics
-' --------------------
-package admin {
-  enum ModerationStatus {
-    OPEN
-    APPROVED
-    REJECTED
-  }
-
-  class ModerationRequest {
-    + id : UUID
-    + productId : UUID
-    + adminId : UUID
-    + status : String
-    + reason : String
-    + requestedAt : Date
-    + review()
-  }
-
-  class RevenueReport {
-    + id : UUID
-    + providerId : UUID
-    + periodStart : Date
-    + periodEnd : Date
-    + totalRevenue : String
-    + items : String
-    + generate()
-  }
-}
-
-package analytics {
-  class Dashboard {
-    + id : UUID
-    + consumerId : UUID
-    + widgets : String
-    + generate()
-  }
-
-  class RecommendationEngine {
-    + generateFor()
-  }
-
-  class MarketStats {
-    + periodStart : Date
-    + periodEnd : Date
-    + stats : String
-    + compute()
-  }
+    enum JobStatus {
+        QUEUED
+        RUNNING
+        COMPLETED
+        FAILED
+    }
 }
 
 class Review {
-  + id : UUID
-  + consumerId : UUID
-  + productId : UUID
-  + rating : int
-  + comment : String
-  + createdAt : Date
+    - Long id
+    - Long datasetId
+    - Long userId
+    - int rating
+    - String comment
+    - LocalDateTime createdAt
+    + Review()
+    + getId(): Long
+    + setId(Long): void
+    + getRating(): int
+    + setRating(int): void
 }
 
-' --------------------
-' Associations (after classes/packages to avoid forward reference issues)
-' --------------------
-auth.User "1" -- "0..1" auth.ProviderProfile : has_profile
-auth.User "1" -- "0..1" auth.ConsumerProfile : has_profile
-auth.User "1" -- "0..*" auth.APIKey : issues
+' ========== REPOSITORIES ==========
 
-data.ProviderProfile .. data.DataProduct : provides
-data.DataProduct "1" -- "0..*" data.DataAsset : contains
-data.DataProduct "1" -- "0..1" data.DatasetMetadata : metadata_of
+package "com.evmarketplace.Repository" {
+    interface UserRepository {
+        + findByEmail(String): Optional<User>
+        + existsByEmail(String): boolean
+    }
 
-data.DataProduct "1" -- "0..*" marketplace.PricingPolicy
-data.DataProduct "1" -- "0..*" marketplace.UsagePolicy
+    interface RoleRepository {
+        + findByName(String): Optional<Role>
+    }
 
-auth.User "1" o-- "0..*" marketplace.Purchase : purchases
-auth.User "1" o-- "0..*" marketplace.Subscription : subscribes
+    interface DatasetRepository {
+        + findByCategory(Category): List<Dataset>
+    }
 
-marketplace.Purchase "1" -- "0..1" billing.Transaction : pays_for
-marketplace.Subscription "1" -- "0..*" billing.Transaction : billed_by
+    interface CategoryRepository {
+        + findByName(String): Optional<Category>
+    }
 
-marketplace.AccessGrant "1" -- "0..1" auth.APIKey : linked_to
+    interface OrderRepository {
+        + findByBuyerId(Long): List<Order>
+        + findByProviderId(Long): List<Order>
+    }
 
-admin.ModerationRequest "1" -- "1" data.DataProduct : targets
-admin.RevenueReport "1" -- "0..*" billing.Transaction : summarizes
+    interface PaymentRepository {
+    }
 
-' Repository layer (simplified labels)
-package repository {
-  interface UserRepository
-  interface ProviderProfileRepository
-  interface ConsumerProfileRepository
-  interface APIKeyRepository
-  interface DataProductRepository
-  interface DataAssetRepository
-  interface DatasetMetadataRepository
-  interface PricingPolicyRepository
-  interface UsagePolicyRepository
-  interface PurchaseRepository
-  interface SubscriptionRepository
-  interface AccessGrantRepository
-  interface TransactionRepository
-  interface InvoiceRepository
-  interface AnonymizationJobRepository
-  interface ConsentRepository
-  interface AuditLogRepository
-  interface ModerationRequestRepository
-  interface RevenueReportRepository
-  interface ReviewRepository
+    interface ConsumerRepository {
+        + findByEmail(String): Optional<Consumer>
+    }
+
+    interface SubscriptionRepository {
+        + findByUserId(Long): List<Subscription>
+    }
+
+    interface ProviderDatasetRepository {
+        + findByUserId(Long): List<ProviderDataset>
+    }
+
+    interface DashboardRepository {
+    }
+
+    interface APIKeyRepository {
+        + findByKey(String): Optional<APIKey>
+        + findByConsumerId(UUID): List<APIKey>
+    }
+
+    interface ApiUsageLogRepository {
+        + findByApiKeyId(UUID): List<ApiUsageLog>
+    }
+
+    interface ConsumerProfileRepository {
+        + findByUserId(UUID): Optional<ConsumerProfile>
+    }
+
+    interface ProviderProfileRepository {
+        + findByProviderName(String): Optional<ProviderProfile>
+        + findByUserId(UUID): Optional<ProviderProfile>
+    }
+
+    interface DataProviderRepository {
+        + findByUserId(Long): Optional<DataProvider>
+    }
+
+    interface DataProductRepository {
+        + findByProviderId(UUID): List<DataProduct>
+        + findByStatus(ProductStatus): List<DataProduct>
+    }
+
+    interface DataAssetRepository {
+    }
+
+    interface DatasetMetadataRepository {
+    }
+
+    interface PurchaseRepository {
+        + findByConsumerId(UUID): List<Purchase>
+        + findByStatus(PurchaseStatus): List<Purchase>
+    }
+
+    interface TransactionRepository {
+        + findByPurchaseId(UUID): List<Transaction>
+    }
+
+    interface InvoiceRepository {
+    }
+
+    interface UsagePolicyRepository {
+    }
+
+    interface AccessGrantRepository {
+        + findByConsumerId(UUID): List<AccessGrant>
+    }
 }
 
-' Link simple repo labels to main entities (visual only)
-repository.UserRepository ..> auth.User
-repository.ProviderProfileRepository ..> auth.ProviderProfile
-repository.ConsumerProfileRepository ..> auth.ConsumerProfile
-repository.APIKeyRepository ..> auth.APIKey
-repository.DataProductRepository ..> data.DataProduct
-repository.DataAssetRepository ..> data.DataAsset
-repository.DatasetMetadataRepository ..> data.DatasetMetadata
-repository.PricingPolicyRepository ..> marketplace.PricingPolicy
-repository.PurchaseRepository ..> marketplace.Purchase
-repository.TransactionRepository ..> billing.Transaction
-repository.ModerationRequestRepository ..> admin.ModerationRequest
-repository.ReviewRepository ..> Review
+' ========== SERVICES ==========
+
+package "com.evmarketplace.Service" {
+    class UserService {
+        - UserRepository userRepository
+        - RoleRepository roleRepository
+        - PasswordEncoder passwordEncoder
+        + registerUser(String, String, String): User
+        + authenticateUser(String, String): User
+        + getUserById(Long): Optional<User>
+        + assignRole(User, String): void
+    }
+
+    class DatasetService {
+        - DatasetRepository datasetRepository
+        + getAllDatasets(): List<Dataset>
+        + getDatasetById(Long): Optional<Dataset>
+        + createDataset(Dataset): Dataset
+        + updateDataset(Long, Dataset): Dataset
+        + deleteDataset(Long): void
+    }
+
+    class CategoryService {
+        - CategoryRepository categoryRepository
+        + getAllCategories(): List<Category>
+        + createCategory(Category): Category
+    }
+
+    class OrderService {
+        - OrderRepository orderRepository
+        + createOrder(Order): Order
+        + getOrdersByBuyer(Long): List<Order>
+        + getOrdersByProvider(Long): List<Order>
+        + updateOrderStatus(Long, String): Order
+    }
+
+    class PaymentService {
+        - PaymentRepository paymentRepository
+        + processPayment(Payment): Payment
+        + getPaymentById(Long): Optional<Payment>
+    }
+
+    class ConsumerService {
+        - ConsumerRepository consumerRepository
+        + getConsumerById(Long): Optional<Consumer>
+        + createConsumer(Consumer): Consumer
+        + updateConsumer(Long, Consumer): Consumer
+    }
+
+    class SubscriptionService {
+        - SubscriptionRepository subscriptionRepository
+        + createSubscription(Subscription): Subscription
+        + getSubscriptionsByUser(Long): List<Subscription>
+        + cancelSubscription(Long): void
+    }
+
+    class ProviderDatasetService {
+        - ProviderDatasetRepository providerDatasetRepository
+        + uploadDataset(ProviderDataset): ProviderDataset
+        + getDatasetsByProvider(Long): List<ProviderDataset>
+    }
+
+    class DashboardService {
+        - DashboardRepository dashboardRepository
+        + createDashboard(Dashboard): Dashboard
+        + getDashboardById(Long): Optional<Dashboard>
+    }
+
+    class ApiAccessService {
+        - APIKeyRepository apiKeyRepository
+        + generateApiKey(UUID): APIKey
+        + validateApiKey(String): boolean
+        + revokeApiKey(UUID): void
+    }
+
+    class AuditLogService {
+        + logAction(String, String): void
+        + getAuditLogs(): List<AuditLog>
+    }
+
+    class AnonymizationService {
+        + anonymizeDataset(UUID): AnonymizationJob
+        + checkJobStatus(UUID): JobStatus
+    }
+
+    class AccessControlService {
+        + grantAccess(UUID, UUID, AccessType): AccessGrant
+        + revokeAccess(UUID): void
+        + checkAccess(UUID, UUID): boolean
+    }
+
+    class RecommendationService {
+        + getRecommendations(Long): List<Dataset>
+        + getPersonalizedRecommendations(Long): List<Dataset>
+    }
+
+    class RevenueService {
+        - OrderRepository orderRepository
+        + calculatePlatformRevenue(): Double
+        + calculateProviderRevenue(Long): Double
+    }
+
+    class RevenueAnalyticsService {
+        + getRevenueReport(Long): RevenueReportDTO
+        + getMonthlyRevenue(): List<MonthlyRevenue>
+    }
+
+    class DashboardAnalyticsService {
+        + getDashboardData(): DashboardDataDTO
+        + getAnalytics(Long): Map<String, Object>
+    }
+
+    class ConsumerDashboardService {
+        + getConsumerDashboard(Long): ConsumerDashboardDTO
+    }
+
+    class GDPRComplianceService {
+        + exportUserData(UUID): String
+        + deleteUserData(UUID): void
+        + getConsentStatus(UUID): boolean
+    }
+
+    class RateLimitService {
+        + checkRateLimit(String): boolean
+        + incrementRequestCount(String): void
+    }
+
+    class PayoutService {
+        + processPayout(Long): void
+        + getPayoutBreakdown(Long): PayoutBreakdown
+    }
+
+    class AIAnalyticsService {
+        - WebClient webClient
+        + getAISuggestions(String): AISuggestionsDTO
+        + analyzeDataset(UUID): Map<String, Object>
+    }
+
+    class StripePaymentService {
+        + createPaymentIntent(Double): String
+        + confirmPayment(String): boolean
+    }
+
+    class S3ProviderService {
+        + uploadToS3(String, byte[]): S3Result
+        + deleteFromS3(String): boolean
+    }
+
+    interface SearchService {
+        + search(String): List<Dataset>
+    }
+
+    interface S3StorageService {
+        + upload(String, InputStream): String
+        + download(String): InputStream
+        + delete(String): boolean
+    }
+
+    interface DatasetIngestService {
+        + ingestDataset(Dataset): void
+    }
+
+    interface ModerationService {
+        + moderateContent(String): boolean
+    }
+
+    interface MetricsService {
+        + collectMetrics(): Map<String, Object>
+    }
+
+    class S3StorageServiceImpl {
+        + upload(String, InputStream): String
+        + download(String): InputStream
+        + delete(String): boolean
+    }
+}
+
+' ========== CONTROLLERS ==========
+
+package "com.evmarketplace.Controller" {
+    class DatasetController {
+        - DatasetService datasetService
+        + getAllDatasets(): ResponseEntity
+        + getDatasetById(Long): ResponseEntity
+        + createDataset(Dataset): ResponseEntity
+        + updateDataset(Long, Dataset): ResponseEntity
+        + deleteDataset(Long): ResponseEntity
+    }
+
+    class CategoryController {
+        - CategoryService categoryService
+        + getAllCategories(): ResponseEntity
+        + createCategory(Category): ResponseEntity
+    }
+
+    class PaymentController {
+        - PaymentService paymentService
+        + processPayment(Payment): ResponseEntity
+        + getPaymentById(Long): ResponseEntity
+    }
+
+    class ConsumerController {
+        - ConsumerService consumerService
+        + getConsumerById(Long): ResponseEntity
+        + createConsumer(Consumer): ResponseEntity
+    }
+
+    class SubscriptionController {
+        - SubscriptionService subscriptionService
+        + createSubscription(Subscription): ResponseEntity
+        + getSubscriptions(Long): ResponseEntity
+        + cancelSubscription(Long): ResponseEntity
+    }
+
+    class ProviderDatasetController {
+        - ProviderDatasetService providerDatasetService
+        + uploadDataset(ProviderDataset): ResponseEntity
+        + getDatasets(Long): ResponseEntity
+    }
+
+    class ReportController {
+        - RevenueService revenueService
+        + getPlatformRevenue(): ResponseEntity
+        + getProviderRevenue(Long): ResponseEntity
+    }
+
+    class RecommendationController {
+        - RecommendationService recommendationService
+        + getRecommendations(Long): ResponseEntity
+    }
+
+    class ProviderRevenueController {
+        - RevenueAnalyticsService revenueAnalyticsService
+        + getRevenueReport(Long): ResponseEntity
+    }
+
+    class APIKeyController {
+        - ApiAccessService apiAccessService
+        + generateApiKey(UUID): ResponseEntity
+        + validateApiKey(String): ResponseEntity
+        + revokeApiKey(UUID): ResponseEntity
+    }
+
+    class GDPRController {
+        - GDPRComplianceService gdprService
+        + exportData(UUID): ResponseEntity
+        + deleteData(UUID): ResponseEntity
+    }
+
+    class ConsumerProfileController {
+        + getProfile(UUID): ResponseEntity
+        + updateProfile(UUID, ConsumerProfile): ResponseEntity
+    }
+
+    class DashboardAnalyticsController {
+        - DashboardAnalyticsService dashboardAnalyticsService
+        + getDashboardData(): ResponseEntity
+    }
+
+    class ConsumerDashboardController {
+        - ConsumerDashboardService consumerDashboardService
+        + getConsumerDashboard(Long): ResponseEntity
+    }
+
+    class OrderCheckoutController {
+        - OrderService orderService
+        - PaymentService paymentService
+        + checkout(OrderRequestDTO): ResponseEntity
+    }
+
+    class AIAnalyticsController {
+        - AIAnalyticsService aiAnalyticsService
+        + getAISuggestions(String): ResponseEntity
+    }
+
+    class AdminController {
+        + getAllUsers(): ResponseEntity
+        + approveProvider(Long): ResponseEntity
+    }
+
+    class AdminPaymentController {
+        + getPayments(): ResponseEntity
+        + processRefund(Long): ResponseEntity
+    }
+
+    class AnalyticsController {
+        + getAnalytics(): ResponseEntity
+    }
+
+    class HealthCheckController {
+        + healthCheck(): ResponseEntity
+    }
+
+    class DatasetRevenueController {
+        + getRevenueByDataset(Long): ResponseEntity
+    }
+}
+
+package "com.evmarketplace.auth" {
+    class AuthController {
+        - UserService userService
+        - JwtUtil jwtUtil
+        + login(AuthRequest): ResponseEntity
+        + register(AuthRegisterRequest): ResponseEntity
+    }
+
+    class JwtUtil {
+        - String secretKey
+        - long expirationTime
+        + generateToken(String): String
+        + validateToken(String): boolean
+        + extractUsername(String): String
+    }
+
+    class JwtFilter {
+        - JwtUtil jwtUtil
+        + doFilter(ServletRequest, ServletResponse, FilterChain): void
+    }
+
+    class ApiKeyFilter {
+        - ApiAccessService apiAccessService
+        + doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain): void
+    }
+
+    class SecurityUtils {
+        + getCurrentUser(): SimpleUser
+        + hasRole(String): boolean
+    }
+
+    class SimpleUser {
+        - Long id
+        - String email
+        - Set<String> roles
+        + SimpleUser(Long, String, Set<String>)
+        + getId(): Long
+        + getEmail(): String
+        + getRoles(): Set<String>
+    }
+
+    class AuthRequest {
+        - String email
+        - String password
+        + getEmail(): String
+        + setEmail(String): void
+        + getPassword(): String
+        + setPassword(String): void
+    }
+
+    class AuthResponse {
+        - String token
+        - String message
+        + getToken(): String
+        + setToken(String): void
+        + getMessage(): String
+        + setMessage(String): void
+    }
+
+    class AuthRegisterRequest {
+        - String name
+        - String email
+        - String password
+        - String role
+        + getName(): String
+        + setName(String): void
+        + getEmail(): String
+        + setEmail(String): void
+    }
+}
+
+package "com.evmarketplace.admin" {
+    class AdminManager {
+        + approveProvider(Long): void
+        + moderateContent(Long): void
+    }
+
+    class RevenueReport {
+        - Double totalRevenue
+        - List<MonthlyRevenue> breakdown
+        + getTotalRevenue(): Double
+        + setTotalRevenue(Double): void
+    }
+
+    class ModerationRequest {
+        - Long id
+        - String content
+        - String status
+        + getId(): Long
+        + setId(Long): void
+        + getStatus(): String
+        + setStatus(String): void
+    }
+
+    class AdminAuthController {
+        + adminLogin(AuthRequest): ResponseEntity
+    }
+}
+
+package "com.evmarketplace.analytics" {
+    class RecommendationEngine {
+        + generateRecommendations(Long): List<Dataset>
+        + calculateSimilarity(Dataset, Dataset): Double
+    }
+
+    class MarketStats {
+        - int totalDatasets
+        - int totalUsers
+        - Double totalRevenue
+        + getTotalDatasets(): int
+        + setTotalDatasets(int): void
+    }
+
+    class Dashboard {
+        - Map<String, Object> metrics
+        + getMetrics(): Map<String, Object>
+        + setMetrics(Map<String, Object>): void
+    }
+}
+
+package "com.evmarketplace.aspect" {
+    class AccessControlAspect {
+        - AccessControlService accessControlService
+        + checkDatasetAccess(JoinPoint): void
+        + checkDashboardAccess(JoinPoint): void
+    }
+
+    annotation RequiresDatasetAccess {
+    }
+
+    annotation RequiresDashboardAccess {
+    }
+}
+
+package "com.evmarketplace.config" {
+    class SecurityConfig {
+        + filterChain(HttpSecurity): SecurityFilterChain
+        + passwordEncoder(): PasswordEncoder
+    }
+
+    class WebConfig {
+        + addCorsMappings(CorsRegistry): void
+    }
+
+    class AsyncConfig {
+        + taskExecutor(): Executor
+    }
+
+    class DataInitializer {
+        + run(String...): void
+    }
+}
+
+package "com.evmarketplace.dto" {
+    class APIKeyRequestDTO {
+        - List<String> scopes
+        - int rateLimit
+        + getScopes(): List<String>
+        + setScopes(List<String>): void
+    }
+
+    class APIKeyResponseDTO {
+        - String key
+        - Date expiresAt
+        + getKey(): String
+        + setKey(String): void
+    }
+
+    class AISuggestionsDTO {
+        - List<String> suggestions
+        + getSuggestions(): List<String>
+        + setSuggestions(List<String>): void
+    }
+
+    class CategoryDTO {
+        - Long id
+        - String name
+        + getId(): Long
+        + setId(Long): void
+    }
+
+    class CheckoutResponseDTO {
+        - String orderId
+        - String status
+        + getOrderId(): String
+        + setOrderId(String): void
+    }
+
+    class ConsumerDashboardDTO {
+        - int totalOrders
+        - Double totalSpent
+        + getTotalOrders(): int
+        + setTotalOrders(int): void
+    }
+
+    class DashboardDataDTO {
+        - Map<String, Object> data
+        + getData(): Map<String, Object>
+        + setData(Map<String, Object>): void
+    }
+
+    class OrderHistoryDTO {
+        - Long orderId
+        - LocalDateTime orderDate
+        - Double amount
+        + getOrderId(): Long
+        + setOrderId(Long): void
+    }
+
+    class OrderRequestDTO {
+        - Long datasetId
+        - Long buyerId
+        - Double amount
+        + getDatasetId(): Long
+        + setDatasetId(Long): void
+    }
+
+    class ProviderRevenueDTO {
+        - Double totalRevenue
+        - List<MonthlyRevenue> monthly
+        + getTotalRevenue(): Double
+        + setTotalRevenue(Double): void
+    }
+
+    class RecommendationDTO {
+        - Long datasetId
+        - String title
+        - Double score
+        + getDatasetId(): Long
+        + setDatasetId(Long): void
+    }
+
+    class SecuritySettingsDTO {
+        - boolean twoFactorEnabled
+        - String lastLogin
+        + isTwoFactorEnabled(): boolean
+        + setTwoFactorEnabled(boolean): void
+    }
+
+    class SubscriptionRequestDTO {
+        - String planName
+        - Long userId
+        + getPlanName(): String
+        + setPlanName(String): void
+    }
+}
+
+class Utils {
+    + {static} hashPassword(String): String
+    + {static} generateUUID(): String
+}
+
+class Application {
+    + {static} main(String[]): void
+    + webClientBuilder(): WebClient.Builder
+    + seed(UserService, ...): CommandLineRunner
+}
+
+' ========== RELATIONSHIPS ==========
+
+' User relationships
+User "1" *-- "many" Role : has >
+User "1" -- "0..1" DataProvider : becomes >
+User "1" -- "0..1" ConsumerProfile : has >
+User "1" -- "0..1" ProviderProfile : has >
+
+' Dataset relationships
+Dataset "many" -- "1" Category : belongs to >
+Payment "many" -- "1" Order : for >
+Consumer "1" *-- "many" Order : places >
+Consumer "1" *-- "many" Subscription : subscribes to >
+
+' Data Provider relationships
+DataProvider "1" *-- "many" DataProduct : provides >
+DataProduct "1" -- "0..1" PricingPolicy : has >
+DataProduct "1" -- "0..1" UsagePolicy : has >
+
+' Marketplace relationships
+Purchase "many" -- "1" DataProduct : for >
+Purchase "1" -- "1" Transaction : generates >
+Transaction "1" -- "0..1" Invoice : has >
+AccessGrant "many" -- "1" DataProduct : grants access to >
+
+' Privacy relationships
+AnonymizationJob "many" -- "1" Dataset : anonymizes >
+APIKey "many" -- "1" ConsumerProfile : belongs to >
+ApiUsageLog "many" -- "1" APIKey : logs usage of >
+
+' Repository relationships
+UserRepository ..|> JpaRepository
+RoleRepository ..|> JpaRepository
+DatasetRepository ..|> JpaRepository
+OrderRepository ..|> JpaRepository
+PaymentRepository ..|> JpaRepository
+ConsumerRepository ..|> JpaRepository
+SubscriptionRepository ..|> JpaRepository
+DataProviderRepository ..|> JpaRepository
+DataProductRepository ..|> JpaRepository
+PurchaseRepository ..|> JpaRepository
+TransactionRepository ..|> JpaRepository
+InvoiceRepository ..|> CrudRepository
+APIKeyRepository ..|> JpaRepository
+
+' Service dependencies
+UserService ..> UserRepository : uses >
+UserService ..> RoleRepository : uses >
+DatasetService ..> DatasetRepository : uses >
+OrderService ..> OrderRepository : uses >
+PaymentService ..> PaymentRepository : uses >
+ConsumerService ..> ConsumerRepository : uses >
+ApiAccessService ..> APIKeyRepository : uses >
+RevenueService ..> OrderRepository : uses >
+S3StorageServiceImpl ..|> S3StorageService : implements >
+
+' Controller dependencies
+DatasetController ..> DatasetService : uses >
+CategoryController ..> CategoryService : uses >
+PaymentController ..> PaymentService : uses >
+ConsumerController ..> ConsumerService : uses >
+SubscriptionController ..> SubscriptionService : uses >
+AuthController ..> UserService : uses >
+AuthController ..> JwtUtil : uses >
+ReportController ..> RevenueService : uses >
+APIKeyController ..> ApiAccessService : uses >
+
+' Filter dependencies
+JwtFilter ..> JwtUtil : uses >
+ApiKeyFilter ..> ApiAccessService : uses >
+
+' Aspect dependencies
+AccessControlAspect ..> AccessControlService : uses >
 
 @enduml

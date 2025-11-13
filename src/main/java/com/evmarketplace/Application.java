@@ -65,7 +65,7 @@ public class Application {
             // Tìm người dùng với email "test@ev.com".
             // Nếu không tìm thấy (.orElseGet), thì gọi hàm `userService.register` để tạo mới.
             // Mật khẩu là "password".
-            com.evmarketplace.Pojo.User u = userService.findByEmail("test@ev.com").orElseGet(() -> userService.register("Demo User","test@ev.com","password"));
+            com.evmarketplace.Pojo.User u = userService.findByEmail("consumer1@example.com").orElseGet(() -> userService.register("Demo User","consumer1@example.com","password"));
             
             // Gán vai trò "Consumer" cho người dùng mẫu.
             // Hàm `assignRoleToUser` sẽ tự tạo vai trò nếu nó chưa tồn tại.
@@ -80,7 +80,7 @@ public class Application {
 
             // --- TẠO NHÀ CUNG CẤP DỮ LIỆU MẪU ---
         com.evmarketplace.Pojo.User providerUser = userService.findByEmail("provider1@example.com")
-            .orElseGet(() -> userService.register("Provider One", "provider1@example.com", "providerpass", "EV Insight Labs", true));
+            .orElseGet(() -> userService.register("Provider One", "provider1@example.com", "password", "EV Insight Labs", true));
             userService.assignRoleToUser(providerUser, "Provider");
             providerUser.setProviderApproved(true);
         String providerOrg = providerUser.getOrganization() != null ? providerUser.getOrganization() : "EV Insight Labs";
@@ -147,9 +147,9 @@ public class Application {
             }
 
             System.out.println("=== DEMO DATA INITIALIZED ===");
-            System.out.println("Consumer: test@ev.com / password");
+            System.out.println("Consumer: consumer1@example.com / password");
             System.out.println("Admin: admin@ev.com / adminpass");
-            System.out.println("Provider: provider1@example.com / providerpass");
+            System.out.println("Provider: provider1@example.com / password");
         };
     }
 

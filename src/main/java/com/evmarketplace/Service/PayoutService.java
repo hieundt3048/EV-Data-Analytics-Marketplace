@@ -96,16 +96,24 @@ public class PayoutService {
             orders = orderRepository.findAll();
         }
         
-        // Chi tinh orders da APPROVED
-        List<Order> approvedOrders = orders.stream()
-            .filter(o -> "APPROVED".equals(o.getStatus()))
+        // Chi tinh orders da APPROVED, COMPLETED, PAYOUT_COMPLETED, PAID
+        List<Order> completedOrders = orders.stream()
+            .filter(o -> {
+                String status = o.getStatus();
+                if (status == null) return false;
+                String statusUpper = status.toUpperCase();
+                return statusUpper.equals("APPROVED") || 
+                       statusUpper.equals("COMPLETED") || 
+                       statusUpper.equals("PAYOUT_COMPLETED") ||
+                       statusUpper.equals("PAID");
+            })
             .collect(Collectors.toList());
         
         BigDecimal totalRevenue = BigDecimal.ZERO;
         BigDecimal totalCommission = BigDecimal.ZERO;
         BigDecimal totalProviderPayouts = BigDecimal.ZERO;
         
-        for (Order order : approvedOrders) {
+        for (Order order : completedOrders) {
             Double amount = order.getAmount() != null ? order.getAmount() : 0.0;
             Double providerRev = order.getProviderRevenue() != null ? order.getProviderRevenue() : 0.0;
             Double platformRev = order.getPlatformRevenue() != null ? order.getPlatformRevenue() : 0.0;
@@ -115,14 +123,21 @@ public class PayoutService {
             totalProviderPayouts = totalProviderPayouts.add(BigDecimal.valueOf(providerRev));
         }
         
+        // Đếm pending payouts
+        long pendingPayouts = orders.stream()
+            .filter(o -> "PENDING".equalsIgnoreCase(o.getStatus()))
+            .count();
+        
         Map<String, Object> stats = new HashMap<>();
         stats.put("startDate", startDate);
         stats.put("endDate", endDate);
         stats.put("totalRevenue", totalRevenue);
-        stats.put("platformCommission", totalCommission);
+        stats.put("platformCommissions", totalCommission);
         stats.put("providerPayouts", totalProviderPayouts);
-        stats.put("totalOrders", approvedOrders.size());
-        stats.put("commissionRate", PLATFORM_COMMISSION_RATE);
+        stats.put("totalTransactions", orders.size());
+        stats.put("completedTransactions", completedOrders.size());
+        stats.put("pendingPayouts", pendingPayouts);
+        stats.put("commissionRate", "30%");
         return stats;
     }
 
