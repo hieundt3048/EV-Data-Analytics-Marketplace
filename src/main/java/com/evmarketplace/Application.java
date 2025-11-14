@@ -9,13 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.evmarketplace.Repository.ConsumerProfileRepository;
 import com.evmarketplace.Repository.DataProductRepository;
 import com.evmarketplace.Repository.DataProviderRepository;
-import com.evmarketplace.Repository.DatasetMetadataRepository;
-import com.evmarketplace.Repository.InvoiceRepository;
 import com.evmarketplace.Repository.RoleRepository;
-import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Repository.ProviderDatasetRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.JwtFilter;
@@ -24,7 +20,6 @@ import com.evmarketplace.data.DataProvider;
 import com.evmarketplace.data.DataType;
 import com.evmarketplace.data.Format;
 import com.evmarketplace.data.ProductStatus;
-import com.evmarketplace.Pojo.ProviderDataset;
 
 import java.time.Instant;
 import java.util.Arrays;

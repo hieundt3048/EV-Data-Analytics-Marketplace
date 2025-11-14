@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 public class PayoutService {
 
-    private static final double PLATFORM_COMMISSION_RATE = 0.20;
+    private static final double PLATFORM_COMMISSION_RATE = 0.30;
 
     private final OrderRepository orderRepository;
 

@@ -34,22 +34,22 @@ const Register = () => {
     const nextErrors = {};
 
     if (!formData.name.trim()) {
-      nextErrors.name = 'Vui lòng nhập họ và tên.';
+      nextErrors.name = 'Please enter your full name.';
     }
     if (!formData.email.trim()) {
-      nextErrors.email = 'Vui lòng nhập email.';
+      nextErrors.email = 'Please enter your email.';
     }
     if (!formData.password) {
-      nextErrors.password = 'Vui lòng nhập mật khẩu.';
+      nextErrors.password = 'Please enter a password.';
     }
     if (!formData.confirmPassword) {
-      nextErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu.';
+      nextErrors.confirmPassword = 'Please confirm your password.';
     }
     if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
-      nextErrors.confirmPassword = 'Mật khẩu không khớp.';
+      nextErrors.confirmPassword = 'Passwords do not match.';
     }
     if (!formData.terms) {
-      nextErrors.terms = 'Bạn phải đồng ý với điều khoản và chính sách.';
+      nextErrors.terms = 'You must agree to the terms and conditions.';
     }
 
     return nextErrors;
@@ -96,7 +96,7 @@ const Register = () => {
       })
       .catch((err) => {
         console.error('Registration error', err);
-        setSubmitError('Đăng ký thất bại. Email có thể đã tồn tại.');
+        setSubmitError('Registration failed. Email may already exist.');
       })
       .finally(() => setLoading(false));
   };
@@ -120,16 +120,16 @@ const Register = () => {
           </div>
           <h1 className="site-title">EV Data Analytics</h1>
           <h2 className="site-subtitle">Marketplace</h2>
-          <p className="site-desc">Tham gia cộng đồng dữ liệu xe điện hàng đầu thế giới</p>
+          <p className="site-desc">Join the world's leading EV data community</p>
 
           <div className="features-box">
             <svg className="feature-icon" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
             <ul className="feature-list">
-              <li>✓ Truy cập dữ liệu toàn cầu</li>
-              <li>✓ Phân tích chuyên sâu</li>
-              <li>✓ Kết nối đối tác</li>
+              <li>✓ Global data access</li>
+              <li>✓ In-depth analytics</li>
+              <li>✓ Partner connections</li>
             </ul>
           </div>
         </div>
@@ -139,16 +139,16 @@ const Register = () => {
       <section className="register-right-panel">
         <div className="form-container">
           <div id="step1" className="form-step">
-            <h2 className="form-title">Tạo tài khoản mới</h2>
+            <h2 className="form-title">Create New Account</h2>
 
             <form id="signupForm" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="fullName">Họ và tên *</label>
+                <label htmlFor="fullName">Full Name *</label>
                 <input 
                   type="text" 
                   id="fullName" 
                   name="name"
-                  placeholder="Nhập họ và tên đầy đủ"
+                  placeholder="Enter your full name"
                   value={formData.name}
                   onChange={handleChange}
                 />
@@ -161,7 +161,7 @@ const Register = () => {
                   type="email" 
                   id="email" 
                   name="email"
-                  placeholder="Nhập địa chỉ email"
+                  placeholder="Enter your email address"
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -169,12 +169,12 @@ const Register = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="password">Mật khẩu *</label>
+                <label htmlFor="password">Password *</label>
                 <input 
                   type="password" 
                   id="password" 
                   name="password"
-                  placeholder="Tạo mật khẩu mạnh"
+                  placeholder="Create a strong password"
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -182,12 +182,12 @@ const Register = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="confirmPassword">Xác nhận mật khẩu *</label>
+                <label htmlFor="confirmPassword">Confirm Password *</label>
                 <input 
                   type="password" 
                   id="confirmPassword" 
                   name="confirmPassword"
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder="Re-enter password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
@@ -195,26 +195,26 @@ const Register = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="userType">Loại người dùng</label>
+                <label htmlFor="userType">User Type</label>
                 <select 
                   id="userType" 
                   name="userType"
                   value={formData.userType}
                   onChange={handleChange}
                 >
-                  <option value="">Chọn loại người dùng</option>
-                  <option value="data-provider">Nhà cung cấp dữ liệu</option>
-                  <option value="data-analyst">Nhà phân tích / Doanh nghiệp</option>
+                  <option value="">Select user type</option>
+                  <option value="data-provider">Data Provider</option>
+                  <option value="data-analyst">Analyst / Business</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="organization">Tổ chức (tùy chọn)</label>
+                <label htmlFor="organization">Organization (optional)</label>
                 <input
                   type="text"
                   id="organization"
                   name="organization"
-                  placeholder="Tên tổ chức"
+                  placeholder="Organization name"
                   value={formData.organization || ''}
                   onChange={handleChange}
                 />
@@ -229,17 +229,17 @@ const Register = () => {
                   onChange={handleChange}
                 />
                 <label htmlFor="terms">
-                  Tôi đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách</a>
+                  I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>
                 </label>
               </div>
               {fieldErrors.terms && <small className="error">{fieldErrors.terms}</small>}
 
-              <button type="submit" className="submit-btn">Đăng ký ngay</button>
-              {loading && <div className="info">Đang gửi...</div>}
+              <button type="submit" className="submit-btn">Sign Up Now</button>
+              {loading && <div className="info">Submitting...</div>}
               {submitError && <div className="error">{submitError}</div>}
 
               <p className="login-prompt">
-                Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+                Already have an account? <Link to="/login">Login</Link>
               </p>
             </form>
           </div>

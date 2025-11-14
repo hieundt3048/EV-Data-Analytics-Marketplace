@@ -43,21 +43,21 @@ public class AuthController {
             return ResponseEntity.status(400).build(); // Trả về lỗi 400 Bad Request.
         }
 
-        // Tìm người dùng bằng email.
+        // Bước 1: Tìm user theo email
         return userService.findByEmail(request.getEmail())
-                // Nếu tìm thấy, kiểm tra mật khẩu có khớp không.
+                // Bước 2: Kiểm tra password
                 .filter(u -> userService.checkPassword(u, request.getPassword()))
-                // Nếu mật khẩu khớp, thực hiện các bước tiếp theo.
+                // Bước 3: Nếu đúng, lấy danh sách roles
                 .map(u -> {
                     // Lấy danh sách vai trò của người dùng.
                     java.util.List<String> roles = new java.util.ArrayList<>();
                     for (Role r : userService.getRolesForUser(u)) roles.add(r.getName());
 
-                    // Tạo JWT token với tên, email và vai trò của người dùng.
+                    // // Bước 4: Tạo JWT token với tên, email và vai trò của người dùng.
                     String token = jwtUtil.generateToken(u.getName(), u.getEmail(), roles);
                     // Tạo một đối tượng SimpleUser để trả về cho frontend.
                     SimpleUser su = new SimpleUser(u.getId() == null ? "" + UUID.randomUUID() : String.valueOf(u.getId()), u.getName(), u.getEmail());
-                    // Trả về response 200 OK cùng với token và thông tin người dùng.
+                    // // Bước 5: Trả về token + user info, response 200 OK cùng với token và thông tin người dùng.
                     return ResponseEntity.ok(new AuthResponse(token, su));
                 })
                 // Nếu không tìm thấy người dùng hoặc mật khẩu không khớp, trả về lỗi 401 Unauthorized.

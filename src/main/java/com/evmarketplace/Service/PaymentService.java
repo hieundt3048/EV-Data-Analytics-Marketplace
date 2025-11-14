@@ -3,16 +3,12 @@ package com.evmarketplace.Service;
 import com.evmarketplace.Pojo.Order;
 import com.evmarketplace.Pojo.Payment;
 import com.evmarketplace.Repository.PaymentRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 public class PaymentService {
-    @Value("${stripe.api.key:}")
-    private String stripeKey; // Kept for future Stripe integration
-
     private final PaymentRepository paymentRepo;
 
     public PaymentService(PaymentRepository paymentRepo) {

@@ -1,6 +1,5 @@
 package com.evmarketplace.Controller;
   
-import com.evmarketplace.Pojo.RevenueReportDTO;
 import com.evmarketplace.Service.RevenueService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

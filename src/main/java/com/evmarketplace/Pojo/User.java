@@ -5,6 +5,7 @@ package com.evmarketplace.Pojo;
 // Nhập các annotation của JPA và các lớp collection.
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -115,6 +116,16 @@ public class User implements Serializable { // Implement Serializable để đ�
     @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean providerApproved = false; // Các tài khoản nhà cung cấp cần được admin phê duyệt.
 
+    // Cột để lưu ngày tạo tài khoản
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME DEFAULT GETDATE()")
+    private LocalDateTime createdAt;
+
+    // Tự động set thời gian tạo khi persist entity
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
     public boolean isProviderApproved() {
         return providerApproved;
     }
@@ -123,7 +134,11 @@ public class User implements Serializable { // Implement Serializable để đ�
         this.providerApproved = providerApproved;
     }
 
-    // Flag soft-delete cho người dùng. Đặt columnDefinition với DEFAULT để Hibernate có thể thêm cột
-    @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
-    private boolean deleted = false;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

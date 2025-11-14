@@ -1,4 +1,6 @@
 @startuml EV-Data-Analytics-Marketplace-Backend
+' Updated: Removed 17 unused files and updated PayoutService logic
+' Last update: 2025-01-13
 
 ' ========== ENTITIES (POJO & DOMAIN MODELS) ==========
 
@@ -262,6 +264,15 @@ package "com.evmarketplace.Pojo" {
         + getTotalRevenue(): Double
         + setTotalRevenue(Double): void
     }
+
+    note right of Order
+        Status values:
+        - PENDING
+        - APPROVED
+        - COMPLETED
+        - PAYOUT_COMPLETED
+        - PAID
+    end note
 }
 
 package "com.evmarketplace.data" {
@@ -307,30 +318,6 @@ package "com.evmarketplace.data" {
         + setTitle(String): void
         + getStatus(): ProductStatus
         + setStatus(ProductStatus): void
-    }
-
-    class DataAsset {
-        - UUID id
-        - String name
-        - String description
-        - String assetType
-        + DataAsset()
-        + getId(): UUID
-        + setId(UUID): void
-        + getName(): String
-        + setName(String): void
-    }
-
-    class DatasetMetadata {
-        - UUID id
-        - String title
-        - String description
-        - Map<String, String> metadata
-        + DatasetMetadata()
-        + getId(): UUID
-        + setId(UUID): void
-        + getTitle(): String
-        + setTitle(String): void
     }
 
     enum DataType {
@@ -388,17 +375,6 @@ package "com.evmarketplace.marketplace" {
         + setModel(PricingModel): void
         + getBasePrice(): BigDecimal
         + setBasePrice(BigDecimal): void
-    }
-
-    class UsagePolicy {
-        - UUID id
-        - AllowedUse allowedUse
-        - String restrictions
-        + UsagePolicy()
-        + getId(): UUID
-        + setId(UUID): void
-        + getAllowedUse(): AllowedUse
-        + setAllowedUse(AllowedUse): void
     }
 
     class AccessGrant {
@@ -464,19 +440,6 @@ package "com.evmarketplace.billing" {
         + setStatus(PaymentStatus): void
     }
 
-    class Invoice {
-        - UUID id
-        - UUID transactionId
-        - String pdfUrl
-        + Invoice()
-        + getId(): UUID
-        + setId(UUID): void
-        + getTransactionId(): UUID
-        + setTransactionId(UUID): void
-        + getPdfUrl(): String
-        + setPdfUrl(String): void
-    }
-
     enum PaymentMethod {
         CREDIT_CARD
         BANK_TRANSFER
@@ -490,66 +453,6 @@ package "com.evmarketplace.billing" {
         FAILED
         REFUNDED
     }
-}
-
-package "com.evmarketplace.privacy" {
-    class Consent {
-        - UUID id
-        - UUID userId
-        - boolean granted
-        - Date consentDate
-        + Consent()
-        + getId(): UUID
-        + setId(UUID): void
-        + isGranted(): boolean
-        + setGranted(boolean): void
-    }
-
-    class AuditLog {
-        - UUID id
-        - String action
-        - String userId
-        - Date timestamp
-        + AuditLog()
-        + getId(): UUID
-        + setId(UUID): void
-        + getAction(): String
-        + setAction(String): void
-    }
-
-    class AnonymizationJob {
-        - UUID id
-        - UUID datasetId
-        - JobStatus status
-        - Date startedAt
-        - Date completedAt
-        + AnonymizationJob()
-        + getId(): UUID
-        + setId(UUID): void
-        + getStatus(): JobStatus
-        + setStatus(JobStatus): void
-    }
-
-    enum JobStatus {
-        QUEUED
-        RUNNING
-        COMPLETED
-        FAILED
-    }
-}
-
-class Review {
-    - Long id
-    - Long datasetId
-    - Long userId
-    - int rating
-    - String comment
-    - LocalDateTime createdAt
-    + Review()
-    + getId(): Long
-    + setId(Long): void
-    + getRating(): int
-    + setRating(int): void
 }
 
 ' ========== REPOSITORIES ==========
@@ -725,12 +628,10 @@ package "com.evmarketplace.Service" {
 
     class AuditLogService {
         + logAction(String, String): void
-        + getAuditLogs(): List<AuditLog>
     }
 
     class AnonymizationService {
-        + anonymizeDataset(UUID): AnonymizationJob
-        + checkJobStatus(UUID): JobStatus
+        + anonymizeDataset(UUID): void
     }
 
     class AccessControlService {
@@ -765,8 +666,7 @@ package "com.evmarketplace.Service" {
     }
 
     class GDPRComplianceService {
-        + exportUserData(UUID): String
-        + deleteUserData(UUID): void
+        + anonymizeUserData(UUID): void
         + getConsentStatus(UUID): boolean
     }
 
@@ -776,8 +676,10 @@ package "com.evmarketplace.Service" {
     }
 
     class PayoutService {
+        - OrderRepository orderRepository
         + processPayout(Long): void
         + getPayoutBreakdown(Long): PayoutBreakdown
+        + getPlatformRevenueStats(LocalDateTime, LocalDateTime): Map<String, Object>
     }
 
     class AIAnalyticsService {
@@ -796,26 +698,10 @@ package "com.evmarketplace.Service" {
         + deleteFromS3(String): boolean
     }
 
-    interface SearchService {
-        + search(String): List<Dataset>
-    }
-
     interface S3StorageService {
         + upload(String, InputStream): String
         + download(String): InputStream
         + delete(String): boolean
-    }
-
-    interface DatasetIngestService {
-        + ingestDataset(Dataset): void
-    }
-
-    interface ModerationService {
-        + moderateContent(String): boolean
-    }
-
-    interface MetricsService {
-        + collectMetrics(): Map<String, Object>
     }
 
     class S3StorageServiceImpl {
@@ -823,6 +709,16 @@ package "com.evmarketplace.Service" {
         + download(String): InputStream
         + delete(String): boolean
     }
+
+    note right of PayoutService
+        Updated to filter multiple statuses:
+        - APPROVED
+        - COMPLETED
+        - PAYOUT_COMPLETED
+        - PAID
+        
+        Commission rate: 30%
+    end note
 }
 
 ' ========== CONTROLLERS ==========
@@ -923,12 +819,9 @@ package "com.evmarketplace.Controller" {
         + getAISuggestions(String): ResponseEntity
     }
 
-    class AdminController {
-        + getAllUsers(): ResponseEntity
-        + approveProvider(Long): ResponseEntity
-    }
-
     class AdminPaymentController {
+        - PayoutService payoutService
+        + getPlatformRevenueStats(LocalDateTime, LocalDateTime): ResponseEntity
         + getPayments(): ResponseEntity
         + processRefund(Long): ResponseEntity
     }
@@ -944,6 +837,13 @@ package "com.evmarketplace.Controller" {
     class DatasetRevenueController {
         + getRevenueByDataset(Long): ResponseEntity
     }
+
+    note right of AdminPaymentController
+        Endpoint: /api/admin/payments/revenue-stats
+        Returns: totalRevenue, platformCommissions,
+        providerPayouts, totalTransactions,
+        completedTransactions, pendingPayouts
+    end note
 }
 
 package "com.evmarketplace.auth" {
@@ -1015,55 +915,22 @@ package "com.evmarketplace.auth" {
         + getEmail(): String
         + setEmail(String): void
     }
+
+    note right of JwtFilter
+        Validates JWT tokens
+        in request headers
+    end note
 }
 
 package "com.evmarketplace.admin" {
-    class AdminManager {
-        + approveProvider(Long): void
-        + moderateContent(Long): void
-    }
-
-    class RevenueReport {
-        - Double totalRevenue
-        - List<MonthlyRevenue> breakdown
-        + getTotalRevenue(): Double
-        + setTotalRevenue(Double): void
-    }
-
-    class ModerationRequest {
-        - Long id
-        - String content
-        - String status
-        + getId(): Long
-        + setId(Long): void
-        + getStatus(): String
-        + setStatus(String): void
-    }
-
     class AdminAuthController {
         + adminLogin(AuthRequest): ResponseEntity
     }
-}
 
-package "com.evmarketplace.analytics" {
-    class RecommendationEngine {
-        + generateRecommendations(Long): List<Dataset>
-        + calculateSimilarity(Dataset, Dataset): Double
-    }
-
-    class MarketStats {
-        - int totalDatasets
-        - int totalUsers
-        - Double totalRevenue
-        + getTotalDatasets(): int
-        + setTotalDatasets(int): void
-    }
-
-    class Dashboard {
-        - Map<String, Object> metrics
-        + getMetrics(): Map<String, Object>
-        + setMetrics(Map<String, Object>): void
-    }
+    note right of AdminAuthController
+        Separate admin login endpoint
+        at /api/admin/login
+    end note
 }
 
 package "com.evmarketplace.aspect" {
@@ -1078,6 +945,11 @@ package "com.evmarketplace.aspect" {
 
     annotation RequiresDashboardAccess {
     }
+
+    note right of AccessControlAspect
+        AOP for checking permissions
+        before method execution
+    end note
 }
 
 package "com.evmarketplace.config" {
@@ -1145,6 +1017,8 @@ package "com.evmarketplace.dto" {
         - Map<String, Object> data
         + getData(): Map<String, Object>
         + setData(Map<String, Object>): void
+        + nested: TimeSeriesData
+        + nested: CategoryData
     }
 
     class OrderHistoryDTO {
@@ -1168,6 +1042,12 @@ package "com.evmarketplace.dto" {
         - List<MonthlyRevenue> monthly
         + getTotalRevenue(): Double
         + setTotalRevenue(Double): void
+        + nested: DatasetRevenue
+        + nested: RevenueTrend
+        + nested: BuyerDemographics
+        + nested: TopBuyer
+        + nested: TopDataset
+        + nested: RecentTransaction
     }
 
     class RecommendationDTO {
@@ -1191,11 +1071,16 @@ package "com.evmarketplace.dto" {
         + getPlanName(): String
         + setPlanName(String): void
     }
-}
 
-class Utils {
-    + {static} hashPassword(String): String
-    + {static} generateUUID(): String
+    note right of DashboardDataDTO
+        Contains nested TimeSeriesData
+        and CategoryData classes
+    end note
+
+    note right of ProviderRevenueDTO
+        Contains nested classes for
+        revenue analytics and insights
+    end note
 }
 
 class Application {
@@ -1203,6 +1088,13 @@ class Application {
     + webClientBuilder(): WebClient.Builder
     + seed(UserService, ...): CommandLineRunner
 }
+
+note right of Application
+    Main entry point
+    Scans: com.evmarketplace
+    Entity packages: Pojo, billing,
+    data, marketplace, dto, aspect
+end note
 
 ' ========== RELATIONSHIPS ==========
 
@@ -1230,7 +1122,6 @@ Transaction "1" -- "0..1" Invoice : has >
 AccessGrant "many" -- "1" DataProduct : grants access to >
 
 ' Privacy relationships
-AnonymizationJob "many" -- "1" Dataset : anonymizes >
 APIKey "many" -- "1" ConsumerProfile : belongs to >
 ApiUsageLog "many" -- "1" APIKey : logs usage of >
 
@@ -1248,6 +1139,7 @@ PurchaseRepository ..|> JpaRepository
 TransactionRepository ..|> JpaRepository
 InvoiceRepository ..|> CrudRepository
 APIKeyRepository ..|> JpaRepository
+AccessGrantRepository ..|> JpaRepository
 
 ' Service dependencies
 UserService ..> UserRepository : uses >
@@ -1258,6 +1150,7 @@ PaymentService ..> PaymentRepository : uses >
 ConsumerService ..> ConsumerRepository : uses >
 ApiAccessService ..> APIKeyRepository : uses >
 RevenueService ..> OrderRepository : uses >
+PayoutService ..> OrderRepository : uses >
 S3StorageServiceImpl ..|> S3StorageService : implements >
 
 ' Controller dependencies
@@ -1270,6 +1163,7 @@ AuthController ..> UserService : uses >
 AuthController ..> JwtUtil : uses >
 ReportController ..> RevenueService : uses >
 APIKeyController ..> ApiAccessService : uses >
+AdminPaymentController ..> PayoutService : uses >
 
 ' Filter dependencies
 JwtFilter ..> JwtUtil : uses >
@@ -1277,5 +1171,18 @@ ApiKeyFilter ..> ApiAccessService : uses >
 
 ' Aspect dependencies
 AccessControlAspect ..> AccessControlService : uses >
+
+note bottom
+    17 unused files removed:
+    - analytics: RecommendationEngine, Dashboard, MarketStats
+    - admin: AdminManager, RevenueReport, ModerationRequest
+    - services: SearchService, ModerationService, MetricsService, DatasetIngestService
+    - Other: Review, PutObjectRequest, SeedConsumerDemographics
+    
+    PayoutService updated to filter:
+    APPROVED, COMPLETED, PAYOUT_COMPLETED, PAID
+    
+    Revenue calculation: 30% platform, 70% provider
+end note
 
 @enduml
