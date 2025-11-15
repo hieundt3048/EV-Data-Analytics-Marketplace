@@ -27,7 +27,6 @@ const Consumer = () => {
   const [previewDataset, setPreviewDataset] = useState(null);
   const [showReceipt, setShowReceipt] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
-  const [aiSuggestions, setAiSuggestions] = useState([]);
   const [selectedDatasetId, setSelectedDatasetId] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
@@ -49,12 +48,7 @@ const Consumer = () => {
   const [purchaseError, setPurchaseError] = useState(null);
   const [dashboardError, setDashboardError] = useState(null);
   const [analyticsError, setAnalyticsError] = useState(null);
-  const [aiSuggestionsError, setAiSuggestionsError] = useState(null);
   const [apiKeyError, setApiKeyError] = useState(null);
-
-  const [aiSummary, setAiSummary] = useState('');
-  const [aiConfidence, setAiConfidence] = useState(null);
-  const [aiGeneratedAt, setAiGeneratedAt] = useState('');
 
   // Simplified fetchWithAuth like Admin component
   const fetchWithAuth = useCallback(async (url, opts = {}) => {
@@ -126,53 +120,18 @@ const Consumer = () => {
     setAnalyticsError(null);
     try {
       const data = await fetchWithAuth(`/api/dashboards/${datasetId}`);
+      console.log('[fetchAnalyticsData] Response for dataset', datasetId, ':', data);
       if (data) {
+        console.log('[fetchAnalyticsData] Summary metrics:', data.summaryMetrics);
         setAnalyticsData(data);
       } else {
         setAnalyticsData(null);
         setAnalyticsError('No analytics data available for this dataset.');
       }
     } catch (error) {
+      console.error('[fetchAnalyticsData] Error:', error);
       setAnalyticsData(null);
       setAnalyticsError(error.message || 'Unable to load analytics data.');
-      throw error;
-    }
-  }, [fetchWithAuth]);
-
-  const fetchAiSuggestions = useCallback(async (datasetId) => {
-    setAiSuggestionsError(null);
-    if (!datasetId) {
-      setAiSuggestions([]);
-      setAiSummary('');
-      setAiConfidence(null);
-      setAiGeneratedAt('');
-      return;
-    }
-
-    try {
-      const params = new URLSearchParams({
-        datasetId: datasetId.toString(),
-        analysisType: 'general'
-      });
-      const data = await fetchWithAuth(`/api/analytics/ai-suggestions?${params.toString()}`);
-      if (data) {
-        setAiSuggestions(Array.isArray(data.suggestions) ? data.suggestions : []);
-        setAiSummary(data.analysisSummary || '');
-        setAiConfidence(data.confidenceScore ?? null);
-        setAiGeneratedAt(data.generatedAt || '');
-      } else {
-        setAiSuggestions([]);
-        setAiSummary('');
-        setAiConfidence(null);
-        setAiGeneratedAt('');
-        setAiSuggestionsError('No AI suggestions available for this dataset.');
-      }
-    } catch (error) {
-      setAiSuggestions([]);
-      setAiSummary('');
-      setAiConfidence(null);
-      setAiGeneratedAt('');
-      setAiSuggestionsError(error.message || 'Unable to load AI suggestions.');
       throw error;
     }
   }, [fetchWithAuth]);
@@ -568,10 +527,43 @@ const Consumer = () => {
     [datasets, selectedDatasetId]
   );
 
-  const datasetOptions = useMemo(() => datasets.map((dataset) => ({
+  // Lấy danh sách datasets đã mua (loại trừ PENDING) cho Analytics Dashboard
+  const purchasedDatasets = useMemo(() => {
+    console.log('[purchasedDatasets] Purchase history:', purchaseHistory);
+    console.log('[purchasedDatasets] All datasets:', datasets);
+    
+    // Lấy danh sách datasetId từ purchase history (loại trừ PENDING)
+    const purchasedDatasetIds = purchaseHistory
+      .filter(order => {
+        const isPending = order.status && order.status.toUpperCase() === 'PENDING';
+        console.log(`[purchasedDatasets] Order ${order.id}: status=${order.status}, isPending=${isPending}`);
+        return !isPending;
+      })
+      .map(order => order.datasetId);
+    
+    console.log('[purchasedDatasets] Purchased dataset IDs:', purchasedDatasetIds);
+    
+    // Loại bỏ duplicate IDs
+    const uniqueDatasetIds = [...new Set(purchasedDatasetIds)];
+    console.log('[purchasedDatasets] Unique dataset IDs:', uniqueDatasetIds);
+    
+    // Map về dataset objects từ datasets
+    const result = uniqueDatasetIds
+      .map(id => {
+        const found = datasets.find(ds => ds.id === id);
+        console.log(`[purchasedDatasets] Looking for dataset ID ${id}:`, found ? 'Found' : 'Not found');
+        return found;
+      })
+      .filter(ds => ds !== undefined); // Loại bỏ undefined
+    
+    console.log('[purchasedDatasets] Final result:', result);
+    return result;
+  }, [purchaseHistory, datasets]);
+
+  const datasetOptions = useMemo(() => purchasedDatasets.map((dataset) => ({
     value: String(dataset.id),
     label: dataset.name || `Dataset #${dataset.id}`
-  })), [datasets]);
+  })), [purchasedDatasets]);
 
   const summaryMetricsConfig = [
     { key: 'totalRevenue', label: 'Total Revenue', formatter: formatPurchaseAmount },
@@ -606,8 +598,12 @@ const Consumer = () => {
     } else if (activeTab === 'purchases') {
       fetchPurchaseHistory();
     } else if (activeTab === 'analytics') {
+      // Fetch both datasets and purchase history for analytics
       if (!datasets.length) {
         fetchApprovedDatasets();
+      }
+      if (!purchaseHistory.length) {
+        fetchPurchaseHistory();
       }
     }
   }, [activeTab, fetchCategories, fetchApprovedDatasets, fetchPurchaseHistory, fetchDashboard, datasets.length]);
@@ -621,33 +617,31 @@ const Consumer = () => {
   }, [fetchCategories, fetchApprovedDatasets, fetchPurchaseHistory, fetchDashboard]);
 
   useEffect(() => {
-    if (datasets.length > 0 && !selectedDatasetId) {
-      setSelectedDatasetId(String(datasets[0].id));
+    // Auto-select first purchased dataset (không phải tất cả datasets)
+    if (purchasedDatasets.length > 0 && !selectedDatasetId) {
+      setSelectedDatasetId(String(purchasedDatasets[0].id));
     }
-  }, [datasets, selectedDatasetId]);
+  }, [purchasedDatasets, selectedDatasetId]);
 
   const loadDatasetAnalytics = useCallback(async (datasetId) => {
     if (!datasetId) return;
     setAnalyticsLoading(true);
     try {
-      await Promise.all([
-        fetchAnalyticsData(datasetId),
-        fetchAiSuggestions(datasetId)
-      ]);
+      await fetchAnalyticsData(datasetId);
     } catch (error) {
       // errors handled in individual fetches
     } finally {
       setAnalyticsLoading(false);
     }
-  }, [fetchAnalyticsData, fetchAiSuggestions]);
+  }, [fetchAnalyticsData]);
 
   useEffect(() => {
     if (activeTab !== 'analytics' || !selectedDatasetId) return;
-    const targetDataset = datasets.find((item) => String(item.id) === String(selectedDatasetId));
+    const targetDataset = purchasedDatasets.find((item) => String(item.id) === String(selectedDatasetId));
     if (targetDataset) {
       loadDatasetAnalytics(targetDataset.id);
     }
-  }, [activeTab, selectedDatasetId, datasets, loadDatasetAnalytics]);
+  }, [activeTab, selectedDatasetId, purchasedDatasets, loadDatasetAnalytics]);
 
   return (
     <>
@@ -1198,7 +1192,6 @@ const Consumer = () => {
             </div>
 
             {renderErrorBanner(analyticsError)}
-            {renderErrorBanner(aiSuggestionsError)}
 
             {analyticsLoading ? (
               <div className="loading-state">
@@ -1207,47 +1200,20 @@ const Consumer = () => {
             ) : analyticsData ? (
               <>
                 <div className="stats-grid">
-                  {summaryMetricsConfig.map(({ key, label, formatter }) => (
-                    <div className="stat-card" key={key}>
-                      <div className="stat-icon" />
-                      <div className="stat-content">
-                        <h3>{formatter(analyticsData.summaryMetrics?.[key])}</h3>
-                        <p>{label}</p>
+                  {summaryMetricsConfig.map(({ key, label, formatter }) => {
+                    const value = analyticsData.summaryMetrics?.[key];
+                    console.log(`[Analytics] Metric ${key}:`, value, 'formatted:', formatter(value));
+                    return (
+                      <div className="stat-card" key={key}>
+                        <div className="stat-icon" />
+                        <div className="stat-content">
+                          <h3>{formatter(value)}</h3>
+                          <p>{label}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-
-                {analyticsData.insights && Object.keys(analyticsData.insights).length > 0 && (
-                  <div className="consumer-card insights-card">
-                    <div className="card-body">
-                      <div className="card-header-with-icon">
-                        <div className="icon-badge primary">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h4>Key Insights</h4>
-                          <p className="card-subtitle">Important metrics and patterns from your data</p>
-                        </div>
-                      </div>
-                      <ul className="insights-list enhanced">
-                        {Object.entries(analyticsData.insights).map(([insightKey, insightValue]) => (
-                          <li key={insightKey} className="insight-item">
-                            <span className="insight-icon"></span>
-                            <div className="insight-content">
-                              <strong className="insight-label">{formatLabel(insightKey)}:</strong>
-                              <span className="insight-value">
-                                {Array.isArray(insightValue) ? insightValue.join(', ') : (insightValue ?? '—')}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
               </>
             ) : (
               <div className="consumer-card">
@@ -1257,112 +1223,7 @@ const Consumer = () => {
                 </div>
               </div>
             )}
-
-            {aiSummary && (
-              <div className="consumer-card ai-summary-card">
-                <div className="card-body">
-                  <div className="card-header-with-icon">
-                    <div className="icon-badge success">
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4>AI Analysis Summary</h4>
-                      <p className="card-subtitle">Automated insights powered by machine learning</p>
-                    </div>
-                  </div>
-                  <div className="ai-summary-content">
-                    <p className="summary-text">{aiSummary}</p>
-                    <div className="insight-meta enhanced">
-                      {aiConfidence !== null && (
-                        <span className="meta-badge confidence">
-                          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2v-2zm0-6h2v4h-2v-4z"/>
-                          </svg>
-                          Confidence: {formatPercentageValue(aiConfidence * 100)}
-                        </span>
-                      )}
-                      {aiGeneratedAt && (
-                        <span className="meta-badge timestamp">
-                          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                          </svg>
-                          Generated: {formatDateTime(aiGeneratedAt)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </section>
-
-          {aiSuggestions.length > 0 && (
-            <section className="consumer-section ai-suggestions-section">
-              <div className="section-header">
-                <div className="section-title-with-icon">
-                  <div className="icon-badge warning">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h2>AI Suggestions</h2>
-                    <p className="section-subtitle">Actionable recommendations to optimize your data usage</p>
-                  </div>
-                </div>
-              </div>
-              <div className="insights-grid enhanced">
-                {aiSuggestions.map((suggestion, index) => {
-                  const confidenceLabel = suggestion.confidence != null ? formatPercentageValue(suggestion.confidence * 100) : null;
-                  const impactLevel = (suggestion.impact || '').toLowerCase();
-                  const impactColor = impactLevel === 'high' ? 'error' : impactLevel === 'medium' ? 'warning' : 'info';
-                  
-                  return (
-                    <div className={`insight-card enhanced ${impactLevel}-impact`} key={`${suggestion.type}-${index}`}>
-                      <div className="insight-header">
-                        <div className="header-content">
-                          <h4>{suggestion.title || formatLabel(suggestion.type)}</h4>
-                          {confidenceLabel && (
-                            <span className={`insight-confidence ${impactColor}`}>
-                              {confidenceLabel}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="insight-content">
-                        <p className="suggestion-description">{suggestion.description || '—'}</p>
-                        {suggestion.actions && suggestion.actions.length > 0 && (
-                          <div className="action-items">
-                            <strong className="action-title">Recommended Actions:</strong>
-                            <ul className="action-list">
-                              {suggestion.actions.map((action, actionIdx) => (
-                                <li key={actionIdx}>
-                                  <span className="action-bullet">→</span>
-                                  {action}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {suggestion.impact && (
-                          <div className="impact-badge-container">
-                            <span className={`impact-badge ${impactColor}`}>
-                              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                              </svg>
-                              Impact: {formatLabel(suggestion.impact)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
         </div>
 
         {/* API Documentation */}

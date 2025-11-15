@@ -26,26 +26,12 @@ public class DashboardAnalyticsService {
     public DashboardDataDTO getDashboardData(Long datasetId) {
         Optional<Dataset> datasetOpt = datasetRepository.findById(datasetId);
         
-        // If dataset not found, return mock data for testing
-        if (datasetOpt.isEmpty()) {
-            return createMockDashboardData(datasetId);
-        }
-
-        Dataset dataset = datasetOpt.get();
-        
-        // Check if there are any orders for this dataset
-        List<Order> datasetOrders = orderRepository.findAll().stream()
-                .filter(order -> order.getDatasetId().equals(datasetId))
-                .collect(java.util.stream.Collectors.toList());
-        
-        // If no orders, return mock data for better UX
-        if (datasetOrders.isEmpty()) {
-            DashboardDataDTO mockData = createMockDashboardData(datasetId);
-            mockData.setDatasetTitle(dataset.getTitle()); // Use real dataset title
-            return mockData;
+        String datasetTitle = "Dataset #" + datasetId;
+        if (datasetOpt.isPresent()) {
+            datasetTitle = datasetOpt.get().getTitle();
         }
         
-        // Tạo dữ liệu tổng hợp cho dashboard từ orders thật
+        // Luôn tính toán metrics từ orders thực tế, không dùng mock data
         Map<String, Object> summaryMetrics = calculateSummaryMetrics(datasetId);
         List<DashboardDataDTO.TimeSeriesData> timeSeries = generateTimeSeriesData(datasetId);
         List<DashboardDataDTO.CategoryData> categories = generateCategoryData(datasetId);
@@ -53,7 +39,7 @@ public class DashboardAnalyticsService {
 
         DashboardDataDTO dashboardData = new DashboardDataDTO();
         dashboardData.setDatasetId(datasetId);
-        dashboardData.setDatasetTitle(dataset.getTitle());
+        dashboardData.setDatasetTitle(datasetTitle);
         dashboardData.setSummaryMetrics(summaryMetrics);
         dashboardData.setTimeSeries(timeSeries);
         dashboardData.setCategories(categories);
@@ -67,12 +53,13 @@ public class DashboardAnalyticsService {
         mockData.setDatasetId(datasetId);
         mockData.setDatasetTitle("Sample Dataset " + datasetId);
         
-        // Mock summary metrics
+        // Mock summary metrics - SỬ DỤNG ĐÚNG KEY NHƯ FRONTEND MONG ĐỢI
         Map<String, Object> summaryMetrics = new HashMap<>();
-        summaryMetrics.put("totalRecords", 1250);
-        summaryMetrics.put("avgBatteryHealth", 87.5);
-        summaryMetrics.put("totalMileage", 125000);
-        summaryMetrics.put("avgChargingTime", 45);
+        summaryMetrics.put("totalRevenue", 0.0);
+        summaryMetrics.put("totalOrders", 0L);
+        summaryMetrics.put("averageOrderValue", 0.0);
+        summaryMetrics.put("conversionRate", 0.0);
+        summaryMetrics.put("activeUsers", 0L);
         mockData.setSummaryMetrics(summaryMetrics);
         
         // Mock time series data
@@ -116,27 +103,37 @@ public class DashboardAnalyticsService {
                 .filter(order -> order.getDatasetId().equals(datasetId))
                 .collect(Collectors.toList());
 
-        // Tinh toan metrics chi tu orders da APPROVED
+        // Danh sách các status hợp lệ (đã thanh toán thành công)
+        Set<String> validStatuses = new HashSet<>(Arrays.asList("PAID", "APPROVED", "PAYOUT_COMPLETED"));
+
+        // Tính toán metrics từ orders có status hợp lệ (không bao gồm PENDING)
         double totalRevenue = datasetOrders.stream()
-                .filter(order -> "APPROVED".equals(order.getStatus()))
+                .filter(order -> validStatuses.contains(order.getStatus()))
                 .mapToDouble(Order::getAmount)
                 .sum();
 
         long totalOrders = datasetOrders.stream()
-                .filter(order -> "APPROVED".equals(order.getStatus()))
+                .filter(order -> validStatuses.contains(order.getStatus()))
                 .count();
 
         double averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-        // Tỉ lệ conversion (giả lập)
+        // Tỉ lệ conversion
         double conversionRate = datasetOrders.size() > 0 ? 
                 (double) totalOrders / datasetOrders.size() * 100 : 0;
+
+        // Số lượng active users (distinct buyers từ orders hợp lệ)
+        long activeUsers = datasetOrders.stream()
+                .filter(order -> validStatuses.contains(order.getStatus()))
+                .map(Order::getBuyerId)
+                .distinct()
+                .count();
 
         metrics.put("totalRevenue", Math.round(totalRevenue * 100.0) / 100.0);
         metrics.put("totalOrders", totalOrders);
         metrics.put("averageOrderValue", Math.round(averageOrderValue * 100.0) / 100.0);
         metrics.put("conversionRate", Math.round(conversionRate * 100.0) / 100.0);
-        metrics.put("activeUsers", datasetOrders.stream().map(Order::getBuyerId).distinct().count());
+        metrics.put("activeUsers", activeUsers);
 
         return metrics;
     }
