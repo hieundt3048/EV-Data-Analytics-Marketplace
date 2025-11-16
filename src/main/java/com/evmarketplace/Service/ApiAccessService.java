@@ -41,6 +41,20 @@ public class ApiAccessService {
     }
     
     /**
+     * Simple log access method (endpoint and status only)
+     */
+    @Transactional
+    public void logAccess(UUID apiKeyId, String endpoint, String method, boolean success) {
+        ApiUsageLog log = new ApiUsageLog();
+        log.setApiKeyId(apiKeyId.getMostSignificantBits());
+        log.setEndpoint(endpoint);
+        log.setMethod(method);
+        log.setStatusCode(success ? 200 : 500);
+        
+        usageLogRepository.save(log);
+    }
+    
+    /**
      * Log API request with error
      */
     @Transactional

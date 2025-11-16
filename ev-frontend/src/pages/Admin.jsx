@@ -3,6 +3,7 @@ import '../styles/index.css';
 import '../styles/admin.css';
 
 const Admin = () => {
+  // Initialize ALL state with safe defaults and add guards
   const [activeTab, setActiveTab] = useState('users');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAPIKeyModal, setShowAPIKeyModal] = useState(false);
@@ -17,8 +18,10 @@ const Admin = () => {
   const [apiKeys, setApiKeys] = useState([]);
   const [paymentStats, setPaymentStats] = useState(null);
   const [providerPayouts, setProviderPayouts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start as true to prevent premature rendering
   const [error, setError] = useState(null);
+  const [initialized, setInitialized] = useState(false); // Track initialization
+  
   const roleOptions = ['Admin', 'Provider', 'Consumer', 'Partner'];
   const USERS_PER_PAGE = 5;
   const [roleFilter, setRoleFilter] = useState('');
@@ -60,25 +63,36 @@ const Admin = () => {
       setLoading(true);
       setError(null);
       const [analyticsRes, usersRes, pendingRes, transactionsRes, revenueRes, apiKeyRes, paymentStatsRes, payoutsRes] = await Promise.all([
-        fetchWithAuth('/api/admin/analytics/overview'),
-        fetchWithAuth('/api/admin/users'),
-        fetchWithAuth('/api/admin/provider-datasets/pending'),
-        fetchWithAuth('/api/admin/orders').catch(() => []),
-        fetchWithAuth('/api/admin/payments/revenue-share').catch(() => ({})),
-        fetchWithAuth('/api/admin/security/apikeys').catch(() => []),
-        fetchWithAuth('/api/admin/payments/revenue-stats').catch(() => null),
-        fetchWithAuth('/api/admin/payments/provider-payouts').catch(() => [])
+        fetchWithAuth('/api/admin/analytics/overview').catch((e) => { console.error('Analytics error:', e); return null; }),
+        fetchWithAuth('/api/admin/users').catch((e) => { console.error('Users error:', e); return []; }),
+        fetchWithAuth('/api/admin/provider-datasets/pending').catch((e) => { console.error('Pending datasets error:', e); return []; }),
+        fetchWithAuth('/api/admin/orders').catch((e) => { console.error('Orders error:', e); return []; }),
+        fetchWithAuth('/api/admin/payments/revenue-share').catch((e) => { console.error('Revenue share error:', e); return {}; }),
+        fetchWithAuth('/api/admin/security/apikeys').catch((e) => { console.error('API keys error:', e); return { keys: [] }; }),
+        fetchWithAuth('/api/admin/payments/revenue-stats').catch((e) => { console.error('Payment stats error:', e); return null; }),
+        fetchWithAuth('/api/admin/payments/provider-payouts').catch((e) => { console.error('Payouts error:', e); return []; })
       ]);
       setAnalytics(analyticsRes);
-      setUsers(usersRes || []);
-      setPendingDatasets(pendingRes || []);
-      setTransactions(transactionsRes || []);
-      setRevenueShare(revenueRes || {});
-      setApiKeys(apiKeyRes || []);
+      setUsers(Array.isArray(usersRes) ? usersRes : []);
+      setPendingDatasets(Array.isArray(pendingRes) ? pendingRes : []);
+      setTransactions(Array.isArray(transactionsRes) ? transactionsRes : []);
+      setRevenueShare(revenueRes && typeof revenueRes === 'object' ? revenueRes : {});
+      // Backend now returns { success, keys, total }
+      setApiKeys(Array.isArray(apiKeyRes?.keys) ? apiKeyRes.keys : (Array.isArray(apiKeyRes) ? apiKeyRes : []));
       setPaymentStats(paymentStatsRes);
-      setProviderPayouts(payoutsRes || []);
+      setProviderPayouts(Array.isArray(payoutsRes) ? payoutsRes : []);
+      setInitialized(true); // Mark as initialized after first successful load
     } catch (err) {
+      console.error('RefreshAll error:', err);
       setError(err.message || 'Unable to load admin data');
+      // Still initialize with empty arrays on error
+      setUsers([]);
+      setPendingDatasets([]);
+      setTransactions([]);
+      setRevenueShare({});
+      setApiKeys([]);
+      setProviderPayouts([]);
+      setInitialized(true);
     } finally {
       setLoading(false);
     }
@@ -90,7 +104,7 @@ const Admin = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [roleFilter, statusFilter, users.length]);
+  }, [roleFilter, statusFilter, Array.isArray(users) ? users.length : 0]);
 
   // Select All checkbox: toggle row checkboxes
   useEffect(() => {
@@ -137,12 +151,39 @@ const Admin = () => {
     }
   };
 
-  const revokeKey = async (id) => {
+  const revokeKey = async (keyId) => {
+    if (!window.confirm('Are you sure you want to revoke this API key? This will expire it but keep it in the database.')) {
+      return;
+    }
+    
     try {
-      await fetchWithAuth(`/api/admin/security/apikeys/${id}/revoke`, { method: 'PUT' });
+      await fetchWithAuth(`/api/admin/security/apikeys/${keyId}/revoke`, {
+        method: 'PUT'
+      });
+      
+      alert('API key revoked successfully');
       refreshAll();
     } catch (err) {
-      setError(`Unable to revoke API key: ${err.message}`);
+      console.error('Revoke API key error:', err);
+      alert(`Failed to revoke API key:\n${err.message}`);
+    }
+  };
+
+  const deleteKey = async (keyId) => {
+    if (!window.confirm('WARNING: This will PERMANENTLY DELETE the API key from the database. This action CANNOT be undone. Are you absolutely sure?')) {
+      return;
+    }
+    
+    try {
+      await fetchWithAuth(`/api/admin/security/apikeys/${keyId}`, {
+        method: 'DELETE'
+      });
+      
+      alert('API key permanently deleted');
+      refreshAll();
+    } catch (err) {
+      console.error('Delete API key error:', err);
+      alert(`Failed to delete API key:\n${err.message}`);
     }
   };
 
@@ -181,6 +222,9 @@ const Admin = () => {
 
   const toggleEditRole = (role) => {
     setEditForm((prev) => {
+      if (!prev || !Array.isArray(prev.roles)) {
+        return { ...prev, roles: [role] };
+      }
       const hasRole = prev.roles.includes(role);
       const roles = hasRole ? prev.roles.filter((r) => r !== role) : [...prev.roles, role];
       return { ...prev, roles };
@@ -227,9 +271,51 @@ const Admin = () => {
 
   const openAPIKeyModal = () => setShowAPIKeyModal(true);
   const closeAPIKeyModal = () => setShowAPIKeyModal(false);
-  const createAPIKey = () => {
-    alert('API key generated (demo)');
-    closeAPIKeyModal();
+  
+  const createAPIKey = async () => {
+    try {
+      const form = document.getElementById('apiKeyForm');
+      const formData = new FormData(form);
+      const ownerId = document.getElementById('keyOwner').value;
+      const rateLimit = document.getElementById('rateLimit').value;
+      const expiryDays = document.getElementById('expiryDays')?.value || 365;
+      
+      if (!ownerId) {
+        alert('Please select an owner for the API key');
+        return;
+      }
+      
+      const permissions = [];
+      const checkboxes = form.querySelectorAll('input[name="keyPermissions"]:checked');
+      checkboxes.forEach(cb => permissions.push(cb.value));
+      
+      if (permissions.length === 0) {
+        alert('Please select at least one permission');
+        return;
+      }
+      
+      const payload = {
+        userId: parseInt(ownerId),
+        scopes: permissions,
+        rateLimit: parseInt(rateLimit) || 100,
+        expiresInDays: parseInt(expiryDays)
+      };
+      
+      const result = await fetchWithAuth('/api/admin/security/apikeys', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      // Show the key in a more prominent way
+      const keyDisplay = result.key || result.apiKey;
+      alert(`API Key Created Successfully!\n\nKey: ${keyDisplay}\n\nIMPORTANT: Please save this key securely.\nIt won't be shown again for security reasons.`);
+      
+      closeAPIKeyModal();
+      refreshAll();
+    } catch (err) {
+      console.error('Create API key error:', err);
+      alert(`Failed to create API key:\n${err.message}`);
+    }
   };
 
   // small helpers used by action buttons in the template
@@ -246,36 +332,93 @@ const Admin = () => {
     }
   };
 
-  const providerUsers = users.filter((u) => hasRole(u, 'Provider'));
-  const consumerUsers = users.filter((u) => hasRole(u, 'Consumer'));
-  const partnerUsers = users.filter((u) => hasRole(u, 'Partner'));
-  const pendingProviders = providerUsers.filter((u) => !u.providerApproved);
-  const totalUsers = analytics?.totalUsers ?? users.length;
-  const totalProviders = analytics?.providers ?? providerUsers.length;
-  const totalConsumers = analytics?.consumers ?? consumerUsers.length;
-  const pendingProducts = analytics?.pendingProducts ?? pendingDatasets.length;
-  const pendingProviderDatasets = analytics?.pendingProviderDatasets ?? pendingDatasets.length;
-  const approvedProviderDatasets = analytics?.approvedProviderDatasets ?? 0;
-  const publishedProducts = analytics?.publishedProducts ?? approvedProviderDatasets;
+  // Wrap all computed values in useMemo for safety and performance
+  const providerUsers = useMemo(() => 
+    Array.isArray(users) ? users.filter((u) => hasRole(u, 'Provider')) : []
+  , [users]);
+  
+  const consumerUsers = useMemo(() => 
+    Array.isArray(users) ? users.filter((u) => hasRole(u, 'Consumer')) : []
+  , [users]);
+  
+  const partnerUsers = useMemo(() => 
+    Array.isArray(users) ? users.filter((u) => hasRole(u, 'Partner')) : []
+  , [users]);
+  
+  const pendingProviders = useMemo(() => 
+    Array.isArray(providerUsers) ? providerUsers.filter((u) => !u.providerApproved) : []
+  , [providerUsers]);
+  
+  const totalUsers = useMemo(() => 
+    analytics?.totalUsers ?? (Array.isArray(users) ? users.length : 0)
+  , [analytics, users]);
+  
+  const totalProviders = useMemo(() => 
+    analytics?.providers ?? (Array.isArray(providerUsers) ? providerUsers.length : 0)
+  , [analytics, providerUsers]);
+  
+  const totalConsumers = useMemo(() => 
+    analytics?.consumers ?? (Array.isArray(consumerUsers) ? consumerUsers.length : 0)
+  , [analytics, consumerUsers]);
+  
+  const pendingProducts = useMemo(() => 
+    analytics?.pendingProducts ?? (Array.isArray(pendingDatasets) ? pendingDatasets.length : 0)
+  , [analytics, pendingDatasets]);
+  
+  const pendingProviderDatasets = useMemo(() => 
+    analytics?.pendingProviderDatasets ?? (Array.isArray(pendingDatasets) ? pendingDatasets.length : 0)
+  , [analytics, pendingDatasets]);
+  
+  const approvedProviderDatasets = useMemo(() => 
+    analytics?.approvedProviderDatasets ?? 0
+  , [analytics]);
+  
+  const publishedProducts = useMemo(() => 
+    analytics?.publishedProducts ?? approvedProviderDatasets
+  , [analytics, approvedProviderDatasets]);
+  
   const numberFrom = (value) => {
     if (value == null) return 0;
     if (typeof value === 'number') return value;
     const parsed = Number(value);
     return Number.isNaN(parsed) ? 0 : parsed;
   };
-  const totalRevenue = transactions.reduce((sum, t) => sum + numberFrom(t.amount), 0);
-  const totalPayout = transactions.reduce((sum, t) => sum + numberFrom(t.providerRevenue), 0);
-  const platformRevenue = transactions.reduce((sum, t) => sum + numberFrom(t.platformRevenue), 0);
+  
+  const totalRevenue = useMemo(() => 
+    Array.isArray(transactions) ? transactions.reduce((sum, t) => sum + numberFrom(t.amount), 0) : 0
+  , [transactions]);
+  
+  const totalPayout = useMemo(() => 
+    Array.isArray(transactions) ? transactions.reduce((sum, t) => sum + numberFrom(t.providerRevenue), 0) : 0
+  , [transactions]);
+  
+  const platformRevenue = useMemo(() => 
+    Array.isArray(transactions) ? transactions.reduce((sum, t) => sum + numberFrom(t.platformRevenue), 0) : 0
+  , [transactions]);
+  
   const formatNumber = (value) => new Intl.NumberFormat().format(Math.round(value || 0));
   const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value || 0);
-  const totalTransactions = transactions.length;
-  const successfulTransactions = transactions.filter((t) => (t?.status || '').toLowerCase() === 'approved').length;
-  const revenueShareEntries = Object.entries(revenueShare || {});
-  const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateA = a?.orderDate ? new Date(a.orderDate).getTime() : 0;
-    const dateB = b?.orderDate ? new Date(b.orderDate).getTime() : 0;
-    return dateB - dateA;
-  });
+  
+  const totalTransactions = useMemo(() => 
+    Array.isArray(transactions) ? transactions.length : 0
+  , [transactions]);
+  
+  const successfulTransactions = useMemo(() => 
+    Array.isArray(transactions) ? transactions.filter((t) => (t?.status || '').toLowerCase() === 'approved').length : 0
+  , [transactions]);
+  
+  const revenueShareEntries = useMemo(() => 
+    Object.entries(revenueShare || {})
+  , [revenueShare]);
+  
+  const sortedTransactions = useMemo(() => 
+    Array.isArray(transactions) ? [...transactions].sort((a, b) => {
+      const dateA = a?.orderDate ? new Date(a.orderDate).getTime() : 0;
+      const dateB = b?.orderDate ? new Date(b.orderDate).getTime() : 0;
+      return dateB - dateA;
+    }) : []
+  , [transactions]);
+  
   const formatDateTime = (value) => {
     if (!value) return '-';
     try {
@@ -334,94 +477,114 @@ const Admin = () => {
     if (!numeric || Number.isNaN(numeric) || numeric <= 0) return 'Unlimited';
     return `${numeric.toLocaleString()}/hr`;
   };
-  const activeApiKeyCount = apiKeys.reduce((total, key) => {
-    const status = apiKeyStatus(key);
-    return status.label === 'Active' ? total + 1 : total;
-  }, 0);
+  
+  const activeApiKeyCount = useMemo(() => 
+    Array.isArray(apiKeys) ? apiKeys.reduce((total, key) => {
+      try {
+        const status = apiKeyStatus(key);
+        return status.label === 'Active' ? total + 1 : total;
+      } catch (e) {
+        console.error('Error calculating active API key count:', e, key);
+        return total;
+      }
+    }, 0) : 0
+  , [apiKeys]);
+  
   const initialsFor = (user) => {
     if (!user?.name) return 'NA';
     return user.name.split(' ').map((p) => p[0]).join('').substring(0, 2).toUpperCase();
   };
 
   const processedUsers = useMemo(() => {
-    const decorated = users.map((user) => {
-      const roleNames = (user.roles || []).map((r) => (r?.name || '').trim());
-      const normalizedRoles = roleNames.map((r) => r.toLowerCase());
-      const primaryRole = roleNames[0] || 'Consumer';
-      const primaryRoleLower = primaryRole.toLowerCase();
-      const isProvider = normalizedRoles.includes('provider');
-      const explicitStatus = (user.status || '').toLowerCase();
-      const computedStatusKey = explicitStatus || (isProvider && !user.providerApproved ? 'pending' : 'active');
-      const statusLabel = computedStatusKey === 'pending' ? 'Pending Approval' : computedStatusKey === 'suspended' ? 'Suspended' : 'Active';
-      const statusClass = computedStatusKey === 'pending' ? 'pending' : computedStatusKey === 'suspended' ? 'failed' : 'active';
-      const roleBadgeClass = primaryRoleLower.includes('provider')
-        ? 'provider'
-        : primaryRoleLower.includes('partner')
-          ? 'partner'
-          : 'consumer';
-      
-      // Format registration date
-      const registrationDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      }) : '-';
-      
-      return {
-        user,
-        primaryRole,
-        primaryRoleLower,
-        normalizedRoles,
-        roleBadgeClass,
-        statusKey: computedStatusKey,
-        statusLabel,
-        statusClass,
-        isProvider,
-        dataSubmissions: isProvider ? (user.datasetsPublished || 0) : 0,
-        registrationDate,
-      };
-    });
+    if (!Array.isArray(users) || users.length === 0) {
+      return [];
+    }
+    
+    try {
+      const decorated = users.map((user) => {
+        if (!user) return null;
+        
+        const roleNames = (user.roles || []).map((r) => (r?.name || '').trim());
+        const normalizedRoles = roleNames.map((r) => r.toLowerCase());
+        const primaryRole = roleNames[0] || 'Consumer';
+        const primaryRoleLower = primaryRole.toLowerCase();
+        const isProvider = normalizedRoles.includes('provider');
+        const explicitStatus = (user.status || '').toLowerCase();
+        const computedStatusKey = explicitStatus || (isProvider && !user.providerApproved ? 'pending' : 'active');
+        const statusLabel = computedStatusKey === 'pending' ? 'Pending Approval' : computedStatusKey === 'suspended' ? 'Suspended' : 'Active';
+        const statusClass = computedStatusKey === 'pending' ? 'pending' : computedStatusKey === 'suspended' ? 'failed' : 'active';
+        const roleBadgeClass = primaryRoleLower.includes('provider')
+          ? 'provider'
+          : primaryRoleLower.includes('partner')
+            ? 'partner'
+            : 'consumer';
+        
+        // Format registration date
+        const registrationDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        }) : '-';
+        
+        return {
+          user,
+          primaryRole,
+          primaryRoleLower,
+          normalizedRoles,
+          roleBadgeClass,
+          statusKey: computedStatusKey,
+          statusLabel,
+          statusClass,
+          isProvider,
+          dataSubmissions: isProvider ? (user.datasetsPublished || 0) : 0,
+          registrationDate,
+        };
+      }).filter(entry => entry !== null);
 
-    const filtered = decorated.filter((entry) => {
-      if (roleFilter) {
-        if (!entry.normalizedRoles.includes(roleFilter.toLowerCase())) {
-          return false;
+      const filtered = decorated.filter((entry) => {
+        if (roleFilter) {
+          if (!entry.normalizedRoles.includes(roleFilter.toLowerCase())) {
+            return false;
+          }
         }
-      }
-      if (statusFilter) {
-        if ((entry.statusKey || '') !== statusFilter.toLowerCase()) {
-          return false;
+        if (statusFilter) {
+          if ((entry.statusKey || '') !== statusFilter.toLowerCase()) {
+            return false;
+          }
         }
-      }
-      return true;
-    });
+        return true;
+      });
 
-    const sorted = [...filtered].sort((a, b) => {
-      const direction = sortConfig.direction === 'asc' ? 1 : -1;
-      const compareText = (valA, valB) => {
-        const aVal = (valA || '').toString().toLowerCase();
-        const bVal = (valB || '').toString().toLowerCase();
-        if (aVal < bVal) return -1 * direction;
-        if (aVal > bVal) return 1 * direction;
-        return 0;
-      };
-      if (sortConfig.key === 'role') {
-        return compareText(a.primaryRoleLower, b.primaryRoleLower);
-      }
-      if (sortConfig.key === 'status') {
-        return compareText(a.statusLabel, b.statusLabel);
-      }
-      if (sortConfig.key === 'dataSubmissions') {
-        const diff = (a.dataSubmissions || 0) - (b.dataSubmissions || 0);
-        return diff === 0 ? compareText(a.user.name, b.user.name) : diff * direction;
-      }
-      if (sortConfig.key === 'email') {
-        return compareText(a.user.email, b.user.email);
-      }
-      return compareText(a.user.name, b.user.name);
-    });
+      const sorted = [...filtered].sort((a, b) => {
+        const direction = sortConfig.direction === 'asc' ? 1 : -1;
+        const compareText = (valA, valB) => {
+          const aVal = (valA || '').toString().toLowerCase();
+          const bVal = (valB || '').toString().toLowerCase();
+          if (aVal < bVal) return -1 * direction;
+          if (aVal > bVal) return 1 * direction;
+          return 0;
+        };
+        if (sortConfig.key === 'role') {
+          return compareText(a.primaryRoleLower, b.primaryRoleLower);
+        }
+        if (sortConfig.key === 'status') {
+          return compareText(a.statusLabel, b.statusLabel);
+        }
+        if (sortConfig.key === 'dataSubmissions') {
+          const diff = (a.dataSubmissions || 0) - (b.dataSubmissions || 0);
+          return diff === 0 ? compareText(a.user.name, b.user.name) : diff * direction;
+        }
+        if (sortConfig.key === 'email') {
+          return compareText(a.user.email, b.user.email);
+        }
+        return compareText(a.user.name, b.user.name);
+      });
 
-    return sorted;
+      return sorted;
+    } catch (err) {
+      console.error('Error processing users:', err);
+      return [];
+    }
   }, [users, roleFilter, statusFilter, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(processedUsers.length / USERS_PER_PAGE));
@@ -456,6 +619,15 @@ const Admin = () => {
     return sortConfig.direction === 'asc' ? 'ascending' : 'descending';
   };
 
+  // Early return if not initialized to prevent rendering with invalid state
+  if (!initialized) {
+    return (
+      <div className="admin-banner info-banner">
+        Đang khởi tạo trang quản trị...
+      </div>
+    );
+  }
+
   return (
     <>
       {loading && (
@@ -487,7 +659,8 @@ const Admin = () => {
 
       <main className="admin-container">
         {/* Users Tab */}
-        <div id="users" className="tab-content">
+        {activeTab === 'users' && (
+        <div id="users" className="tab-content active">
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>User Management Dashboard</h2>
@@ -516,6 +689,10 @@ const Admin = () => {
               <div className="table-header">
                 <h3>All Users</h3>
                 <div className="table-filters">
+                  <button className="admin-btn admin-btn-primary" onClick={openAddUserModal}>
+                    <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    Add New User
+                  </button>
                   <select id="roleFilter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                     <option value="">All Roles</option>
                     <option value="consumer">Data Consumer</option>
@@ -620,7 +797,7 @@ const Admin = () => {
                 >
                   <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
                 </button>
-                {pageNumbers.map((page) => (
+                {Array.isArray(pageNumbers) && pageNumbers.map((page) => (
                   <button
                     key={page}
                     className={`pagination-btn ${page === safeCurrentPage ? 'active' : ''}`}
@@ -645,10 +822,11 @@ const Admin = () => {
           <section className="admin-section">
             <h2>Pending Data Approvals</h2>
             <div className="approval-grid">
-              {pendingDatasets.length === 0 && (
+              {(!pendingDatasets || pendingDatasets.length === 0) && (
                 <div className="empty-state">Không có bộ dữ liệu nào cần phê duyệt.</div>
               )}
-              {pendingDatasets.map((dataset) => {
+              {Array.isArray(pendingDatasets) && pendingDatasets.map((dataset) => {
+                if (!dataset) return null;
                 const providerLabel = dataset.providerName || `Provider #${dataset.providerId || 'N/A'}`;
                 return (
                   <div className="approval-card" key={dataset.id}>
@@ -704,9 +882,11 @@ const Admin = () => {
             </div>
           </section>
         </div>
+        )}
 
         {/* Payments Tab (simplified for JSX correctness) */}
-        <div id="payments" className="tab-content">
+        {activeTab === 'payments' && (
+        <div id="payments" className="tab-content active">
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>Revenue Overview</h2>
@@ -770,7 +950,9 @@ const Admin = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedTransactions.map((tx) => (
+                      {Array.isArray(sortedTransactions) && sortedTransactions.map((tx) => {
+                        if (!tx) return null;
+                        return (
                         <tr key={tx.id}>
                           <td>TX-{tx.id}</td>
                           <td>{tx.datasetId ? `Dataset #${tx.datasetId}` : '-'}</td>
@@ -795,8 +977,9 @@ const Admin = () => {
                             )}
                           </td>
                         </tr>
-                      ))}
-                      {sortedTransactions.length === 0 && (
+                      );
+                      })}
+                      {(!Array.isArray(sortedTransactions) || sortedTransactions.length === 0) && (
                         <tr>
                           <td colSpan={9} style={{ textAlign: 'center', padding: '16px' }}>No transactions yet.</td>
                         </tr>
@@ -810,10 +993,12 @@ const Admin = () => {
             <section className="admin-section">
               <h2>Provider Payouts</h2>
               <div className="payouts-grid">
-                {providerPayouts.length === 0 && revenueShareEntries.length === 0 && (
+                {(!Array.isArray(providerPayouts) || providerPayouts.length === 0) && (!Array.isArray(revenueShareEntries) || revenueShareEntries.length === 0) && (
                   <div className="empty-state">No revenue share data for providers yet.</div>
                 )}
-                {providerPayouts.map((payout) => (
+                {Array.isArray(providerPayouts) && providerPayouts.map((payout) => {
+                  if (!payout) return null;
+                  return (
                   <div className="payout-card" key={payout.providerId}>
                     <div className="payout-header">
                       <h4>{payout.providerName || `Provider ${shortId(payout.providerId)}`}</h4>
@@ -834,9 +1019,12 @@ const Admin = () => {
                       <button className="admin-btn admin-btn-outline" onClick={noopAlert(`View payout details for ${payout.providerId}`)}>View Details</button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 {/* Fallback to old revenue share data if new API not available */}
-                {providerPayouts.length === 0 && revenueShareEntries.map(([providerId, amount]) => (
+                {Array.isArray(providerPayouts) && providerPayouts.length === 0 && Array.isArray(revenueShareEntries) && revenueShareEntries.map(([providerId, amount]) => {
+                  if (!providerId || !amount) return null;
+                  return (
                   <div className="payout-card" key={providerId}>
                     <div className="payout-header">
                       <h4>{`Provider ${shortId(providerId)}`}</h4>
@@ -852,14 +1040,17 @@ const Admin = () => {
                       <button className="admin-btn admin-btn-outline" onClick={noopAlert(`View payout details for ${providerId}`)}>View Details</button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           </section>
         </div>
+        )}
 
         {/* Security Tab - copied from template and adapted */}
-        <div id="security" className="tab-content">
+        {activeTab === 'security' && (
+        <div id="security" className="tab-content active">
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>Security Overview</h2>
@@ -901,34 +1092,67 @@ const Admin = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {apiKeys.map((key) => {
-                        const status = apiKeyStatus(key);
+                      {Array.isArray(apiKeys) && apiKeys.map((key) => {
+                        if (!key || !key.id) return null;
+                        
+                        const consumer = key.consumer || null;
+                        const ownerDisplay = consumer?.name || consumer?.email || (key.consumerId ? shortId(key.consumerId) : '—');
+                        const statusValue = key.status || (key.expiresAt && new Date(key.expiresAt) < new Date() ? 'expired' : 'active');
+                        const statusClass = statusValue === 'active' ? 'active' : (statusValue === 'expired' ? 'warning' : 'inactive');
+                        const statusLabel = statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
+                        
                         return (
                           <tr key={key.id}>
-                            <td><code className="api-key">{key.key}</code></td>
-                            <td>{key.consumerId ? shortId(key.consumerId) : '—'}</td>
+                            <td><code className="api-key">{key.key || '—'}</code></td>
+                            <td>
+                              {consumer ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                  <strong>{consumer.name || '—'}</strong>
+                                  <small style={{ color: '#6B7280' }}>{consumer.email || '—'}</small>
+                                  {consumer.organization && <small style={{ color: '#9CA3AF' }}>{consumer.organization}</small>}
+                                </div>
+                              ) : (
+                                <span style={{ color: '#9CA3AF' }}>{ownerDisplay}</span>
+                              )}
+                            </td>
                             <td>
                               <div className="permissions-tags">
-                                {(key.scopes || []).length === 0 && <span className="permission-tag">default</span>}
-                                {(key.scopes || []).map((scope) => (
+                                {(!key.scopes || key.scopes.length === 0) && <span className="permission-tag">default</span>}
+                                {Array.isArray(key.scopes) && key.scopes.map((scope) => (
                                   <span className="permission-tag" key={scope}>{scope}</span>
                                 ))}
                               </div>
                             </td>
                             <td>{rateLimitLabel(key.rateLimit)}</td>
                             <td>{formatDateTime(key.expiresAt)}</td>
-                            <td><span className={`status-badge ${status.className}`}>{status.label}</span></td>
+                            <td><span className={`status-badge ${statusClass}`}>{statusLabel}</span></td>
                             <td>
                               <div className="action-buttons">
-                                <button className="btn-icon danger" title="Revoke" onClick={() => revokeKey(key.id)}>
-                                  <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                <button 
+                                  className="btn-icon warning" 
+                                  title="Revoke (Expire)" 
+                                  onClick={() => revokeKey(key.id)}
+                                  style={{ marginRight: '8px' }}
+                                >
+                                  <svg viewBox="0 0 24 24" width="18" height="18">
+                                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                                  </svg>
+                                </button>
+                                <button 
+                                  className="btn-icon danger" 
+                                  title="Delete Permanently" 
+                                  onClick={() => deleteKey(key.id)}
+                                >
+                                  <svg viewBox="0 0 24 24" width="18" height="18">
+                                    <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                  </svg>
                                 </button>
                               </div>
                             </td>
                           </tr>
                         );
                       })}
-                      {apiKeys.length === 0 && (
+                      {(!apiKeys || apiKeys.length === 0) && (
                         <tr>
                           <td colSpan={7} style={{ textAlign: 'center', padding: '16px' }}>No API keys yet.</td>
                         </tr>
@@ -948,9 +1172,11 @@ const Admin = () => {
             </section>
           </section>
         </div>
+        )}
 
         {/* Analytics Tab (simplified for JSX correctness) */}
-        <div id="analytics" className="tab-content">
+        {activeTab === 'analytics' && (
+        <div id="analytics" className="tab-content active">
           <section className="admin-section">
             <div className="dashboard-header">
               <h2>Platform Performance</h2>
@@ -1054,6 +1280,7 @@ const Admin = () => {
             </div>
           </section>
         </div>
+        )}
 
       </main>
 
@@ -1068,7 +1295,7 @@ const Admin = () => {
                 <div className="form-group"><label htmlFor="editOrganization">Organization</label><input type="text" id="editOrganization" value={editForm.organization} onChange={(e) => handleEditField('organization', e.target.value)} /></div>
                 <div className="form-group"><label>Roles</label><div className="permissions-grid">{roleOptions.map((role) => (
                   <label className="permission-checkbox" key={role}>
-                    <input type="checkbox" checked={editForm.roles.includes(role)} onChange={() => toggleEditRole(role)} />
+                    <input type="checkbox" checked={Array.isArray(editForm?.roles) && editForm.roles.includes(role)} onChange={() => toggleEditRole(role)} />
                     {role}
                   </label>
                 ))}</div></div>
@@ -1105,9 +1332,51 @@ const Admin = () => {
             <div className="modal-header"><h3>Generate New API Key</h3><button className="modal-close" onClick={closeAPIKeyModal}>&times;</button></div>
             <div className="modal-body">
               <form className="api-key-form" id="apiKeyForm">
-                <div className="form-group"><label htmlFor="keyOwner">Owner</label><select id="keyOwner" required><option value="">Select User</option><option value="1">John Doe (john.doe@company.com)</option><option value="2">Sarah Johnson (sarah@evresearch.org)</option></select></div>
-                <div className="form-group"><label>Permissions</label><div className="permissions-grid"><label className="permission-checkbox"><input type="checkbox" name="keyPermissions" value="data_read"/>Read Data</label><label className="permission-checkbox"><input type="checkbox" name="keyPermissions" value="data_write"/>Write Data</label><label className="permission-checkbox"><input type="checkbox" name="keyPermissions" value="analytics"/>Analytics Access</label><label className="permission-checkbox"><input type="checkbox" name="keyPermissions" value="export"/>Data Export</label></div></div>
-                <div className="form-group"><label htmlFor="rateLimit">Rate Limit (requests/hour)</label><input type="number" id="rateLimit" defaultValue={1000} min={100} max={10000}/></div>
+                <div className="form-group">
+                  <label htmlFor="keyOwner">Owner (Consumer)</label>
+                  <select id="keyOwner" required>
+                    <option value="">Select Consumer</option>
+                    {Array.isArray(consumerUsers) && consumerUsers.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Permissions</label>
+                  <div className="permissions-grid">
+                    <label className="permission-checkbox">
+                      <input type="checkbox" name="keyPermissions" value="read:datasets" defaultChecked/>
+                      Read Datasets
+                    </label>
+                    <label className="permission-checkbox">
+                      <input type="checkbox" name="keyPermissions" value="download:data"/>
+                      Download Data
+                    </label>
+                    <label className="permission-checkbox">
+                      <input type="checkbox" name="keyPermissions" value="analytics:access"/>
+                      Analytics Access
+                    </label>
+                    <label className="permission-checkbox">
+                      <input type="checkbox" name="keyPermissions" value="api:premium"/>
+                      Premium API Features
+                    </label>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="rateLimit">Rate Limit (requests/hour)</label>
+                  <input type="number" id="rateLimit" defaultValue={100} min={10} max={10000}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="expiryDays">Expires In (days)</label>
+                  <select id="expiryDays">
+                    <option value="30">30 days</option>
+                    <option value="90">90 days</option>
+                    <option value="180">180 days</option>
+                    <option value="365">1 year</option>
+                  </select>
+                </div>
               </form>
             </div>
             <div className="modal-footer"><button className="admin-btn admin-btn-outline" onClick={closeAPIKeyModal}>Cancel</button><button className="admin-btn admin-btn-primary" onClick={createAPIKey}>Generate Key</button></div>

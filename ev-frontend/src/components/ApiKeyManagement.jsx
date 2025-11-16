@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -6,7 +7,7 @@ const ApiKeyManagement = ({ fetchWithAuth }) => {
   const [apiKeys, setApiKeys] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(true); // Hiển thị form ngay trong trang
   const [showKeyModal, setShowKeyModal] = useState(false); // Modal to show generated key
   const [generatedKey, setGeneratedKey] = useState(''); // Store generated key
   const [expandedStats, setExpandedStats] = useState({}); // Track which keys have expanded stats
@@ -67,7 +68,6 @@ const ApiKeyManagement = ({ fetchWithAuth }) => {
       
       // Show key in modal instead of alert
       setGeneratedKey(apiKeyValue);
-      setShowCreateModal(false);
       setShowKeyModal(true);
       
       // Refresh list
@@ -157,15 +157,174 @@ const ApiKeyManagement = ({ fetchWithAuth }) => {
     <div className="api-key-management">
       <div className="section-header">
         <h2>API Key Management</h2>
-        <button 
-          className="consumer-btn consumer-btn-primary"
-          onClick={() => setShowCreateModal(true)}
-        >
-          + Generate New Key
-        </button>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
+
+      {/* API Endpoints Documentation */}
+      <div style={{
+        backgroundColor: '#EFF6FF',
+        padding: '1.5rem',
+        borderRadius: '0.75rem',
+        marginBottom: '2rem',
+        border: '1px solid #BFDBFE'
+      }}>
+        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', color: '#1E40AF', fontWeight: '600' }}>
+          Available API Endpoints
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ background: 'white', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #3B82F6' }}>
+            <code style={{ color: '#059669', fontWeight: '600' }}>GET /api/v1/datasets</code>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
+              Get list of all datasets. Requires scope: <strong>read:datasets</strong>
+            </p>
+          </div>
+          <div style={{ background: 'white', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #3B82F6' }}>
+            <code style={{ color: '#059669', fontWeight: '600' }}>GET /api/v1/datasets/{'{id}'}</code>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
+              Get dataset details by ID. Requires scope: <strong>read:datasets</strong>
+            </p>
+          </div>
+          <div style={{ background: 'white', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #8B5CF6' }}>
+            <code style={{ color: '#059669', fontWeight: '600' }}>GET /api/v1/datasets/{'{id}'}/download</code>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
+              Download dataset. Requires scope: <strong>download:data</strong>
+            </p>
+          </div>
+          <div style={{ background: 'white', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #F59E0B' }}>
+            <code style={{ color: '#059669', fontWeight: '600' }}>GET /api/v1/analytics</code>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
+              Get analytics statistics. Requires scope: <strong>analytics:access</strong>
+            </p>
+          </div>
+          <div style={{ background: 'white', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #10B981' }}>
+            <code style={{ color: '#059669', fontWeight: '600' }}>GET /api/v1/health</code>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6B7280' }}>
+              Check API health status. No authentication required.
+            </p>
+          </div>
+        </div>
+        <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#FEF3C7', borderRadius: '0.5rem' }}>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: '#92400E' }}>
+            <strong>Tip:</strong> All requests (except /health) require header <code>X-API-Key: your_api_key</code>
+          </p>
+        </div>
+      </div>
+
+      {/* Form tạo API Key hiển thị ngay trong trang */}
+      {showCreateForm && (
+        <div className="create-key-form-inline" style={{
+          backgroundColor: '#f8f9fa',
+          padding: '1.5rem',
+          borderRadius: '0.75rem',
+          marginBottom: '2rem',
+          border: '1px solid #dee2e6'
+        }}>
+          <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.375rem', color: '#0A192F', fontWeight: '600' }}>
+            Generate New API Key
+          </h3>
+        
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>
+              Key Name (optional):
+            </label>
+            <input
+              type="text"
+              value={newKeyConfig.name}
+              onChange={(e) => setNewKeyConfig({ ...newKeyConfig, name: e.target.value })}
+              placeholder="My API Key"
+              style={{ width: '100%', padding: '0.5rem', border: '1px solid #D1D5DB', borderRadius: '0.375rem', fontSize: '0.875rem' }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>
+                Rate Limit (requests/min):
+              </label>
+              <input
+                type="number"
+                value={newKeyConfig.rateLimit}
+                onChange={(e) => setNewKeyConfig({ ...newKeyConfig, rateLimit: parseInt(e.target.value) })}
+                min="1"
+                max="1000"
+                style={{ width: '100%', padding: '0.5rem', border: '1px solid #D1D5DB', borderRadius: '0.375rem', fontSize: '0.875rem' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>
+                Expiry (days):
+              </label>
+              <input
+                type="number"
+                value={newKeyConfig.expiryDays}
+                onChange={(e) => setNewKeyConfig({ ...newKeyConfig, expiryDays: parseInt(e.target.value) })}
+                min="1"
+                max="365"
+                style={{ width: '100%', padding: '0.5rem', border: '1px solid #D1D5DB', borderRadius: '0.375rem', fontSize: '0.875rem' }}
+              />
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: '1rem' }}>
+            <small style={{ display: 'block', color: '#6B7280', fontSize: '0.75rem' }}>Leave as 30 for default expiration</small>
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '500', color: '#374151', fontSize: '0.875rem' }}>
+              Scopes:
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {['read:datasets', 'download:data', 'analytics:access'].map(scope => (
+                <label key={scope} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={newKeyConfig.scopes.includes(scope)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setNewKeyConfig({ 
+                          ...newKeyConfig, 
+                          scopes: [...newKeyConfig.scopes, scope] 
+                        });
+                      } else {
+                        setNewKeyConfig({ 
+                          ...newKeyConfig, 
+                          scopes: newKeyConfig.scopes.filter(s => s !== scope) 
+                        });
+                      }
+                    }}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  <span>{scope}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid #E5E7EB' }}>
+            <button 
+              onClick={generateApiKey}
+              disabled={loading}
+              style={{ 
+                padding: '0.625rem 1.5rem', 
+                borderRadius: '0.5rem', 
+                background: loading ? '#93C5FD' : '#3B82F6', 
+                color: 'white', 
+                border: 'none', 
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => { if (!loading) e.target.style.background = '#2563EB' }}
+              onMouseOut={(e) => { if (!loading) e.target.style.background = '#3B82F6' }}
+            >
+              {loading ? 'Generating...' : 'Generate Key'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {loading && <div className="loading-spinner">Loading...</div>}
 
@@ -238,142 +397,178 @@ const ApiKeyManagement = ({ fetchWithAuth }) => {
         ))}
       </div>
 
-      {/* Create API Key Modal */}
-      {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Generate New API Key</h3>
-            
-            <div className="form-group">
-              <label>Key Name (optional):</label>
-              <input
-                type="text"
-                value={newKeyConfig.name}
-                onChange={(e) => setNewKeyConfig({ ...newKeyConfig, name: e.target.value })}
-                placeholder="My API Key"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Rate Limit (requests/minute):</label>
-              <input
-                type="number"
-                value={newKeyConfig.rateLimit}
-                onChange={(e) => setNewKeyConfig({ ...newKeyConfig, rateLimit: parseInt(e.target.value) })}
-                min="1"
-                max="1000"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Expiry (days):</label>
-              <input
-                type="number"
-                value={newKeyConfig.expiryDays}
-                onChange={(e) => setNewKeyConfig({ ...newKeyConfig, expiryDays: parseInt(e.target.value) })}
-                min="1"
-                max="365"
-              />
-              <small>Leave as 0 for no expiration</small>
-            </div>
-
-            <div className="form-group">
-              <label>Scopes:</label>
-              <div className="checkbox-group">
-                {['read:datasets', 'download:data', 'analytics:access'].map(scope => (
-                  <label key={scope}>
-                    <input
-                      type="checkbox"
-                      checked={newKeyConfig.scopes.includes(scope)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewKeyConfig({ 
-                            ...newKeyConfig, 
-                            scopes: [...newKeyConfig.scopes, scope] 
-                          });
-                        } else {
-                          setNewKeyConfig({ 
-                            ...newKeyConfig, 
-                            scopes: newKeyConfig.scopes.filter(s => s !== scope) 
-                          });
-                        }
-                      }}
-                    />
-                    {scope}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button 
-                className="consumer-btn consumer-btn-secondary"
-                onClick={() => setShowCreateModal(false)}
-              >
-                Cancel
-              </button>
-              <button 
-                className="consumer-btn consumer-btn-primary"
-                onClick={generateApiKey}
-                disabled={loading}
-              >
-                {loading ? 'Generating...' : 'Generate Key'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Generated API Key Modal - Show once after creation */}
-      {showKeyModal && (
-        <div className="modal-overlay" onClick={() => setShowKeyModal(false)}>
-          <div className="modal-content modal-success" onClick={(e) => e.stopPropagation()}>
-            <div className="success-icon">✓</div>
-            <h3>API Key Created Successfully!</h3>
+      {showKeyModal && ReactDOM.createPortal(
+        <div 
+          className="api-key-success-overlay" 
+          style={{ 
+            zIndex: 9999999, 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setShowKeyModal(false)}
+        >
+          <div 
+            className="api-key-success-content" 
+            style={{
+              background: 'white',
+              padding: '1.5rem',
+              borderRadius: '0.75rem',
+              maxWidth: '650px',
+              width: '100%',
+              position: 'relative',
+              zIndex: 10000000,
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ 
+              textAlign: 'center', 
+              fontSize: '1.25rem', 
+              fontWeight: '600', 
+              color: '#10B981',
+              margin: 0
+            }}>API Key Created Successfully!</h3>
             
-            <div className="alert alert-warning" style={{ marginBottom: '1rem', padding: '1rem', background: '#FEF3C7', borderRadius: '0.5rem', border: '1px solid #FCD34D' }}>
-              <strong>⚠️ Important:</strong> This is the only time you'll see this key. Copy it now and store it securely!
+            <div style={{ 
+              padding: '0.875rem', 
+              background: '#FEF3C7', 
+              borderRadius: '0.5rem', 
+              border: '1px solid #FCD34D',
+              fontSize: '0.813rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.25rem'
+            }}>
+              <strong style={{ color: '#92400E', display: 'block' }}>Important:</strong>
+              <span style={{ color: '#92400E' }}>
+                This is the only time you'll see this key. Copy it now and store it securely!
+              </span>
             </div>
 
-            <div className="key-display">
-              <code className="api-key-value">{generatedKey}</code>
+            <div style={{
+              background: '#F3F4F6',
+              padding: '0.875rem',
+              borderRadius: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.625rem'
+            }}>
+              <code style={{
+                display: 'block',
+                wordBreak: 'break-all',
+                padding: '0.625rem',
+                background: '#1F2937',
+                color: '#10B981',
+                borderRadius: '0.375rem',
+                fontFamily: 'monospace',
+                fontSize: '0.813rem',
+                margin: 0
+              }}>{generatedKey}</code>
               <button 
-                className="consumer-btn consumer-btn-primary btn-copy"
                 onClick={() => copyToClipboard(generatedKey, 'API Key')}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  background: '#3B82F6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.813rem',
+                  fontWeight: '500',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#2563EB'}
+                onMouseOut={(e) => e.target.style.background = '#3B82F6'}
               >
-                📋 Copy Key
+                Copy Key
               </button>
             </div>
 
-            <div className="usage-example" style={{ marginTop: '1.5rem', padding: '1rem', background: '#F3F4F6', borderRadius: '0.5rem' }}>
-              <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Usage Example:</p>
-              <pre style={{ background: '#1F2937', color: '#10B981', padding: '1rem', borderRadius: '0.5rem', overflow: 'auto', fontSize: '0.875rem' }}>
-{`curl -X GET "http://localhost:8080/api/datasets" \\
+            <div style={{ 
+              padding: '0.875rem', 
+              background: '#F3F4F6', 
+              borderRadius: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.625rem'
+            }}>
+              <p style={{ 
+                fontWeight: '600', 
+                color: '#374151',
+                fontSize: '0.813rem',
+                margin: 0
+              }}>Usage Example:</p>
+              <pre style={{ 
+                background: '#1F2937', 
+                color: '#10B981', 
+                padding: '0.75rem', 
+                borderRadius: '0.5rem', 
+                overflow: 'auto', 
+                fontSize: '0.688rem',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all'
+              }}>
+{`curl -X GET "http://localhost:8080/api/v1/datasets" \\
   -H "X-API-Key: ${generatedKey}"`}
               </pre>
               <button 
-                className="btn-link"
-                onClick={() => copyToClipboard(`curl -X GET "http://localhost:8080/api/datasets" -H "X-API-Key: ${generatedKey}"`, 'cURL command')}
-                style={{ marginTop: '0.5rem' }}
+                onClick={() => copyToClipboard(`curl -X GET "http://localhost:8080/api/v1/datasets" -H "X-API-Key: ${generatedKey}"`, 'cURL command')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#3B82F6',
+                  cursor: 'pointer',
+                  fontSize: '0.813rem',
+                  textDecoration: 'underline',
+                  padding: 0,
+                  textAlign: 'left'
+                }}
               >
-                📋 Copy cURL Command
+                Copy cURL Command
               </button>
             </div>
 
-            <div className="modal-actions" style={{ marginTop: '1.5rem' }}>
-              <button 
-                className="consumer-btn consumer-btn-primary"
-                onClick={() => setShowKeyModal(false)}
-                style={{ width: '100%' }}
-              >
-                I've Saved My Key
-              </button>
-            </div>
+            <button 
+              onClick={() => setShowKeyModal(false)}
+              style={{
+                width: '100%',
+                padding: '0.625rem',
+                background: '#10B981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.background = '#059669'}
+              onMouseOut={(e) => e.target.style.background = '#10B981'}
+            >
+              I've Saved My Key
+            </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      <style jsx>{`
+      <style>{`
         .api-key-management {
           padding: 20px;
         }
@@ -445,25 +640,38 @@ const ApiKeyManagement = ({ fetchWithAuth }) => {
           font-weight: bold;
           color: #333;
         }
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
+        
+        /* Unique modal styles for API Key Generation */
+        .api-key-generation-overlay,
+        .api-key-success-overlay {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          background: rgba(0, 0, 0, 0.75) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          z-index: 9999999 !important;
         }
-        .modal-content {
-          background: white;
-          border-radius: 8px;
-          padding: 30px;
-          max-width: 500px;
-          width: 90%;
+        
+        .api-key-generation-content,
+        .api-key-success-content {
+          background: white !important;
+          border-radius: 0.75rem !important;
+          padding: 2rem !important;
+          max-width: 600px !important;
+          width: 90% !important;
+          max-height: 90vh !important;
+          overflow-y: auto !important;
+          position: relative !important;
+          z-index: 10000000 !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3) !important;
         }
+        
         .form-group {
           margin-bottom: 20px;
         }
@@ -508,6 +716,43 @@ const ApiKeyManagement = ({ fetchWithAuth }) => {
           text-align: center;
           padding: 40px;
           color: #666;
+        }
+        
+        /* Success modal specific styles */
+        .success-icon {
+          width: 60px;
+          height: 60px;
+          background: #10B981;
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 32px;
+          margin: 0 auto 1.5rem;
+        }
+        
+        .key-display {
+          background: #F3F4F6;
+          padding: 1rem;
+          border-radius: 0.5rem;
+          margin: 1rem 0;
+        }
+        
+        .api-key-value {
+          display: block;
+          word-break: break-all;
+          padding: 0.75rem;
+          background: #1F2937;
+          color: #10B981;
+          border-radius: 0.375rem;
+          font-family: monospace;
+          font-size: 0.875rem;
+          margin-bottom: 0.75rem;
+        }
+        
+        .btn-copy {
+          width: 100%;
         }
       `}</style>
     </div>

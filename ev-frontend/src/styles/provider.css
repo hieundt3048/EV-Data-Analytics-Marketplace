@@ -3,33 +3,42 @@
    All selectors below are scoped to the .provider-page root to avoid
    colliding with other pages' CSS. */
 
-/* NUCLEAR OPTION: Hide ALL fixed/absolute positioned high z-index elements */
-body > div[style*="position: fixed"],
-body > div[style*="position:fixed"],
-body > div[style*="z-index"],
-body > section[style*="position: fixed"],
-body > aside[style*="position: fixed"],
-div[style*="position: fixed"][style*="z-index"],
-div[style*="z-index: 999"],
-div[style*="z-index: 9999"],
-div[style*="z-index:999"],
-div[style*="z-index:9999"],
-[role="dialog"],
-[role="alertdialog"],
-.swal2-container,
-.swal-overlay,
-.sweet-alert,
-.modal-backdrop,
-[class*="modal"],
-[class*="dialog"],
-[class*="popup"],
-[class*="overlay"],
-[class*="alert-wrapper"] {
+/* NUCLEAR OPTION: Hide ONLY provider-specific overlays, NOT ALL modals */
+/* Whitelist: Allow API key modal and other important modals */
+.provider-page div[style*="position: fixed"]:not(#api-key-modal-overlay):not(#api-key-generation-modal-overlay):not(.api-key-generation-overlay):not(.api-key-success-overlay),
+.provider-page div[style*="position:fixed"]:not(#api-key-modal-overlay):not(#api-key-generation-modal-overlay):not(.api-key-generation-overlay):not(.api-key-success-overlay),
+.provider-page [role="dialog"]:not(#api-key-modal-overlay):not([id*="api-key"]):not(.api-key-generation-overlay):not(.api-key-success-overlay),
+.provider-page [role="alertdialog"]:not(#api-key-modal-overlay):not(.api-key-generation-overlay):not(.api-key-success-overlay),
+.provider-page .swal2-container,
+.provider-page .swal-overlay,
+.provider-page .sweet-alert,
+.provider-page .modal-backdrop,
+.provider-page [class*="dialog"]:not([id*="api-key"]):not([class*="api-key"]),
+.provider-page [class*="popup"]:not([id*="api-key"]):not([class*="api-key"]),
+.provider-page [class*="alert-wrapper"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
   z-index: -9999 !important;
+}
+
+/* Ensure API key modals are NEVER hidden */
+#api-key-modal-overlay,
+#api-key-modal-content,
+#api-key-generation-modal-overlay,
+#api-key-generation-modal-content,
+.api-key-generation-overlay,
+.api-key-generation-content,
+.api-key-success-overlay,
+.api-key-success-content,
+[id*="api-key-modal"],
+div[id*="api-key"][style*="position: fixed"],
+div[id*="api-key"][style*="z-index"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .provider-page .provider-menu {

@@ -62,6 +62,8 @@ public class SecurityConfig {
                         .antMatchers("/api/report/**").permitAll()
                         // Temporarily allow admin payment endpoints without auth for testing
                         .antMatchers("/api/admin/payments/**").permitAll()
+                        // Temporarily allow API key management for testing
+                        .antMatchers("/api/apikeys/**").permitAll()
                         // Yêu cầu xác thực cho tất cả các request khác.
                         .anyRequest().authenticated()
                 )

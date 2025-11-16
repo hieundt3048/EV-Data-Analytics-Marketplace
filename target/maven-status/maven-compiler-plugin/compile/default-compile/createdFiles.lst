@@ -86,6 +86,7 @@ com\evmarketplace\marketplace\AccessGrant.class
 com\evmarketplace\data\DataType.class
 com\evmarketplace\Pojo\Dataset.class
 com\evmarketplace\config\WebConfig.class
+com\evmarketplace\Controller\DataAccessController.class
 com\evmarketplace\Service\ConsumerDashboardService.class
 com\evmarketplace\dto\DashboardDataDTO.class
 com\evmarketplace\auth\AuthController.class

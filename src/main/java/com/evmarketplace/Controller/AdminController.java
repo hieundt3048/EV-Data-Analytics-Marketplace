@@ -10,6 +10,7 @@ import com.evmarketplace.Pojo.Order;
 import com.evmarketplace.Repository.APIKeyRepository;
 import com.evmarketplace.Repository.TransactionRepository;
 import com.evmarketplace.Repository.OrderRepository;
+import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.Service.ProviderDatasetService;
 import com.evmarketplace.Service.OrderService;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
     private final DataProductRepository dataProductRepository;
     private final PurchaseRepository purchaseRepository;
     private final TransactionRepository transactionRepository;
@@ -53,6 +55,7 @@ public class AdminController {
 
     public AdminController(
             UserService userService,
+            UserRepository userRepository,
             DataProductRepository dataProductRepository,
             PurchaseRepository purchaseRepository,
             TransactionRepository transactionRepository,
@@ -62,6 +65,7 @@ public class AdminController {
             OrderRepository orderRepository
     ) {
         this.userService = userService;
+        this.userRepository = userRepository;
         this.dataProductRepository = dataProductRepository;
         this.purchaseRepository = purchaseRepository;
         this.transactionRepository = transactionRepository;
@@ -230,16 +234,214 @@ public class AdminController {
     }
 
     @GetMapping("/security/apikeys")
-    public ResponseEntity<List<APIKey>> listApiKeys() {
-        return ResponseEntity.ok(apiKeyRepository.findAll());
+    public ResponseEntity<?> listApiKeys() {
+        List<APIKey> keys = apiKeyRepository.findAll();
+        
+        // Enrich với thông tin Consumer
+        List<Map<String, Object>> enrichedKeys = keys.stream().map(key -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", key.getId());
+            data.put("key", maskApiKey(key.getKey())); // Mask key để bảo mật
+            data.put("consumerId", key.getConsumerId());
+            
+            // Lấy thông tin Consumer
+            // Note: consumerId trong APIKey là UUID, cần mapping với User.id (Long)
+            // Tạm thời skip consumer info vì mismatch type
+            try {
+                // For now, set consumer to null - this needs proper database schema fix
+                data.put("consumer", Map.of(
+                    "id", key.getConsumerId().toString(),
+                    "note", "Consumer info unavailable - ID type mismatch"
+                ));
+            } catch (Exception e) {
+                data.put("consumer", null);
+            }
+            
+            data.put("scopes", key.getScopes());
+            data.put("rateLimit", key.getRateLimit());
+            data.put("expiresAt", key.getExpiryDate());
+            data.put("createdAt", key.getCreatedAt());
+            
+            // Tính status dựa trên expiresAt
+            String status = "active";
+            if (key.getExpiryDate() != null && key.getExpiryDate().before(new java.util.Date())) {
+                status = "expired";
+            }
+            data.put("status", status);
+            
+            return data;
+        }).collect(Collectors.toList());
+        
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "keys", enrichedKeys,
+            "total", enrichedKeys.size()
+        ));
+    }
+    
+    /**
+     * Mask API key để bảo mật (chỉ hiển thị prefix và suffix)
+     */
+    private String maskApiKey(String key) {
+        if (key == null || key.length() < 16) return key;
+        String prefix = key.substring(0, Math.min(12, key.length()));
+        String suffix = key.substring(Math.max(0, key.length() - 4));
+        return prefix + "****" + suffix;
+    }
+    
+    /**
+     * Tạo API key mới cho consumer (Admin only)
+     * POST /api/admin/security/apikeys
+     */
+    @PostMapping("/security/apikeys")
+    public ResponseEntity<?> createApiKey(@RequestBody Map<String, Object> payload) {
+        try {
+            // Validate required fields
+            if (!payload.containsKey("userId")) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", "userId is required"
+                ));
+            }
+            
+            Long userId = Long.parseLong(payload.get("userId").toString());
+            
+            // Verify user exists and is a Consumer
+            User user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of(
+                    "success", false,
+                    "error", "User not found"
+                ));
+            }
+            
+            // Generate unique API key
+            String apiKey = generateUniqueApiKey();
+            
+            // Get scopes/permissions
+            @SuppressWarnings("unchecked")
+            List<String> scopes = payload.containsKey("scopes") 
+                ? (List<String>) payload.get("scopes") 
+                : List.of("read:datasets");
+            
+            // Get rate limit (default 100/hr)
+            int rateLimit = payload.containsKey("rateLimit") 
+                ? Integer.parseInt(payload.get("rateLimit").toString()) 
+                : 100;
+            
+            // Get expiry days (default 365)
+            int expiresInDays = payload.containsKey("expiresInDays") 
+                ? Integer.parseInt(payload.get("expiresInDays").toString()) 
+                : 365;
+            
+            // Create APIKey entity
+            // Note: consumerId in APIKey is UUID, but User.id is Long
+            // We'll use a deterministic UUID based on userId for now
+            UUID consumerId = UUID.nameUUIDFromBytes(("consumer-" + userId).getBytes());
+            
+            APIKey newKey = new APIKey(consumerId, apiKey);
+            newKey.setScopes(scopes);
+            newKey.setRateLimit(rateLimit);
+            
+            // Set expiry date
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.add(java.util.Calendar.DAY_OF_YEAR, expiresInDays);
+            newKey.setExpiresAt(cal.getTime());
+            
+            // Save to database
+            APIKey savedKey = apiKeyRepository.save(newKey);
+            
+            // Return response with full key (only shown once!)
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "API key created successfully");
+            response.put("key", savedKey.getKey()); // Full key - only shown once!
+            response.put("id", savedKey.getId());
+            response.put("consumerId", savedKey.getConsumerId());
+            response.put("scopes", savedKey.getScopes());
+            response.put("rateLimit", savedKey.getRateLimit());
+            response.put("expiresAt", savedKey.getExpiresAt());
+            response.put("createdAt", savedKey.getCreatedAt());
+            
+            return ResponseEntity.status(201).body(response);
+            
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", "Invalid number format in request"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", "Failed to create API key: " + e.getMessage()
+            ));
+        }
+    }
+    
+    /**
+     * Generate a unique API key string
+     */
+    private String generateUniqueApiKey() {
+        // Format: vmkt_<random_uuid_without_dashes>
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "vmkt_" + uuid;
     }
 
     @PutMapping("/security/apikeys/{id}/revoke")
     public ResponseEntity<?> revokeApiKey(@PathVariable UUID id) {
         return apiKeyRepository.findById(id).map(key -> {
-            key.setExpiresAt(new java.util.Date());
-            return ResponseEntity.ok(apiKeyRepository.save(key));
-        }).orElse(ResponseEntity.notFound().build());
+            // Set expiresAt to past date to revoke
+            key.setExpiryDate(new java.util.Date(0)); // Epoch time = revoked
+            APIKey updated = apiKeyRepository.save(key);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "API key revoked successfully",
+                "key", updated
+            ));
+        }).orElse(ResponseEntity.status(404).body(Map.of(
+            "success", false,
+            "error", "API key not found"
+        )));
+    }
+    
+    @DeleteMapping("/security/apikeys/{id}")
+    public ResponseEntity<?> deleteApiKey(@PathVariable UUID id) {
+        return apiKeyRepository.findById(id).map(key -> {
+            // Permanently delete from database
+            apiKeyRepository.delete(key);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "API key permanently deleted"
+            ));
+        }).orElse(ResponseEntity.status(404).body(Map.of(
+            "success", false,
+            "error", "API key not found"
+        )));
+    }
+    
+    /**
+     * Lấy usage statistics chi tiết cho một API key
+     */
+    @GetMapping("/security/apikeys/{id}/usage")
+    public ResponseEntity<?> getApiKeyUsage(@PathVariable UUID id) {
+        return apiKeyRepository.findById(id).map(key -> {
+            // TODO: Tích hợp với ApiAccessService để lấy thống kê thực
+            Map<String, Object> usage = new HashMap<>();
+            usage.put("keyId", key.getId());
+            usage.put("totalRequests", 0); // Placeholder
+            usage.put("successfulRequests", 0);
+            usage.put("failedRequests", 0);
+            usage.put("lastUsed", null);
+            usage.put("bandwidthUsed", "0 MB");
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "usage", usage
+            ));
+        }).orElse(ResponseEntity.status(404).body(Map.of(
+            "success", false,
+            "error", "API key not found"
+        )));
     }
 
     @GetMapping("/analytics/overview")

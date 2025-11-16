@@ -1,3 +1,38 @@
+/* CRITICAL: API Key Modal Override - Must be at top to prevent conflicts */
+/* These modals MUST ALWAYS be visible regardless of other CSS rules */
+#api-key-generation-modal-overlay,
+#api-key-generation-modal-content,
+.api-key-generation-overlay,
+.api-key-generation-content,
+.api-key-success-overlay,
+.api-key-success-content,
+div[id*="api-key-generation"],
+div[class*="api-key-generation"],
+div[class*="api-key-success"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+#api-key-generation-modal-overlay,
+.api-key-generation-overlay,
+.api-key-success-overlay {
+  z-index: 9999999 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+}
+
+#api-key-generation-modal-content,
+.api-key-generation-content,
+.api-key-success-content {
+  z-index: 10000000 !important;
+  position: relative !important;
+  background: white !important;
+}
+
 /* Consumer Page Styles */
 .consumer-container {
     max-width: 1200px;
@@ -2657,7 +2692,7 @@
   font-size: 1rem;
 }
 
-/* Modal Styles */
+/* Modal Styles - Generic modals */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -3094,4 +3129,74 @@
   .btn-primary {
     width: 100%;
   }
+}
+
+/* CRITICAL: Force API Key Modal to display - override any global CSS hiding it */
+#api-key-modal-overlay,
+#api-key-modal-content,
+#api-key-generation-modal-overlay,
+#api-key-generation-modal-content,
+.api-key-generation-overlay,
+.api-key-generation-content,
+.api-key-success-overlay,
+.api-key-success-content,
+div[id*="api-key-modal"],
+div[id*="api-key"][style*="position"],
+div[id*="api-key"][style*="fixed"],
+div.api-key-generation-overlay,
+div.api-key-success-overlay {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#api-key-modal-overlay,
+#api-key-generation-modal-overlay,
+.api-key-generation-overlay,
+.api-key-success-overlay {
+  position: fixed !important;
+  z-index: 9999999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#api-key-modal-content,
+#api-key-generation-modal-content,
+.api-key-generation-content,
+.api-key-success-content {
+  position: relative !important;
+  z-index: 10000000 !important;
+  background: white !important;
+  border-radius: 0.75rem !important;
+  padding: 2rem !important;
+  max-width: 600px !important;
+  width: 90% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* CRITICAL: Prevent generic modal styles from affecting API Key modals */
+.api-key-generation-overlay,
+.api-key-success-overlay {
+  z-index: 9999999 !important;
+}
+
+.api-key-generation-content,
+.api-key-success-content {
+  z-index: 10000000 !important;
+  display: block !important;
+}
+
+/* Force hide any interfering elements that might cover modals */
+body > div[style*="position: fixed"]:not(#api-key-generation-modal-overlay):not(.api-key-generation-overlay):not(.api-key-success-overlay) {
+  z-index: 1000 !important;
 }
