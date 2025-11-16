@@ -1301,14 +1301,19 @@ div[class*="api-key-success"] {
 
 /* Modal */
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+  /* Previously display:none blocked all conditionally rendered modals */
+  display: flex; /* Center children */
+  align-items: flex-start;
+  justify-content: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: 4rem; /* spacing from top */
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
@@ -1318,6 +1323,7 @@ div[class*="api-key-success"] {
     width: 90%;
     max-width: 500px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalFade 0.25s ease;
 }
 
 .modal-header {
@@ -1358,6 +1364,82 @@ div[class*="api-key-success"] {
     padding: 1.5rem;
     border-top: 1px solid #E5E7EB;
 }
+
+@keyframes modalFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Purchase Confirmation Modal Enhancements */
+.purchase-summary {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.purchase-summary h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0A192F;
+}
+.purchase-summary .muted {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #6B7280;
+  line-height: 1.4;
+}
+.purchase-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+.purchase-meta div {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.purchase-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg,#0A192F,#152642);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+.purchase-price .price-label { font-size: 0.75rem; opacity: 0.8; }
+.purchase-price .price-value { font-size: 1.125rem; }
+.payment-methods { margin: 0.5rem 0 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.payment-methods select { padding: 0.6rem 0.75rem; border:1px solid #D1D5DB; border-radius:0.5rem; }
+.payment-error { background:#FEE2E2; color:#B91C1C; padding:0.5rem 0.75rem; border-radius:0.5rem; font-size:0.8125rem; border:1px solid #FCA5A5; }
+
+/* Receipt Modal Enhancements */
+.receipt-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+  padding: 0.5rem 0.25rem 1rem;
+  font-size: 0.8125rem;
+}
+.receipt-row { display: contents; }
+.receipt-label { font-weight: 600; color:#374151; }
+.receipt-value { color:#1F2937; }
+.receipt-value.amount { font-weight:700; color:#0A192F; }
+.receipt-status-badge { display:inline-flex; padding:0.25rem 0.6rem; border-radius:0.75rem; font-size:0.65rem; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; }
+.receipt-status-badge.completed { background:#D1FAE5; color:#065F46; }
+.receipt-status-badge.pending { background:#FEF3C7; color:#92400E; }
+.receipt-status-badge.failed { background:#FEE2E2; color:#991B1B; }
+.receipt-status-badge.info { background:#DBEAFE; color:#1E40AF; }
 
 /* Forms */
 .api-key-form {

@@ -26,6 +26,9 @@ const Consumer = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [previewDataset, setPreviewDataset] = useState(null);
   const [showReceipt, setShowReceipt] = useState(null);
+  const [confirmPurchase, setConfirmPurchase] = useState(null); // dataset pending confirmation
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [selectedDatasetId, setSelectedDatasetId] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
@@ -49,6 +52,9 @@ const Consumer = () => {
   const [dashboardError, setDashboardError] = useState(null);
   const [analyticsError, setAnalyticsError] = useState(null);
   const [apiKeyError, setApiKeyError] = useState(null);
+
+  // Business rule: A purchase is only considered SUCCESSFUL when status is APPROVED or PAYOUT_COMPLETED
+  const SUCCESS_STATUSES = ['approved', 'payout_completed'];
 
   // Simplified fetchWithAuth like Admin component
   const fetchWithAuth = useCallback(async (url, opts = {}) => {
@@ -357,37 +363,74 @@ const Consumer = () => {
   };
 
   // Purchase functions
+  // Open the confirmation modal; actual checkout/POST remains unchanged
   const purchaseDataset = async (dataset) => {
     if (!dataset?.id) {
       alert('Unable to identify dataset to purchase.');
       return;
     }
 
-    const priceLabel = dataset?.price === null || dataset?.price === undefined
-      ? '—'
-      : formatPurchaseAmount(dataset.price);
+    // Reset any previous payment state and open modal
+    setPaymentError(null);
+    setConfirmPurchase(dataset);
+  };
 
-    if (!window.confirm(`Are you sure you want to purchase "${dataset.name || 'Dataset'}" for ${priceLabel}?`)) {
-      return;
-    }
-
+  // Confirm and perform the checkout request
+  const confirmAndProcessPurchase = async (dataset, paymentMethod = 'card') => {
+    if (!dataset || !dataset.id) return;
+    setPaymentProcessing(true);
+    setPaymentError(null);
     try {
       const response = await fetchWithAuth('/api/orders/checkout', {
         method: 'POST',
-        body: JSON.stringify({ datasetId: dataset.id })
+        body: JSON.stringify({ datasetId: dataset.id, paymentMethod })
       });
-      
-      if (response && response.status === 'success') {
-        alert('Dataset purchased successfully!');
+      // Normalize response to a receipt object, even if backend only returns {status:'success'}
+      let receipt = null;
+      if (response) {
+        const hasOrderLikeFields = response.order || response.id || response.amount || response.datasetId;
+        const raw = response.order || response;
+        if (hasOrderLikeFields) {
+          // Build receipt from available fields + dataset fallback, FORCE initial status to PENDING
+          const base = raw.order ? raw.order : raw;
+          receipt = {
+            id: base.id || `temp-${Date.now()}`,
+            datasetId: base.datasetId || dataset.id,
+            itemTitle: base.itemTitle || base.datasetTitle || dataset.name,
+            amount: base.amount || dataset.price,
+            purchaseDate: base.purchaseDate || base.timestamp || base.createdAt || new Date().toISOString(),
+            status: 'PENDING',
+            pricingType: base.pricingType || dataset.pricingType,
+            paymentMethod,
+          };
+        } else {
+          // Minimal response, still create PENDING receipt
+          receipt = {
+            id: `temp-${Date.now()}`,
+            datasetId: dataset.id,
+            itemTitle: dataset.name,
+            amount: dataset.price,
+            purchaseDate: new Date().toISOString(),
+            status: 'PENDING',
+            pricingType: dataset.pricingType,
+            paymentMethod,
+          };
+        }
+      }
+
+      if (receipt) {
+        setShowReceipt(receipt);
         fetchPurchaseHistory();
       } else {
         const errorMsg = response?.message || 'Unknown error from server.';
-        alert('Error: ' + errorMsg);
+        setPaymentError(errorMsg);
       }
     } catch (e) {
-      const message = e.message || 'Unable to complete transaction.';
       console.error('Purchase error:', e);
-      alert('Error: ' + message);
+      setPaymentError(e.message || 'Unable to complete transaction.');
+    } finally {
+      setPaymentProcessing(false);
+      setConfirmPurchase(null);
     }
   };
 
@@ -469,9 +512,11 @@ const Consumer = () => {
 
   const getStatusClass = (status) => {
     const normalized = (status || '').toString().toLowerCase();
-    if (['paid', 'completed', 'success'].includes(normalized)) return 'completed';
-    if (normalized === 'failed' || normalized === 'cancelled' || normalized === 'canceled') return 'failed';
+    if (SUCCESS_STATUSES.includes(normalized)) return 'completed';
     if (normalized === 'pending' || normalized === 'processing') return 'pending';
+    if (normalized === 'failed' || normalized === 'cancelled' || normalized === 'canceled') return 'failed';
+    // Legacy statuses treated as informational
+    if (['paid', 'completed', 'success'].includes(normalized)) return 'info';
     return 'info';
   };
 
@@ -513,14 +558,19 @@ const Consumer = () => {
 
   const successfulPurchases = useMemo(() => purchaseHistory.filter((order) => {
     const status = (order?.status || '').toString().toLowerCase();
-    return ['paid', 'completed', 'success'].includes(status);
-  }).length, [purchaseHistory]);
+    return SUCCESS_STATUSES.includes(status);
+  }).length, [purchaseHistory, SUCCESS_STATUSES]);
 
   // Tính số dataset duy nhất đã mua (unique dataset IDs)
   const uniqueDatasetsPurchased = useMemo(() => {
-    const uniqueIds = new Set(purchaseHistory.map(order => order.datasetId).filter(id => id));
+    // Count only datasets for successful purchases per new business rule
+    const successfulIds = purchaseHistory
+      .filter(order => SUCCESS_STATUSES.includes((order?.status || '').toString().toLowerCase()))
+      .map(order => order.datasetId)
+      .filter(id => id);
+    const uniqueIds = new Set(successfulIds);
     return uniqueIds.size;
-  }, [purchaseHistory]);
+  }, [purchaseHistory, SUCCESS_STATUSES]);
 
   const selectedDataset = useMemo(
     () => datasets.find((dataset) => String(dataset.id) === String(selectedDatasetId)),
@@ -1315,23 +1365,114 @@ const Consumer = () => {
           </div>
         </div>
       )}
+      {/* Payment Confirmation Modal */}
+      {confirmPurchase && (
+        <div className="modal" onClick={() => { if (!paymentProcessing) setConfirmPurchase(null); }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Confirm Purchase</h3>
+              <button className="modal-close" onClick={() => { if (!paymentProcessing) setConfirmPurchase(null); }}>×</button>
+            </div>
+            <div className="modal-body">
+              <p>You're about to purchase the following dataset:</p>
+              <div className="purchase-summary">
+                <h4>{confirmPurchase.name}</h4>
+                <p className="muted">{confirmPurchase.description || 'No description available'}</p>
+                <div className="purchase-meta">
+                  <div><strong>Size:</strong> {formatBytes(confirmPurchase.sizeBytes)}</div>
+                  <div><strong>Format:</strong> {confirmPurchase.dataFormat || '—'}</div>
+                  <div><strong>Pricing:</strong> {confirmPurchase.pricingType ? formatLabel(confirmPurchase.pricingType) : '—'}</div>
+                </div>
+                <div className="purchase-price">
+                  <span className="price-label">Total</span>
+                  <span className="price-value">{formatPurchaseAmount(confirmPurchase.price)}</span>
+                </div>
+              </div>
+
+              <div className="payment-methods">
+                <label>Payment Method</label>
+                <select id="paymentMethodSelect" defaultValue="card">
+                  <option value="card">Credit / Debit Card</option>
+                  <option value="invoice">Invoice (For enterprise)</option>
+                  <option value="wallet">Wallet / Balance</option>
+                </select>
+              </div>
+
+              {paymentError && <div className="payment-error" role="alert">{paymentError}</div>}
+            </div>
+            <div className="modal-footer">
+              <button className="consumer-btn consumer-btn-outline" onClick={() => { if (!paymentProcessing) setConfirmPurchase(null); }} disabled={paymentProcessing}>Cancel</button>
+              <button
+                className="consumer-btn consumer-btn-primary"
+                onClick={async () => {
+                  if (paymentProcessing) return;
+                  const select = document.getElementById('paymentMethodSelect');
+                  const method = select ? select.value : 'card';
+                  await confirmAndProcessPurchase(confirmPurchase, method);
+                }}
+                disabled={paymentProcessing}
+              >
+                {paymentProcessing ? 'Processing…' : `Pay ${confirmPurchase ? formatPurchaseAmount(confirmPurchase.price) : ''}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Receipt Modal */}
       {showReceipt && (
         <div className="modal" onClick={closeReceipt}>
           <div className="modal-content" onClick={(e)=>e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Receipt: {showReceipt.id}</h3>
+              <h3>Receipt</h3>
               <button className="modal-close" onClick={closeReceipt}>×</button>
             </div>
             <div className="modal-body">
-              <div className="receipt-details">
-                <p><strong>Item:</strong> {showReceipt.itemTitle}</p>
-                <p><strong>Amount:</strong> {showReceipt.amount}</p>
-                <p><strong>Date:</strong> {showReceipt.purchaseDate}</p>
-                <p><strong>Status:</strong> {showReceipt.status}</p>
-              </div>
-              <div className="modal-actions">
+              {(() => {
+                const ds = datasets.find(d => String(d.id) === String(showReceipt.datasetId)) || {};
+                const itemName = showReceipt.itemTitle || showReceipt.datasetTitle || ds.name || `Dataset #${showReceipt.datasetId || showReceipt.id}`;
+                const amountFormatted = formatPurchaseAmount(showReceipt.amount || ds.price);
+                const dateFormatted = formatDateTime(showReceipt.purchaseDate || showReceipt.timestamp || showReceipt.createdAt);
+                const pricing = formatLabel(showReceipt.pricingType || ds.pricingType);
+                const method = showReceipt.paymentMethod ? formatLabel(showReceipt.paymentMethod) : 'card';
+                return (
+                  <div className="receipt-details-grid">
+                    <div className="receipt-row">
+                      <span className="receipt-label">Receipt ID</span>
+                      <span className="receipt-value">{showReceipt.id}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Dataset</span>
+                      <span className="receipt-value">{itemName}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Dataset ID</span>
+                      <span className="receipt-value">{showReceipt.datasetId || ds.id || '—'}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Pricing Model</span>
+                      <span className="receipt-value">{pricing}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Payment Method</span>
+                      <span className="receipt-value">{method}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Amount</span>
+                      <span className="receipt-value amount">{amountFormatted}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Date</span>
+                      <span className="receipt-value">{dateFormatted}</span>
+                    </div>
+                    <div className="receipt-row">
+                      <span className="receipt-label">Status</span>
+                      <span className={`receipt-status-badge ${getStatusClass(showReceipt.status)}`}>{showReceipt.status}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="modal-footer">
                 <button className="consumer-btn" onClick={() => alert('Download invoice feature coming soon')}>Download Invoice</button>
                 <button className="consumer-btn consumer-btn-outline" onClick={closeReceipt}>Close</button>
               </div>
