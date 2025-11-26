@@ -44,4 +44,15 @@ public class SubscriptionRequestDTO {
 
     public Long getDatasetId() { return datasetId; }
     public void setDatasetId(Long datasetId) { this.datasetId = datasetId; }
+
+    @Override
+    public String toString() {
+        return "SubscriptionRequestDTO{" +
+                "consumerId=" + consumerId +
+                ", stripePlanId='" + stripePlanId + '\'' +
+                ", productName='" + productName + '\'' +
+                ", price=" + price +
+                ", datasetId=" + datasetId +
+                '}';
+    }
 }

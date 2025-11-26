@@ -1,7 +1,6 @@
 // Khai báo package cho các lớp Service.
 package com.evmarketplace.Service;
 
-// Nhập các lớp cần thiết.
 import com.evmarketplace.Pojo.User; // Lớp thực thể User.
 import com.evmarketplace.Repository.UserRepository; // Repository để tương tác với bảng User.
 import com.evmarketplace.Pojo.Role; // Lớp thực thể Role.
@@ -101,9 +100,22 @@ public class UserService {
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    /**
+     * Cập nhật thông tin người dùng.
+     * Cho phép admin chỉnh sửa tên, tổ chức, trạng thái phê duyệt và vai trò của người dùng.
+     * @param userId ID của người dùng cần cập nhật.
+     * @param name Tên mới (có thể null nếu không cập nhật).
+     * @param organization Tên tổ chức mới (có thể null nếu không cập nhật).
+     * @param providerApproved Trạng thái phê duyệt mới (có thể null nếu không cập nhật).
+     * @param roleNames Danh sách tên vai trò mới (có thể null nếu không cập nhật).
+     * @return Đối tượng User sau khi cập nhật.
+     */
     @Transactional
     public User updateUser(Long userId, String name, String organization, Boolean providerApproved, List<String> roleNames) {
+        // Tìm người dùng theo ID, ném ngoại lệ nếu không tồn tại
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Chỉ cập nhật các trường không null (cho phép cập nhật từng phần)
         if (name != null) {
             user.setName(name);
         }
@@ -113,21 +125,37 @@ public class UserService {
         if (providerApproved != null) {
             user.setProviderApproved(providerApproved);
         }
+        
+        // Cập nhật vai trò nếu có danh sách mới
         if (roleNames != null) {
-        Set<Role> newRoles = roleNames.stream()
-            .filter(r -> r != null && !r.trim().isEmpty())
-            .map(String::trim)
-                    .map(this::resolveRole)
-                    .collect(Collectors.toSet());
+            // Lọc bỏ các giá trị null hoặc rỗng, sau đó chuyển đổi thành các đối tượng Role
+            Set<Role> newRoles = roleNames.stream()
+                .filter(r -> r != null && !r.trim().isEmpty())
+                .map(String::trim)
+                .map(this::resolveRole) // Tìm hoặc tạo mới vai trò
+                .collect(Collectors.toSet());
             user.setRoles(newRoles);
         }
+        
+        // Lưu và trả về đối tượng user đã cập nhật
         return userRepository.save(user);
     }
 
+    /**
+     * Xóa người dùng khỏi hệ thống.
+     * Tự động xóa các dữ liệu liên quan như DataProvider trước khi xóa User để tránh lỗi ràng buộc khóa ngoại.
+     * @param userId ID của người dùng cần xóa.
+     */
     @Transactional
     public void deleteUser(Long userId) {
+        // Tìm người dùng theo ID, ném ngoại lệ nếu không tồn tại
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Xóa DataProvider liên quan (nếu có) trước khi xóa User
+        // Điều này đảm bảo không vi phạm ràng buộc khóa ngoại trong database
         dataProviderRepository.findByUser(user).ifPresent(dataProviderRepository::delete);
+        
+        // Xóa người dùng khỏi database
         userRepository.delete(user);
     }
 
@@ -184,7 +212,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Tìm vai trò theo tên, nếu không tồn tại thì tạo mới.
+     * Phương thức helper để đảm bảo vai trò luôn tồn tại khi cần gán cho người dùng.
+     * @param roleName Tên của vai trò cần tìm hoặc tạo.
+     * @return Đối tượng Role đã tồn tại hoặc mới được tạo.
+     */
     private Role resolveRole(String roleName) {
+        // Tìm vai trò trong database, nếu không có thì tạo mới và lưu
         return roleRepository.findByName(roleName)
                 .orElseGet(() -> roleRepository.save(new Role(roleName)));
     }

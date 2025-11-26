@@ -10,8 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Admin Controller for Payment Processing and Revenue Sharing
- * Handles platform revenue, provider payouts, and commission management
+ * Controller Admin xử lý thanh toán và chia sẻ doanh thu
+ * Quản lý doanh thu nền tảng, chi trả cho provider, và quản lý hoa hồng
+ * Endpoint: /api/admin/payments/*
  */
 @RestController
 @RequestMapping("/api/admin/payments")
@@ -20,17 +21,21 @@ public class AdminPaymentController {
     
     private final PayoutService payoutService;
     
+    /**
+     * Constructor injection - khởi tạo PayoutService
+     * @param payoutService Service xử lý logic thanh toán và chi trả
+     */
     public AdminPaymentController(PayoutService payoutService) {
         this.payoutService = payoutService;
     }
     
     /**
+     * Lấy thống kê doanh thu toàn nền tảng
      * GET /api/admin/payments/revenue-stats
-     * Get platform-wide revenue statistics
      * 
-     * Query params:
-     * - startDate: Optional filter start date
-     * - endDate: Optional filter end date
+     * @param startDate Ngày bắt đầu lọc (tùy chọn, format ISO DateTime)
+     * @param endDate Ngày kết thúc lọc (tùy chọn, format ISO DateTime)
+     * @return ResponseEntity chứa thống kê doanh thu bao gồm tổng doanh thu, doanh thu platform, doanh thu provider
      */
     @GetMapping("/revenue-stats")
     public ResponseEntity<Map<String, Object>> getPlatformRevenueStats(
@@ -42,8 +47,10 @@ public class AdminPaymentController {
     }
     
     /**
+     * Lấy tổng hợp tất cả các khoản chi trả cho providers
      * GET /api/admin/payments/provider-payouts
-     * Get all provider payouts summary
+     * Hiển thị danh sách tất cả providers và tổng số tiền cần chi trả
+     * @return ResponseEntity chứa danh sách payouts của tất cả providers
      */
     @GetMapping("/provider-payouts")
     public ResponseEntity<List<Map<String, Object>>> getAllProviderPayouts() {
@@ -52,8 +59,12 @@ public class AdminPaymentController {
     }
     
     /**
+     * Lấy danh sách các khoản thanh toán đang chờ xử lý cho một provider cụ thể
      * GET /api/admin/payments/provider/{providerId}/payouts
-     * Get pending payouts for a specific provider
+     * Chỉ hiển thị các payouts có status = PENDING
+     * 
+     * @param providerId ID của provider cần xem payouts
+     * @return ResponseEntity chứa danh sách các pending payouts của provider
      */
     @GetMapping("/provider/{providerId}/payouts")
     public ResponseEntity<List<Map<String, Object>>> getProviderPayouts(@PathVariable Long providerId) {
@@ -62,8 +73,12 @@ public class AdminPaymentController {
     }
     
     /**
+     * Lấy tổng quan doanh thu của một provider cụ thể
      * GET /api/admin/payments/provider/{providerId}/summary
-     * Get revenue summary for a specific provider
+     * Bao gồm: tổng doanh thu, đã chi trả, chờ chi trả, số lượng transactions
+     * 
+     * @param providerId ID của provider cần xem tổng quan
+     * @return ResponseEntity chứa thông tin tổng quan doanh thu của provider
      */
     @GetMapping("/provider/{providerId}/summary")
     public ResponseEntity<Map<String, Object>> getProviderRevenueSummary(@PathVariable Long providerId) {
@@ -72,8 +87,12 @@ public class AdminPaymentController {
     }
     
     /**
+     * Xử lý và thực hiện chi trả các khoản đang chờ cho provider
      * POST /api/admin/payments/provider/{providerId}/process
-     * Process pending payouts for a provider
+     * Chuyển status của payouts từ PENDING sang COMPLETED và cập nhật ngày chi trả
+     * 
+     * @param providerId ID của provider cần xử lý payouts
+     * @return ResponseEntity chứa kết quả xử lý (số lượng payouts đã xử lý, tổng số tiền)
      */
     @PostMapping("/provider/{providerId}/process")
     public ResponseEntity<Map<String, Object>> processProviderPayouts(@PathVariable Long providerId) {

@@ -1,15 +1,15 @@
 package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.Dataset;
-import com.evmarketplace.Service.DatasetService; // THÊM IMPORT
+import com.evmarketplace.Pojo.ProviderDataset;
+import com.evmarketplace.Service.DatasetService;
+import com.evmarketplace.Service.ProviderDatasetService;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -17,9 +17,11 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:5173")
 public class DatasetController {
     private final DatasetService service;
+    private final ProviderDatasetService providerDatasetService;
 
-    public DatasetController(DatasetService service) {
+    public DatasetController(DatasetService service, ProviderDatasetService providerDatasetService) {
         this.service = service;
+        this.providerDatasetService = providerDatasetService;
     }
 
     // THÊM ENDPOINT MỚI - Lấy datasets đã approved
@@ -42,22 +44,74 @@ public class DatasetController {
     // THÊM ENDPOINT MỚI - Download dataset
     @GetMapping("/{id}/download")
     public ResponseEntity<?> downloadDataset(@PathVariable Long id) {
+        System.out.println("=== Download Dataset Called ===");
+        System.out.println("Dataset ID: " + id);
+        
         try {
-            // SỬA LỖI: sử dụng service.findById thay vì service trực tiếp
-            Optional<Dataset> datasetOpt = service.findById(id);
-            if (datasetOpt.isEmpty()) {
-                return ResponseEntity.notFound().build();
+            // Try ProviderDataset first (this is what orders reference)
+            ProviderDataset providerDataset = providerDatasetService.findById(id);
+            
+            if (providerDataset != null) {
+                System.out.println("Found provider dataset: " + providerDataset.getName());
+                
+                // Generate download content
+                String downloadContent = String.format(
+                    "Dataset: %s (ID: %d)\n" +
+                    "Description: %s\n" +
+                    "Category: %s\n" +
+                    "Region: %s\n" +
+                    "Format: %s\n" +
+                    "Size: %d bytes\n" +
+                    "Price: $%.2f\n\n" +
+                    "This is a sample dataset file. In production, this would contain the actual dataset content.\n",
+                    providerDataset.getName(),
+                    providerDataset.getId(),
+                    providerDataset.getDescription(),
+                    providerDataset.getCategory(),
+                    providerDataset.getRegion(),
+                    providerDataset.getDataFormat(),
+                    providerDataset.getSizeBytes(),
+                    providerDataset.getPrice()
+                );
+                
+                String filename = providerDataset.getName().replaceAll("[^a-zA-Z0-9\\-_]", "_") + ".txt";
+                System.out.println("Returning download response for: " + providerDataset.getName());
+                
+                return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                    .header("Content-Type", "text/plain")
+                    .body(downloadContent);
             }
             
-            Dataset dataset = datasetOpt.get();
-            // Giả lập download - trong thực tế sẽ trả về file thật
-            String downloadMessage = String.format("Downloading dataset: %s (ID: %d)", 
-                dataset.getTitle(), dataset.getId());
+            // Fallback to Dataset table
+            Optional<Dataset> datasetOpt = service.findById(id);
+            if (datasetOpt.isPresent()) {
+                Dataset dataset = datasetOpt.get();
+                System.out.println("Found dataset: " + dataset.getTitle());
+                
+                String downloadContent = String.format(
+                    "Dataset: %s (ID: %d)\n\n" +
+                    "This is a sample dataset file. In production, this would contain the actual dataset content.\n",
+                    dataset.getTitle(), dataset.getId()
+                );
+                
+                return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"" + dataset.getTitle().replaceAll("[^a-zA-Z0-9\\-_]", "_") + ".txt\"")
+                    .header("Content-Type", "text/plain")
+                    .body(downloadContent);
+            }
             
-            return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=\"dataset_" + id + ".zip\"")
-                .body(downloadMessage);
+            // Not found in either table
+            System.out.println("Dataset not found in either table: " + id);
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Dataset not found");
+            error.put("message", "Dataset ID " + id + " does not exist in the system.");
+            error.put("datasetId", String.valueOf(id));
+            return ResponseEntity.status(404).body(error);
+            
         } catch (Exception e) {
+            System.err.println("Download error: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Download failed: " + e.getMessage());
         }
     }

@@ -51,11 +51,26 @@ public class SubscriptionService {
     @Transactional
     public CheckoutResponseDTO createSubscription(SubscriptionRequestDTO subscriptionRequest, javax.servlet.http.HttpServletRequest httpRequest) {
         try {
+            logger.info("Creating subscription - Request: {}", subscriptionRequest);
+            
             // Thử lấy email từ request (được JwtFilter đặt vào request nếu user đã xác thực)
             String email = com.evmarketplace.auth.SecurityUtils.getEmailFromRequest(httpRequest);
+            logger.info("Email from request: {}", email);
+            
+            // Also try to get from SecurityContext
+            if (email == null) {
+                org.springframework.security.core.Authentication auth = 
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof String) {
+                    email = (String) auth.getPrincipal();
+                    logger.info("Email from SecurityContext: {}", email);
+                }
+            }
+            
             Optional<User> userOpt = Optional.empty();
             if (email != null) {
                 userOpt = userRepository.findByEmail(email);
+                logger.info("User found by email: {}", userOpt.isPresent());
             }
 
             // Nếu không có user từ principal, fallback sang consumerId từ payload (nếu được gửi)
@@ -85,37 +100,96 @@ public class SubscriptionService {
             subscription.setStartAt(LocalDateTime.now());
             subscription.setEndAt(LocalDateTime.now().plusMonths(1));
             subscription.setPrice(subscriptionRequest.getPrice());
-            subscription.setStatus("PENDING");
+            subscription.setStatus("ACTIVE"); // Set ACTIVE directly for development
             
             Subscription savedSubscription = subscriptionRepository.save(subscription);
 
-            // Tạo Stripe checkout session
-            String sessionId = stripePaymentService.createSubscriptionSession(
-                user.getId(),
-                subscriptionRequest.getStripePlanId(),
-                subscriptionRequest.getProductName(),
-                (long) (subscriptionRequest.getPrice() * 100),
-                "usd",
-                savedSubscription.getId(),
-                subscriptionRequest.getDatasetId()
-            );
-
-            String sessionUrl = "https://checkout.stripe.com/pay/" + sessionId;
+            // Skip Stripe for development - TODO: Enable Stripe with real API keys
+            // String sessionId = stripePaymentService.createSubscriptionSession(...);
+            
+            logger.info("Subscription created successfully (Stripe bypassed for development): {}", savedSubscription.getId());
 
             return new CheckoutResponseDTO(
-                sessionId,
-                sessionUrl,
-                "pending", 
-                "Subscription checkout created successfully",
+                null, // No Stripe session ID
+                null, // No checkout URL
+                "success", 
+                "Subscription activated successfully (Development mode)",
                 savedSubscription.getId()
             );
 
-        } catch (StripeException e) {
-            throw new RuntimeException("Stripe subscription error: " + e.getMessage(), e);
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid consumer ID format: " + subscriptionRequest.getConsumerId());
         } catch (Exception e) {
             throw new RuntimeException("Subscription creation error: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public java.util.List<Subscription> getUserSubscriptions() {
+        try {
+            // Get authenticated user email from SecurityContext
+            org.springframework.security.core.Authentication auth = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            
+            if (auth == null || auth.getPrincipal() == null) {
+                logger.warn("No authenticated user found");
+                return java.util.Collections.emptyList();
+            }
+            
+            String email = auth.getPrincipal().toString();
+            logger.info("Fetching subscriptions for user: {}", email);
+            
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                logger.warn("User not found for email: {}", email);
+                return java.util.Collections.emptyList();
+            }
+            
+            User user = userOpt.get();
+            return subscriptionRepository.findByUserId(user.getId());
+        } catch (Exception e) {
+            logger.error("Error fetching user subscriptions", e);
+            return java.util.Collections.emptyList();
+        }
+    }
+
+    @Transactional
+    public void cancelSubscription(Long subscriptionId) {
+        try {
+            Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                    .orElseThrow(() -> new RuntimeException("Subscription not found with ID: " + subscriptionId));
+            
+            // Update status to CANCELLED
+            subscription.setStatus("CANCELLED");
+            subscription.setEndAt(LocalDateTime.now()); // End subscription immediately
+            subscriptionRepository.save(subscription);
+            
+            logger.info("Subscription cancelled: {}", subscriptionId);
+            
+            // TODO: When Stripe is enabled, call Stripe API to cancel subscription
+            // stripe.subscriptions.cancel(subscription.getStripeSubscriptionId());
+        } catch (Exception e) {
+            logger.error("Error cancelling subscription: {}", subscriptionId, e);
+            throw new RuntimeException("Failed to cancel subscription: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void deleteSubscription(Long subscriptionId) {
+        try {
+            Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                    .orElseThrow(() -> new RuntimeException("Subscription not found with ID: " + subscriptionId));
+            
+            // Only allow deletion of CANCELLED subscriptions
+            if (!"CANCELLED".equals(subscription.getStatus())) {
+                throw new RuntimeException("Only cancelled subscriptions can be deleted. Please cancel the subscription first.");
+            }
+            
+            subscriptionRepository.delete(subscription);
+            logger.info("Subscription deleted: {}", subscriptionId);
+        } catch (Exception e) {
+            logger.error("Error deleting subscription: {}", subscriptionId, e);
+            throw new RuntimeException("Failed to delete subscription: " + e.getMessage());
         }
     }
 

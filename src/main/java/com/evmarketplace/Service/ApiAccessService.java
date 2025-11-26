@@ -10,12 +10,22 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Service quản lý truy cập API và theo dõi sử dụng
+ * Xử lý: logging API requests, tracking usage, kiểm tra rate limit, quản lý permissions
+ * Tích hợp với RateLimitService để giới hạn số requests và ApiUsageLogRepository để lưu logs
+ */
 @Service
 public class ApiAccessService {
     
     private final ApiUsageLogRepository usageLogRepository;
     private final RateLimitService rateLimitService;
     
+    /**
+     * Constructor injection - khởi tạo dependencies
+     * @param usageLogRepository Repository để lưu trữ logs sử dụng API
+     * @param rateLimitService Service quản lý giới hạn tần suất truy cập
+     */
     public ApiAccessService(ApiUsageLogRepository usageLogRepository, 
                            RateLimitService rateLimitService) {
         this.usageLogRepository = usageLogRepository;
@@ -23,7 +33,13 @@ public class ApiAccessService {
     }
     
     /**
-     * Log API request for usage tracking and analytics
+     * Ghi log API request để theo dõi và phân tích sử dụng
+     * Lưu thông tin đầy đủ: endpoint, method, status code, response time, IP address, user agent
+     * 
+     * @param apiKey API key được sử dụng cho request
+     * @param request HTTP request object chứa thông tin request
+     * @param statusCode HTTP status code của response (200, 404, 500...)
+     * @param responseTimeMs Thời gian xử lý request (milliseconds)
      */
     @Transactional
     public void logApiRequest(APIKey apiKey, HttpServletRequest request, 
@@ -41,7 +57,13 @@ public class ApiAccessService {
     }
     
     /**
-     * Simple log access method (endpoint and status only)
+     * Ghi log truy cập đơn giản (chỉ endpoint và status)
+     * Phiên bản rút gọn của logApiRequest, dùng khi không có HttpServletRequest object
+     * 
+     * @param apiKeyId ID của API key được sử dụng
+     * @param endpoint Đường dẫn API được gọi (ví dụ: /api/datasets)
+     * @param method HTTP method (GET, POST, PUT, DELETE)
+     * @param success True nếu request thành công (status 200), false nếu lỗi (status 500)
      */
     @Transactional
     public void logAccess(UUID apiKeyId, String endpoint, String method, boolean success) {
@@ -55,7 +77,13 @@ public class ApiAccessService {
     }
     
     /**
-     * Log API request with error
+     * Ghi log API request khi có lỗi xảy ra
+     * Lưu thông tin lỗi chi tiết để debug và phân tích
+     * 
+     * @param apiKey API key được sử dụng cho request
+     * @param request HTTP request object chứa thông tin request
+     * @param statusCode HTTP error status code (400, 401, 403, 404, 500...)
+     * @param errorMessage Thông báo lỗi chi tiết
      */
     @Transactional
     public void logApiError(APIKey apiKey, HttpServletRequest request, 
@@ -72,7 +100,12 @@ public class ApiAccessService {
     }
     
     /**
-     * Log data download for bandwidth tracking
+     * Ghi log khi tải dataset để theo dõi băng thông sử dụng
+     * Tính toán chi phí bandwidth và giám sát lưu lượng dữ liệu
+     * 
+     * @param apiKey API key được sử dụng để tải dữ liệu
+     * @param datasetId ID của dataset được tải
+     * @param bytesTransferred Số bytes đã truyền tải (dung lượng file)
      */
     @Transactional
     public void logDataDownload(APIKey apiKey, Long datasetId, long bytesTransferred) {
@@ -88,7 +121,12 @@ public class ApiAccessService {
     }
     
     /**
-     * Get usage statistics for an API key
+     * Lấy thống kê sử dụng chi tiết cho một API key
+     * Bao gồm: tổng requests, success rate, avg response time, top endpoints, bandwidth, error count
+     * 
+     * @param apiKeyId ID của API key cần lấy thống kê
+     * @param since Thời điểm bắt đầu tính thống kê (LocalDateTime)
+     * @return Map chứa các metrics: totalRequests, successRate, avgResponseTimeMs, topEndpoints, totalBandwidthMB, errorCount
      */
     public Map<String, Object> getUsageStatistics(UUID apiKeyId, LocalDateTime since) {
         Long apiKeyLongId = apiKeyId.getMostSignificantBits();
@@ -137,14 +175,24 @@ public class ApiAccessService {
     }
     
     /**
-     * Check if API key has specific scope/permission
+     * Kiểm tra xem API key có quyền (scope) cụ thể hay không
+     * Scopes định nghĩa các permissions như: read:datasets, write:datasets, admin:all
+     * 
+     * @param apiKey API key cần kiểm tra quyền
+     * @param requiredScope Scope/permission yêu cầu (ví dụ: "read:datasets")
+     * @return true nếu API key có scope này, false nếu không có
      */
     public boolean hasScope(APIKey apiKey, String requiredScope) {
         return apiKey.getScopes() != null && apiKey.getScopes().contains(requiredScope);
     }
     
     /**
-     * Validate API key and check rate limit
+     * Validate API key và kiểm tra giới hạn tần suất truy cập (rate limit)
+     * Kiểm tra 2 điều kiện: (1) key chưa hết hạn, (2) chưa vượt quá rate limit
+     * 
+     * @param apiKey API key cần validate
+     * @param ipAddress Địa chỉ IP của client (dùng cho rate limiting)
+     * @return true nếu API key hợp lệ và chưa vượt rate limit, false nếu không hợp lệ hoặc vượt giới hạn
      */
     public boolean validateApiAccess(APIKey apiKey, String ipAddress) {
         // Check if key is expired
@@ -161,7 +209,11 @@ public class ApiAccessService {
     }
     
     /**
-     * Extract client IP address from request
+     * Trích xuất địa chỉ IP thực của client từ HTTP request
+     * Xử lý các trường hợp: proxy (X-Forwarded-For), load balancer (X-Real-IP), direct connection
+     * 
+     * @param request HTTP request object
+     * @return Địa chỉ IP của client (ưu tiên X-Forwarded-For, sau đó X-Real-IP, cuối cùng RemoteAddr)
      */
     private String getClientIpAddress(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");

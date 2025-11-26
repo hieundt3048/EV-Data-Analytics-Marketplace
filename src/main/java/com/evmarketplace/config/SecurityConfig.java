@@ -64,6 +64,8 @@ public class SecurityConfig {
                         .antMatchers("/api/admin/payments/**").permitAll()
                         // Temporarily allow API key management for testing
                         .antMatchers("/api/apikeys/**").permitAll()
+                        // Allow dataset download endpoint
+                        .antMatchers("/api/datasets/**").permitAll()
                         // Yêu cầu xác thực cho tất cả các request khác.
                         .anyRequest().authenticated()
                 )

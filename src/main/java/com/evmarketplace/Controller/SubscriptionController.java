@@ -37,11 +37,30 @@ public class SubscriptionController {
     @GetMapping
     public ResponseEntity<java.util.List<com.evmarketplace.Pojo.Subscription>> getUserSubscriptions() {
         try {
-            // For now, return sample subscriptions for testing
-            java.util.List<com.evmarketplace.Pojo.Subscription> sampleSubscriptions = createSampleSubscriptions();
-            return ResponseEntity.ok(sampleSubscriptions);
+            java.util.List<com.evmarketplace.Pojo.Subscription> subscriptions = subscriptionService.getUserSubscriptions();
+            return ResponseEntity.ok(subscriptions);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{subscriptionId}/cancel")
+    public ResponseEntity<String> cancelSubscription(@PathVariable Long subscriptionId) {
+        try {
+            subscriptionService.cancelSubscription(subscriptionId);
+            return ResponseEntity.ok("Subscription cancelled successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error cancelling subscription: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{subscriptionId}")
+    public ResponseEntity<String> deleteSubscription(@PathVariable Long subscriptionId) {
+        try {
+            subscriptionService.deleteSubscription(subscriptionId);
+            return ResponseEntity.ok("Subscription deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting subscription: " + e.getMessage());
         }
     }
 

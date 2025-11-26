@@ -14,6 +14,7 @@ import com.evmarketplace.Repository.UserRepository;
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.Service.ProviderDatasetService;
 import com.evmarketplace.Service.OrderService;
+import com.evmarketplace.Service.PayoutService;
 import com.evmarketplace.data.DataProduct;
 import com.evmarketplace.data.ProductStatus;
 import com.evmarketplace.marketplace.Purchase;
@@ -38,6 +39,8 @@ import java.util.Comparator;
 
 import java.util.stream.Collectors;
 
+// Controller xử lý tất cả các chức năng dành riêng cho Admin
+// Bao gồm: quản lý users, duyệt datasets, xem thống kê, quản lý API keys, duyệt giao dịch
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('Admin')") // Yêu cầu vai trò Admin cho tất cả các endpoint trong controller này
@@ -52,7 +55,10 @@ public class AdminController {
     private final ProviderDatasetService providerDatasetService;
     private final OrderService orderService;
     private final OrderRepository orderRepository;
+    private final PayoutService payoutService;
 
+    // Constructor injection - khởi tạo tất cả các dependencies cần thiết
+    // Sử dụng dependency injection của Spring để quản lý các service và repository
     public AdminController(
             UserService userService,
             UserRepository userRepository,
@@ -62,7 +68,8 @@ public class AdminController {
             APIKeyRepository apiKeyRepository,
             ProviderDatasetService providerDatasetService,
             OrderService orderService,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            PayoutService payoutService
     ) {
         this.userService = userService;
         this.userRepository = userRepository;
@@ -73,12 +80,12 @@ public class AdminController {
         this.providerDatasetService = providerDatasetService;
         this.orderService = orderService;
         this.orderRepository = orderRepository;
+        this.payoutService = payoutService;
     }
 
     /**
      * Lấy danh sách tất cả người dùng trong hệ thống.
      * Chỉ Admin mới có quyền truy cập.
-     * @return Danh sách các đối tượng User.
      */
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -86,6 +93,12 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    /**
+     * Cập nhật thông tin người dùng bởi Admin.
+     * @param userId ID của người dùng cần cập nhật
+     * @param body Dữ liệu cập nhật (name, organization, providerApproved, roles)
+     * @return ResponseEntity chứa thông tin người dùng đã cập nhật hoặc lỗi 404 nếu không tìm thấy
+     */
     @PutMapping("/users/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody AdminUserUpdateRequest body) {
         try {
@@ -96,6 +109,11 @@ public class AdminController {
         }
     }
 
+    /**
+     * Xóa người dùng khỏi hệ thống.
+     * @param userId ID của người dùng cần xóa
+     * @return ResponseEntity với status 204 (No Content) nếu thành công, hoặc 404 nếu không tìm thấy
+     */
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         try {
@@ -106,16 +124,28 @@ public class AdminController {
         }
     }
 
+    /**
+     * Lấy danh sách tất cả người dùng có vai trò Provider.
+     * @return ResponseEntity chứa danh sách các Provider
+     */
     @GetMapping("/users/providers")
     public ResponseEntity<List<User>> getProviders() {
         return ResponseEntity.ok(userService.getUsersByRole("Provider"));
     }
 
+    /**
+     * Lấy danh sách tất cả người dùng có vai trò Consumer.
+     * @return ResponseEntity chứa danh sách các Consumer
+     */
     @GetMapping("/users/consumers")
     public ResponseEntity<List<User>> getConsumers() {
         return ResponseEntity.ok(userService.getUsersByRole("Consumer"));
     }
 
+    /**
+     * Lấy danh sách tất cả người dùng có vai trò Partner.
+     * @return ResponseEntity chứa danh sách các Partner
+     */
     @GetMapping("/users/partners")
     public ResponseEntity<List<User>> getPartners() {
         return ResponseEntity.ok(userService.getUsersByRole("Partner"));
@@ -136,6 +166,11 @@ public class AdminController {
         }
     }
 
+    /**
+     * Lấy danh sách tất cả datasets đang chờ duyệt (PENDING_REVIEW).
+     * Trả về thông tin chi tiết bao gồm dataset info, provider info, và submission time.
+     * @return ResponseEntity chứa danh sách datasets đang chờ duyệt
+     */
     @GetMapping("/datasets/pending")
     public ResponseEntity<List<Map<String, Object>>> getPendingDatasets() {
         List<Map<String, Object>> payload = dataProductRepository.findByStatus(ProductStatus.PENDING_REVIEW).stream()
@@ -160,6 +195,11 @@ public class AdminController {
         return ResponseEntity.ok(payload);
     }
 
+    /**
+     * Phê duyệt dataset, chuyển trạng thái từ PENDING_REVIEW sang PUBLISHED.
+     * @param id ID của dataset cần phê duyệt
+     * @return ResponseEntity với status 200 nếu thành công, hoặc 404 nếu không tìm thấy
+     */
     @PutMapping("/datasets/{id}/approve")
     public ResponseEntity<?> approveDataset(@PathVariable UUID id) {
         return dataProductRepository.findById(id).map(product -> {
@@ -169,6 +209,11 @@ public class AdminController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Từ chối dataset, chuyển trạng thái sang ARCHIVED.
+     * @param id ID của dataset cần từ chối
+     * @return ResponseEntity với status 200 nếu thành công, hoặc 404 nếu không tìm thấy
+     */
     @PutMapping("/datasets/{id}/reject")
     public ResponseEntity<?> rejectDataset(@PathVariable UUID id) {
         return dataProductRepository.findById(id).map(product -> {
@@ -178,6 +223,10 @@ public class AdminController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Lấy danh sách tất cả các giao dịch thanh toán trong hệ thống.
+     * @return ResponseEntity chứa danh sách tất cả transactions
+     */
     @GetMapping("/payments/transactions")
     public ResponseEntity<?> listTransactions() {
         return ResponseEntity.ok(transactionRepository.findAll());
@@ -186,6 +235,7 @@ public class AdminController {
     /**
      * Lấy danh sách tất cả orders (giao dịch mua dataset)
      * Hiển thị trong "Recent Transactions" của Admin
+     * Sắp xếp theo thời gian mới nhất trước, bao gồm thông tin revenue split
      */
     @GetMapping("/orders")
     public ResponseEntity<?> getAllOrders() {
@@ -213,6 +263,11 @@ public class AdminController {
         return ResponseEntity.ok(ordersDTO);
     }
 
+    /**
+     * Tính toán tổng doanh thu chia sẻ cho từng Provider.
+     * Dựa trên các transactions và purchases để tính providerShare.
+     * @return ResponseEntity chứa Map<providerId, totalRevenue>
+     */
     @GetMapping("/payments/revenue-share")
     public ResponseEntity<?> getRevenueShareByProvider() {
     Map<UUID, Purchase> purchasesById = purchaseRepository.findAll().stream()
@@ -233,6 +288,11 @@ public class AdminController {
     return ResponseEntity.ok(share);
     }
 
+    /**
+     * Lấy danh sách tất cả API keys trong hệ thống.
+     * API keys được mask (che bớt) để bảo mật, chỉ hiển thị prefix và suffix.
+     * @return ResponseEntity chứa danh sách API keys với thông tin consumer, scopes, rate limit, expiry
+     */
     @GetMapping("/security/apikeys")
     public ResponseEntity<?> listApiKeys() {
         List<APIKey> keys = apiKeyRepository.findAll();
@@ -281,6 +341,8 @@ public class AdminController {
     
     /**
      * Mask API key để bảo mật (chỉ hiển thị prefix và suffix)
+     * Format: hiển thị 12 ký tự đầu + "****" + 4 ký tự cuối
+     * Ví dụ: vmkt_abc123def456 -> vmkt_abc123d****f456
      */
     private String maskApiKey(String key) {
         if (key == null || key.length() < 16) return key;
@@ -292,6 +354,8 @@ public class AdminController {
     /**
      * Tạo API key mới cho consumer (Admin only)
      * POST /api/admin/security/apikeys
+     * Request body: { userId, scopes[], rateLimit, expiresInDays }
+     * Response: Trả về full API key (chỉ hiển thị 1 lần duy nhất khi tạo)
      */
     @PostMapping("/security/apikeys")
     public ResponseEntity<?> createApiKey(@RequestBody Map<String, Object> payload) {
@@ -380,6 +444,8 @@ public class AdminController {
     
     /**
      * Generate a unique API key string
+     * Format: vmkt_<32_random_hex_characters>
+     * Ví dụ: vmkt_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
      */
     private String generateUniqueApiKey() {
         // Format: vmkt_<random_uuid_without_dashes>
@@ -387,6 +453,12 @@ public class AdminController {
         return "vmkt_" + uuid;
     }
 
+    /**
+     * Thu hồi (revoke) một API key bằng cách set expiryDate về quá khứ.
+     * Key vẫn tồn tại trong database nhưng không còn hoạt động.
+     * @param id ID của API key cần thu hồi
+     * @return ResponseEntity với thông tin API key đã thu hồi hoặc lỗi 404
+     */
     @PutMapping("/security/apikeys/{id}/revoke")
     public ResponseEntity<?> revokeApiKey(@PathVariable UUID id) {
         return apiKeyRepository.findById(id).map(key -> {
@@ -404,6 +476,12 @@ public class AdminController {
         )));
     }
     
+    /**
+     * Xóa vĩnh viễn một API key khỏi database.
+     * Khác với revoke, hành động này không thể hoàn tác.
+     * @param id ID của API key cần xóa
+     * @return ResponseEntity với thông báo xóa thành công hoặc lỗi 404
+     */
     @DeleteMapping("/security/apikeys/{id}")
     public ResponseEntity<?> deleteApiKey(@PathVariable UUID id) {
         return apiKeyRepository.findById(id).map(key -> {
@@ -421,6 +499,8 @@ public class AdminController {
     
     /**
      * Lấy usage statistics chi tiết cho một API key
+     * Bao gồm: tổng số requests, requests thành công/thất bại, bandwidth, lần dùng cuối
+     * TODO: Hiện tại trả về placeholder data, cần tích hợp với ApiAccessService
      */
     @GetMapping("/security/apikeys/{id}/usage")
     public ResponseEntity<?> getApiKeyUsage(@PathVariable UUID id) {
@@ -444,6 +524,12 @@ public class AdminController {
         )));
     }
 
+    /**
+     * Lấy tổng quan thống kê toàn hệ thống cho Admin Dashboard.
+     * Bao gồm: tổng số users, providers, consumers, datasets (pending/published),
+     * provider datasets (pending/approved), và revenue statistics.
+     * @return ResponseEntity chứa map với các chỉ số thống kê
+     */
     @GetMapping("/analytics/overview")
     public ResponseEntity<?> getAnalyticsOverview() {
         long totalUsers = userService.getAllUsers().size();
@@ -462,6 +548,17 @@ public class AdminController {
             .filter(d -> "APPROVED".equals(d.getStatus()))
             .count();
 
+        // Lấy revenue statistics từ PayoutService
+        Map<String, Object> revenueStats = payoutService.getPlatformRevenueStats(null, null);
+        Object totalRevenueObj = revenueStats.get("totalRevenue");
+        double totalRevenue = 0.0;
+        if (totalRevenueObj != null) {
+            totalRevenue = ((Number) totalRevenueObj).doubleValue();
+        }
+
+        // Đếm tổng số API requests từ orders
+        long totalApiRequests = orderRepository.count();
+
         Map<String, Object> response = new HashMap<>();
         response.put("totalUsers", totalUsers);
         response.put("providers", providers);
@@ -470,6 +567,81 @@ public class AdminController {
         response.put("publishedProducts", published);
         response.put("pendingProviderDatasets", pendingProviderDatasets);
         response.put("approvedProviderDatasets", approvedProviderDatasets);
+        response.put("totalRevenue", totalRevenue);
+        response.put("totalApiRequests", totalApiRequests);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Thống kê thị trường dữ liệu - datasets nào được quan tâm nhất.
+     * Trả về: top datasets theo số lượng orders, phân loại theo category, revenue breakdown
+     * @return ResponseEntity chứa market statistics
+     */
+    @GetMapping("/analytics/market-statistics")
+    public ResponseEntity<?> getMarketStatistics() {
+        List<Order> allOrders = orderRepository.findAll();
+        List<ProviderDataset> allDatasets = providerDatasetService.findAll();
+        
+        // Top datasets by order count
+        Map<Long, Long> datasetOrderCount = allOrders.stream()
+            .filter(o -> o.getDatasetId() != null)
+            .collect(Collectors.groupingBy(Order::getDatasetId, Collectors.counting()));
+        
+        List<Map<String, Object>> topDatasets = datasetOrderCount.entrySet().stream()
+            .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
+            .limit(10)
+            .map(entry -> {
+                Long datasetId = entry.getKey();
+                Long orderCount = entry.getValue();
+                
+                // Find dataset details
+                ProviderDataset dataset = allDatasets.stream()
+                    .filter(d -> d.getId().equals(datasetId))
+                    .findFirst()
+                    .orElse(null);
+                
+                // Calculate revenue for this dataset
+                double revenue = allOrders.stream()
+                    .filter(o -> datasetId.equals(o.getDatasetId()))
+                    .mapToDouble(o -> o.getAmount() != null ? o.getAmount() : 0.0)
+                    .sum();
+                
+                Map<String, Object> item = new HashMap<>();
+                item.put("datasetId", datasetId);
+                item.put("datasetName", dataset != null ? dataset.getName() : "Unknown");
+                item.put("category", dataset != null && dataset.getCategory() != null && !dataset.getCategory().isEmpty() 
+                    ? dataset.getCategory() : "Uncategorized");
+                item.put("orderCount", orderCount);
+                item.put("revenue", Math.round(revenue * 100.0) / 100.0);
+                return item;
+            })
+            .collect(Collectors.toList());
+        
+        // Category distribution
+        Map<String, Long> categoryCount = allDatasets.stream()
+            .filter(d -> "APPROVED".equals(d.getStatus()))
+            .collect(Collectors.groupingBy(
+                d -> d.getCategory() != null ? d.getCategory() : "Other",
+                Collectors.counting()
+            ));
+        
+        long totalDatasets = categoryCount.values().stream().mapToLong(Long::longValue).sum();
+        List<Map<String, Object>> categoryStats = categoryCount.entrySet().stream()
+            .map(entry -> {
+                Map<String, Object> stat = new HashMap<>();
+                stat.put("category", entry.getKey());
+                stat.put("count", entry.getValue());
+                stat.put("percentage", totalDatasets > 0 ? 
+                    Math.round((entry.getValue() * 100.0 / totalDatasets) * 10.0) / 10.0 : 0.0);
+                return stat;
+            })
+            .sorted((a, b) -> Long.compare((Long)b.get("count"), (Long)a.get("count")))
+            .collect(Collectors.toList());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("topDatasets", topDatasets);
+        response.put("categoryDistribution", categoryStats);
+        response.put("totalDatasets", totalDatasets);
         return ResponseEntity.ok(response);
     }
 
@@ -477,6 +649,8 @@ public class AdminController {
     
     /**
      * Lấy danh sách datasets đang chờ duyệt từ providers
+     * Chỉ hiển thị các datasets có status = "PENDING_REVIEW"
+     * Dùng để Admin xem và duyệt các dataset mới được provider submit
      */
     @GetMapping("/provider-datasets/pending")
     public ResponseEntity<List<ProviderDataset>> getPendingProviderDatasets() {
@@ -486,6 +660,8 @@ public class AdminController {
 
     /**
      * Lấy tất cả provider datasets (bao gồm cả đã duyệt, chờ duyệt, bị từ chối)
+     * Không filter theo status - trả về toàn bộ datasets để Admin quản lý
+     * Dùng cho trang quản lý tổng hợp tất cả datasets
      */
     @GetMapping("/provider-datasets")
     public ResponseEntity<List<ProviderDataset>> getAllProviderDatasets() {
@@ -494,6 +670,8 @@ public class AdminController {
 
     /**
      * Duyệt dataset của provider
+     * Chuyển status từ "PENDING_REVIEW" sang "APPROVED"
+     * Dataset sau khi được duyệt sẽ hiển thị công khai trên marketplace
      */
     @PutMapping("/provider-datasets/{id}/approve")
     public ResponseEntity<?> approveProviderDataset(@PathVariable Long id) {
@@ -506,6 +684,8 @@ public class AdminController {
 
     /**
      * Từ chối dataset của provider
+     * Chuyển status sang "REJECTED" và lưu lý do từ chối
+     * Provider có thể xem lý do và chỉnh sửa dataset để submit lại
      */
     @PutMapping("/provider-datasets/{id}/reject")
     public ResponseEntity<?> rejectProviderDataset(
@@ -519,6 +699,8 @@ public class AdminController {
         return ResponseEntity.ok(rejected);
     }
 
+    // DTO class để nhận request body khi Admin cập nhật thông tin user
+    // Chứa các field: name, organization, providerApproved, roles
     public static class AdminUserUpdateRequest {
         private String name;
         private String organization;

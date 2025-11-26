@@ -1,6 +1,4 @@
 package com.evmarketplace.admin;
-
-// Import các lớp cần thiết
 import com.evmarketplace.Service.UserService;
 import com.evmarketplace.auth.AuthRequest;
 import com.evmarketplace.auth.AuthResponse;
@@ -22,8 +20,6 @@ import java.util.List;
 
 /**
  * Đây là controller xử lý endpoint đăng nhập dành riêng cho Quản trị viên (Admin).
- * Admin phải đăng nhập thông qua endpoint này (ví dụ: từ trang /admin/login ở frontend).
- * Endpoint này sẽ kiểm tra xem người dùng có vai trò "Admin" hay không trước khi cấp token.
  */
 // Đánh dấu đây là một Rest Controller, xử lý các request HTTP và trả về JSON.
 @RestController
@@ -37,10 +33,9 @@ public class AdminAuthController {
     private final Logger logger = LoggerFactory.getLogger(AdminAuthController.class);
 
     // Khai báo các dependency sẽ được inject vào.
-    private final UserService userService; // Dịch vụ xử lý logic người dùng.
-    private final JwtUtil jwtUtil; // Tiện ích để tạo và xử lý JWT.
-
-    // Constructor Injection: Spring sẽ tự động inject các bean cần thiết.
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
+    
     public AdminAuthController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
@@ -58,7 +53,7 @@ public class AdminAuthController {
             if (u == null) return ResponseEntity.status(401).build();
             if (!userService.checkPassword(u, request.getPassword())) return ResponseEntity.status(401).build();
 
-            // **Kiểm tra quan trọng**: Xác minh người dùng có vai trò "Admin" hay không.
+            //Xác minh người dùng có vai trò "Admin" hay không.
             boolean isAdmin = userService.getRolesForUser(u).stream().anyMatch(r -> "Admin".equals(r.getName()));
             // Nếu không phải Admin, trả về lỗi 403 Forbidden (Cấm truy cập).
             if (!isAdmin) return ResponseEntity.status(403).build();
