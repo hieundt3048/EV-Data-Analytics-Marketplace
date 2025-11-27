@@ -452,13 +452,8 @@ const Consumer = () => {
     }
 
     try {
-<<<<<<< HEAD
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:8080/api/datasets/${id}/download`, {
-=======
       const token = localStorage.getItem('authToken'); // Lấy token từ localStorage
       const response = await fetch(`http://localhost:8080/api/datasets/${id}/download`, { // Gọi API để download dataset
->>>>>>> c36786b63332fc1d6cd805a395c69c0c3e5b4810
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
