@@ -60,7 +60,6 @@ E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\aspect\Acce
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\RecommendationController.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\ConsumerProfileController.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\CategoryController.java
-E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\marketplace\Subscription.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Repository\CategoryRepository.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\data\Format.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Repository\PurchaseRepository.java
@@ -82,7 +81,6 @@ E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\dto\APIKeyResponseDTO.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\DataAccessController.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\marketplace\AccessType.java
-E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\marketplace\SubscriptionStatus.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Service\StripePaymentService.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Pojo\User.java
 E:\tai\EV-Data-Analytics-Marketplace\src\main\java\com\evmarketplace\Controller\PaymentController.java

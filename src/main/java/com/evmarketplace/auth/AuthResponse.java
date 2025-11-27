@@ -1,7 +1,7 @@
 package com.evmarketplace.auth;
 
 /**
- * DTO for login response.
+ * DTO để phản hồi đăng nhập, bao gồm token JWT và thông tin người dùng đơn giản.
  */
 public class AuthResponse {
     private String token;

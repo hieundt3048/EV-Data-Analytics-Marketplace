@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Cho phép tất cả các request đến các đường dẫn bắt đầu bằng "/api/auth/" và "/api/admin/login" mà không cần xác thực.
                         .antMatchers("/api/auth/**", "/api/admin/login").permitAll()
+                        // Allow API v1 endpoints (authenticated via API Key Filter instead of JWT)
+                        .antMatchers("/api/v1/**").permitAll()
                         // Temporarily allow recommendations without auth for testing
                         .antMatchers("/api/recommendations/**").permitAll()
                         // Temporarily allow dashboards without auth for testing
@@ -91,7 +93,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Cho phép các request từ nguồn gốc của frontend (máy chủ Vite).
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));  // Sửa: dùng Patterns thay vì Origins
         // Cho phép các phương thức HTTP này.
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Cho phép tất cả các header trong request.

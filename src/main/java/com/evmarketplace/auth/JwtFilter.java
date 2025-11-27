@@ -55,8 +55,12 @@ public class JwtFilter implements Filter {
 
         // Lấy đường dẫn URI của yêu cầu.
         String path = req.getRequestURI();
-        // Bỏ qua xác thực cho các endpoint công khai, đăng nhập admin và tài nguyên tĩnh.
-        if (path.startsWith("/api/auth") || path.startsWith("/api/admin/login") || path.startsWith("/public") || path.startsWith("/static")) {
+        // Bỏ qua xác thực cho các endpoint công khai, đăng nhập admin, tài nguyên tĩnh và API v1 (dùng API Key)
+        if (path.startsWith("/api/auth") || 
+            path.startsWith("/api/admin/login") || 
+            path.startsWith("/api/v1") ||  // THÊM: Skip JWT cho API v1 (dùng API Key)
+            path.startsWith("/public") || 
+            path.startsWith("/static")) {
             // Nếu là đường dẫn công khai, chuyển yêu cầu đến filter tiếp theo mà không cần xác thực.
             chain.doFilter(request, response);
             return;

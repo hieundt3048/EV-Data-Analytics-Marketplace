@@ -94,10 +94,51 @@ public class AdminController {
     }
 
     /**
+     * Tạo người dùng mới bởi Admin.
+     * @param body Dữ liệu người dùng mới (name, email, password, organization, roles)
+     * @return ResponseEntity chứa thông tin người dùng đã tạo
+     */
+    @PostMapping("/users")
+    public ResponseEntity<?> createUser(@RequestBody AdminUserCreateRequest body) {
+        try {
+            // Kiểm tra email đã tồn tại chưa
+            if (userService.findByEmail(body.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
+            }
+
+            // Tạo user mới với thông tin cơ bản
+            User newUser = userService.register(
+                body.getName(), 
+                body.getEmail(), 
+                body.getPassword(),
+                body.getOrganization() != null ? body.getOrganization() : "",
+                false // providerApproved mặc định là false
+            );
+
+            // Gán roles nếu có
+            if (body.getRoles() != null && !body.getRoles().isEmpty()) {
+                userService.updateUser(
+                    newUser.getId(), 
+                    newUser.getName(), 
+                    newUser.getOrganization(), 
+                    newUser.isProviderApproved(), 
+                    body.getRoles()
+                );
+                // Refresh user để lấy roles mới
+                newUser = userService.findByEmail(body.getEmail()).orElse(newUser);
+            }
+
+            return ResponseEntity.ok(newUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
      * Cập nhật thông tin người dùng bởi Admin.
-     * @param userId ID của người dùng cần cập nhật
-     * @param body Dữ liệu cập nhật (name, organization, providerApproved, roles)
-     * @return ResponseEntity chứa thông tin người dùng đã cập nhật hoặc lỗi 404 nếu không tìm thấy
+     * userId ID của người dùng cần cập nhật
+     * body Dữ liệu cập nhật (name, organization, providerApproved, roles)
+     * return ResponseEntity chứa thông tin người dùng đã cập nhật hoặc lỗi 404 nếu không tìm thấy
      */
     @PutMapping("/users/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody AdminUserUpdateRequest body) {
@@ -308,7 +349,6 @@ public class AdminController {
             // Note: consumerId trong APIKey là UUID, cần mapping với User.id (Long)
             // Tạm thời skip consumer info vì mismatch type
             try {
-                // For now, set consumer to null - this needs proper database schema fix
                 data.put("consumer", Map.of(
                     "id", key.getConsumerId().toString(),
                     "note", "Consumer info unavailable - ID type mismatch"
@@ -360,7 +400,6 @@ public class AdminController {
     @PostMapping("/security/apikeys")
     public ResponseEntity<?> createApiKey(@RequestBody Map<String, Object> payload) {
         try {
-            // Validate required fields
             if (!payload.containsKey("userId")) {
                 return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
@@ -370,7 +409,7 @@ public class AdminController {
             
             Long userId = Long.parseLong(payload.get("userId").toString());
             
-            // Verify user exists and is a Consumer
+            // kiểm tra người dùng tồn tại với vai trò Consumer
             User user = userRepository.findById(userId).orElse(null);
             if (user == null) {
                 return ResponseEntity.status(404).body(Map.of(
@@ -379,43 +418,42 @@ public class AdminController {
                 ));
             }
             
-            // Generate unique API key
+            // Tạo khóa API duy nhất
             String apiKey = generateUniqueApiKey();
             
-            // Get scopes/permissions
+            // lấy scopes/permissions
             @SuppressWarnings("unchecked")
             List<String> scopes = payload.containsKey("scopes") 
                 ? (List<String>) payload.get("scopes") 
                 : List.of("read:datasets");
             
-            // Get rate limit (default 100/hr)
+            // lấy rate limit (mặc định 100/giờ)
             int rateLimit = payload.containsKey("rateLimit") 
                 ? Integer.parseInt(payload.get("rateLimit").toString()) 
                 : 100;
             
-            // Get expiry days (default 365)
+            // lấy số ngày hết hạn (mặc định 365)
             int expiresInDays = payload.containsKey("expiresInDays") 
                 ? Integer.parseInt(payload.get("expiresInDays").toString()) 
                 : 365;
             
-            // Create APIKey entity
-            // Note: consumerId in APIKey is UUID, but User.id is Long
-            // We'll use a deterministic UUID based on userId for now
+            // Tạo thực thể APIKey
+            // Chúng ta sẽ sử dụng một UUID xác định dựa trên userId cho bây giờ
             UUID consumerId = UUID.nameUUIDFromBytes(("consumer-" + userId).getBytes());
             
             APIKey newKey = new APIKey(consumerId, apiKey);
             newKey.setScopes(scopes);
             newKey.setRateLimit(rateLimit);
             
-            // Set expiry date
+            // đặt ngày hết hạn
             java.util.Calendar cal = java.util.Calendar.getInstance();
             cal.add(java.util.Calendar.DAY_OF_YEAR, expiresInDays);
             newKey.setExpiresAt(cal.getTime());
             
-            // Save to database
+            // Lưu vào cơ sở dữ liệu
             APIKey savedKey = apiKeyRepository.save(newKey);
             
-            // Return response with full key (only shown once!)
+            // Trả về phản hồi với khóa đầy đủ (chỉ hiển thị một lần!)
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "API key created successfully");
@@ -443,7 +481,7 @@ public class AdminController {
     }
     
     /**
-     * Generate a unique API key string
+     * Tạo một API key duy nhất theo định dạng yêu cầu.
      * Format: vmkt_<32_random_hex_characters>
      * Ví dụ: vmkt_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
      */
@@ -485,7 +523,7 @@ public class AdminController {
     @DeleteMapping("/security/apikeys/{id}")
     public ResponseEntity<?> deleteApiKey(@PathVariable UUID id) {
         return apiKeyRepository.findById(id).map(key -> {
-            // Permanently delete from database
+            // Xóa vĩnh viễn khỏi cơ sở dữ liệu
             apiKeyRepository.delete(key);
             return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -500,12 +538,11 @@ public class AdminController {
     /**
      * Lấy usage statistics chi tiết cho một API key
      * Bao gồm: tổng số requests, requests thành công/thất bại, bandwidth, lần dùng cuối
-     * TODO: Hiện tại trả về placeholder data, cần tích hợp với ApiAccessService
      */
     @GetMapping("/security/apikeys/{id}/usage")
     public ResponseEntity<?> getApiKeyUsage(@PathVariable UUID id) {
         return apiKeyRepository.findById(id).map(key -> {
-            // TODO: Tích hợp với ApiAccessService để lấy thống kê thực
+            //Tích hợp với ApiAccessService để lấy thống kê thực
             Map<String, Object> usage = new HashMap<>();
             usage.put("keyId", key.getId());
             usage.put("totalRequests", 0); // Placeholder
@@ -769,6 +806,57 @@ public class AdminController {
             error.put("success", false);
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    /**
+     * DTO cho request tạo user mới từ Admin
+     */
+    static class AdminUserCreateRequest {
+        private String name;
+        private String email;
+        private String password;
+        private String organization;
+        private List<String> roles;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getOrganization() {
+            return organization;
+        }
+
+        public void setOrganization(String organization) {
+            this.organization = organization;
+        }
+
+        public List<String> getRoles() {
+            return roles;
+        }
+
+        public void setRoles(List<String> roles) {
+            this.roles = roles;
         }
     }
 }

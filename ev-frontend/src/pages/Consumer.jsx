@@ -4,6 +4,8 @@ import '../styles/index.css';
 import '../styles/consumer.css';
 import ApiKeyManagement from '../components/ApiKeyManagement';
 import RecommendationsSection from '../components/RecommendationsSection';
+import AdvancedAnalytics from '../components/AdvancedAnalytics';
+import SubscriptionManagement from '../components/SubscriptionManagement';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ConsumerProfile from './ConsumerProfile';
 
@@ -20,6 +22,7 @@ const Consumer = () => {
   
   const [datasets, setDatasets] = useState([]);
   const [filteredDatasets, setFilteredDatasets] = useState([]);
+  const [searchResults, setSearchResults] = useState(null); // For advanced search results
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [purchaseHistory, setPurchaseHistory] = useState([]);
@@ -441,10 +444,49 @@ const Consumer = () => {
     }
 
     try {
-      // Use relative URL for Vite proxy
-      window.open(`/api/datasets/${id}/download`, '_blank');
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:8080/api/datasets/${id}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+      }
+
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `dataset_${id}.zip`;
+      if (contentDisposition) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+        if (matches != null && matches[1]) {
+          filename = matches[1].replace(/['"]/g, '');
+        }
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      alert('Dataset download started successfully!');
     } catch (e) {
-      alert('Unable to start dataset download.');
+      console.error('Download error:', e);
+      
+      // Try to get more specific error message
+      if (e.message.includes('404')) {
+        alert('Dataset not found. This dataset may have been removed from the system.');
+      } else {
+        alert('Unable to download dataset. Error: ' + e.message);
+      }
     }
   };
 
@@ -709,6 +751,7 @@ const Consumer = () => {
           <div className="tabs-container">
             <button className="tab-btn" data-tab="data-discovery" onClick={() => setActiveTab('data-discovery')}>Data Discovery</button>
             <button className="tab-btn" data-tab="purchases" onClick={() => setActiveTab('purchases')}>Purchase History</button>
+            <button className="tab-btn" data-tab="subscriptions" onClick={() => setActiveTab('subscriptions')}>Subscriptions</button>
             <button className="tab-btn" data-tab="analytics" onClick={() => setActiveTab('analytics')}>Analytics Dashboard</button>
             <button className="tab-btn" data-tab="api" onClick={() => setActiveTab('api')}>API Documentation</button>
             <button className="tab-btn" data-tab="profile" onClick={() => setActiveTab('profile')}>My Profile</button>
@@ -1028,7 +1071,13 @@ const Consumer = () => {
 
             {/* AI Recommendations */}
             <ErrorBoundary>
-              <RecommendationsSection fetchWithAuth={fetchWithAuth} />
+              <RecommendationsSection 
+                fetchWithAuth={fetchWithAuth}
+                onViewDataset={(id) => {
+                  const dataset = datasets.find(d => d.id === id);
+                  if (dataset) setPreviewDataset(dataset);
+                }}
+              />
             </ErrorBoundary>
           </section>
         </div>
@@ -1047,15 +1096,6 @@ const Consumer = () => {
                   <h2 className="section-title-enhanced">Purchase History</h2>
                   <p className="section-description">Track all your dataset purchases and transactions</p>
                 </div>
-              </div>
-              <div className="header-actions">
-                <button
-                  className="consumer-btn consumer-btn-outline"
-                  onClick={() => alert('Tính năng xuất báo cáo sẽ sớm được bổ sung.')}
-                >
-                  <svg className="btn-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                  Export History
-                </button>
               </div>
             </div>
 
@@ -1175,7 +1215,12 @@ const Consumer = () => {
                               <td><span className={`status-badge ${getStatusClass(statusLabel)}`}>{statusLabel}</span></td>
                               <td>
                                 <div className="action-buttons">
-                                  <button className="btn-icon" title="Download Again" onClick={() => downloadDataset(purchase.datasetId)} disabled={!purchase.datasetId}>
+                                  <button 
+                                    className="btn-icon" 
+                                    title={purchase.status === 'PAYOUT_COMPLETED' ? 'Download Dataset' : 'Download available after payment is completed'} 
+                                    onClick={() => downloadDataset(purchase.datasetId)} 
+                                    disabled={!purchase.datasetId || purchase.status !== 'PAYOUT_COMPLETED'}
+                                  >
                                     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                                   </button>
                                   <button className="btn-icon" title="View Receipt" onClick={() => openReceipt(purchase)}>
@@ -1264,6 +1309,14 @@ const Consumer = () => {
                     );
                   })}
                 </div>
+
+                {/* Advanced Analytics Component */}
+                <ErrorBoundary>
+                  <AdvancedAnalytics
+                    fetchWithAuth={fetchWithAuth}
+                    datasetId={selectedDatasetId}
+                  />
+                </ErrorBoundary>
               </>
             ) : (
               <div className="consumer-card">
@@ -1280,6 +1333,13 @@ const Consumer = () => {
         <div id="api" className="tab-content">
           <ErrorBoundary>
             <ApiKeyManagement fetchWithAuth={fetchWithAuth} />
+          </ErrorBoundary>
+        </div>
+
+        {/* Subscriptions */}
+        <div id="subscriptions" className="tab-content">
+          <ErrorBoundary>
+            <SubscriptionManagement fetchWithAuth={fetchWithAuth} />
           </ErrorBoundary>
         </div>
 

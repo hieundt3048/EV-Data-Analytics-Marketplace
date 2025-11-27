@@ -624,7 +624,7 @@ div[class*="api-key-success"] {
     width: 4rem;
     height: 4rem;
     background: rgba(100, 255, 218, 0.1);
-    border-radius: 1rem;
+    border-radius: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1766,7 +1766,7 @@ div[class*="api-key-success"] {
 .icon-badge {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;

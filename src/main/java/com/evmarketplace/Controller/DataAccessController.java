@@ -1,8 +1,8 @@
 package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.APIKey;
-import com.evmarketplace.Pojo.Dataset;
-import com.evmarketplace.Repository.DatasetRepository;
+import com.evmarketplace.Pojo.ProviderDataset;
+import com.evmarketplace.Repository.ProviderDatasetRepository;
 import com.evmarketplace.Service.ApiAccessService;
 import com.evmarketplace.Service.RateLimitService;
 import org.springframework.http.HttpStatus;
@@ -19,18 +19,18 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/v1")
-@CrossOrigin(origins = "*")
+// CORS được cấu hình toàn cục trong SecurityConfig, không cần @CrossOrigin ở đây
 public class DataAccessController {
 
-    private final DatasetRepository datasetRepository;
+    private final ProviderDatasetRepository providerDatasetRepository;
     private final ApiAccessService apiAccessService;
     private final RateLimitService rateLimitService;
 
     public DataAccessController(
-            DatasetRepository datasetRepository,
+            ProviderDatasetRepository providerDatasetRepository,
             ApiAccessService apiAccessService,
             RateLimitService rateLimitService) {
-        this.datasetRepository = datasetRepository;
+        this.providerDatasetRepository = providerDatasetRepository;
         this.apiAccessService = apiAccessService;
         this.rateLimitService = rateLimitService;
     }
@@ -43,47 +43,66 @@ public class DataAccessController {
     @GetMapping("/datasets")
     public ResponseEntity<?> getDatasets(HttpServletRequest request) {
         APIKey apiKey = (APIKey) request.getAttribute("apiKey");
+        System.out.println("=== DataAccessController Debug ===");
+        System.out.println("API Key from request: " + (apiKey != null ? apiKey.getKey() : "null"));
+        
         if (apiKey == null) {
+            System.out.println("REJECT: API key is null");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", "Invalid API key"));
         }
 
+        System.out.println("API Key ID: " + apiKey.getId());
+        System.out.println("Consumer ID: " + apiKey.getConsumerId());
+        System.out.println("Rate Limit: " + apiKey.getRateLimit());
+        System.out.println("Scopes: " + apiKey.getScopes());
+
         // Kiểm tra rate limit
         if (!rateLimitService.allowRequest(apiKey.getId().toString(), apiKey.getRateLimit())) {
+            System.out.println("REJECT: Rate limit exceeded");
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .body(Map.of("error", "Rate limit exceeded"));
         }
 
         // Kiểm tra scope
         if (!hasScope(apiKey, "read:datasets")) {
+            System.out.println("REJECT: Missing scope 'read:datasets'");
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", "Insufficient permissions"));
         }
 
+        System.out.println("Scope check PASSED");
+
         // Kiểm tra API key đã hết hạn chưa
         if (apiKey.getExpiryDate() != null && apiKey.getExpiryDate().before(new Date())) {
+            System.out.println("REJECT: API key expired");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", "API key has expired"));
         }
+        
+        System.out.println("All checks PASSED, fetching datasets...");
 
         try {
-            // Lấy danh sách datasets
-            List<Dataset> datasets = datasetRepository.findAll();
+            // Lấy danh sách datasets từ provider_datasets
+            List<ProviderDataset> datasets = providerDatasetRepository.findAll();
             
-            // Chuyển đổi sang response format
-            List<Map<String, Object>> response = datasets.stream().map(ds -> {
-                Map<String, Object> data = new HashMap<>();
-                data.put("id", ds.getId());
-                data.put("title", ds.getTitle());
-                data.put("description", ds.getDescription());
-                data.put("category", ds.getCategory());
-                data.put("dataType", ds.getDataType());
-                data.put("size", ds.getSize());
-                data.put("price", ds.getPrice());
-                data.put("createdAt", ds.getCreatedAt());
-                data.put("tags", ds.getTags());
-                return data;
-            }).collect(Collectors.toList());
+            // Chuyển đổi sang response format (trả về tất cả datasets công khai)
+            List<Map<String, Object>> response = datasets.stream()
+                .map(ds -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("id", ds.getId());
+                    data.put("name", ds.getName());
+                    data.put("description", ds.getDescription());
+                    data.put("category", ds.getCategory());
+                    data.put("dataFormat", ds.getDataFormat());
+                    data.put("sizeBytes", ds.getSizeBytes());
+                    data.put("price", ds.getPrice());
+                    data.put("pricingType", ds.getPricingType());
+                    data.put("region", ds.getRegion());
+                    data.put("vehicleType", ds.getVehicleType());
+                    data.put("timeRange", ds.getTimeRange());
+                    return data;
+                }).collect(Collectors.toList());
 
             // Log truy cập
             apiAccessService.logAccess(apiKey.getId(), "/api/v1/datasets", "GET", true);
@@ -136,27 +155,28 @@ public class DataAccessController {
         }
 
         try {
-            Optional<Dataset> datasetOpt = datasetRepository.findById(id);
+            Optional<ProviderDataset> datasetOpt = providerDatasetRepository.findById(id);
             if (datasetOpt.isEmpty()) {
                 apiAccessService.logAccess(apiKey.getId(), "/api/v1/datasets/" + id, "GET", false);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Dataset not found"));
             }
 
-            Dataset ds = datasetOpt.get();
+            ProviderDataset ds = datasetOpt.get();
+            
             Map<String, Object> data = new HashMap<>();
             data.put("id", ds.getId());
-            data.put("title", ds.getTitle());
+            data.put("name", ds.getName());
             data.put("description", ds.getDescription());
             data.put("category", ds.getCategory());
-            data.put("dataType", ds.getDataType());
-            data.put("size", ds.getSize());
+            data.put("dataFormat", ds.getDataFormat());
+            data.put("sizeBytes", ds.getSizeBytes());
             data.put("price", ds.getPrice());
-            data.put("createdAt", ds.getCreatedAt());
-            data.put("tags", ds.getTags());
+            data.put("pricingType", ds.getPricingType());
             data.put("region", ds.getRegion());
             data.put("vehicleType", ds.getVehicleType());
-            data.put("collectionDate", ds.getCollectionDate());
+            data.put("timeRange", ds.getTimeRange());
+            data.put("batteryType", ds.getBatteryType());
 
             // Log truy cập
             apiAccessService.logAccess(apiKey.getId(), "/api/v1/datasets/" + id, "GET", true);
@@ -208,14 +228,14 @@ public class DataAccessController {
         }
 
         try {
-            Optional<Dataset> datasetOpt = datasetRepository.findById(id);
+            Optional<ProviderDataset> datasetOpt = providerDatasetRepository.findById(id);
             if (datasetOpt.isEmpty()) {
                 apiAccessService.logAccess(apiKey.getId(), "/api/v1/datasets/" + id + "/download", "GET", false);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Dataset not found"));
             }
 
-            Dataset ds = datasetOpt.get();
+            ProviderDataset ds = datasetOpt.get();
             
             // Log truy cập
             apiAccessService.logAccess(apiKey.getId(), "/api/v1/datasets/" + id + "/download", "GET", true);
@@ -225,9 +245,10 @@ public class DataAccessController {
                 "success", true,
                 "message", "Download initiated",
                 "datasetId", ds.getId(),
-                "title", ds.getTitle(),
-                "dataType", ds.getDataType(),
-                "size", ds.getSize(),
+                "name", ds.getName(),
+                "dataFormat", ds.getDataFormat(),
+                "sizeBytes", ds.getSizeBytes(),
+                "s3Url", ds.getS3Url(),
                 "rateLimitRemaining", rateLimitService.getRemainingRequests(
                     apiKey.getId().toString(), apiKey.getRateLimit())
             ));
@@ -272,8 +293,8 @@ public class DataAccessController {
         try {
             // Tạo analytics data
             Map<String, Object> analytics = new HashMap<>();
-            analytics.put("totalDatasets", datasetRepository.count());
-            analytics.put("categories", Arrays.asList("EV Sales", "Charging Stations", "Battery Data", "Market Analysis"));
+            analytics.put("totalDatasets", providerDatasetRepository.count());
+            analytics.put("categories", Arrays.asList("charging_behavior", "battery_health", "route_optimization", "energy_consumption"));
             analytics.put("timestamp", new Date());
 
             // Log truy cập

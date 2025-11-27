@@ -1,7 +1,7 @@
 package com.evmarketplace.auth;
 
 /**
- * DTO for registration requests.
+ * DTO(Data Transfer Object) để yêu cầu đăng ký.
  */
 public class AuthRegisterRequest {
     private String name;
