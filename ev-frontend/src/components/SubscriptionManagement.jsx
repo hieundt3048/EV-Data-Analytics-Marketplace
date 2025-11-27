@@ -235,68 +235,76 @@ const SubscriptionManagement = ({ fetchWithAuth }) => {
         </div>
       ) : (
         <div className="subscriptions-grid">
-          {subscriptions.map((sub) => (
-            <div key={sub.id} className="subscription-card">
-              <div className="card-header">
-                <div>
-                  <h3>{sub.dataset?.title || `Dataset #${sub.dataset?.id || 'undefined'}`}</h3>
-                  <span className={`status-badge status-${getStatusBadge(sub.status)}`}>
-                    {sub.status}
-                  </span>
-                </div>
-                <div className="card-price">
-                  {formatCurrency(sub.price)}
-                  <span className="price-period">/month</span>
-                </div>
-              </div>
+          {subscriptions.map((sub) => {
+            const purchased = purchasedDatasets.find(d => d.id === sub.datasetId);
+            const displayName =
+              sub.dataset?.name ||
+              (sub.dataset && sub.dataset.id && `Dataset #${sub.dataset.id}`) ||
+              `Dataset #${sub.datasetId || sub.id}`;
 
-              <div className="card-body">
-                <div className="info-row">
-                  <span className="label">Plan:</span>
-                  <span className="value">Monthly</span>
-                </div>
-                <div className="info-row">
-                  <span className="label">Start Date:</span>
-                  <span className="value">{formatDate(sub.startAt)}</span>
-                </div>
-                <div className="info-row">
-                  <span className="label">Next Billing:</span>
-                  <span className="value">{sub.status === 'ACTIVE' ? formatDate(sub.endAt) : 'N/A'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="label">Auto Renew:</span>
-                  <span className="value">No</span>
-                </div>
-                {sub.stripeSubscriptionId && (
-                  <div className="info-row">
-                    <span className="label">Stripe ID:</span>
-                    <span className="value stripe-id">{sub.stripeSubscriptionId}</span>
+            return (
+              <div key={sub.id} className="subscription-card">
+                <div className="card-header">
+                  <div>
+                    <h3>{displayName}</h3>
+                    <span className={`status-badge status-${getStatusBadge(sub.status)}`}>
+                      {sub.status}
+                    </span>
                   </div>
-                )}
-              </div>
+                  <div className="card-price">
+                    {formatCurrency(sub.price)}
+                    <span className="price-period">/month</span>
+                  </div>
+                </div>
 
-              <div className="card-footer">
-                {sub.status === 'ACTIVE' && (
-                  <button
-                    className="btn-danger-sm"
-                    onClick={() => cancelSubscription(sub.id)}
-                    disabled={loading}
-                  >
-                    Cancel Subscription
-                  </button>
-                )}
-                {sub.status === 'CANCELLED' && (
-                  <button 
-                    className="btn-danger-sm"
-                    onClick={() => deleteSubscription(sub.id)}
-                    disabled={loading}
-                  >
-                    Delete
-                  </button>
-                )}
+                <div className="card-body">
+                  <div className="info-row">
+                    <span className="label">Plan:</span>
+                    <span className="value">Monthly</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Start Date:</span>
+                    <span className="value">{formatDate(sub.startAt)}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Next Billing:</span>
+                    <span className="value">{sub.status === 'ACTIVE' ? formatDate(sub.endAt) : 'N/A'}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Auto Renew:</span>
+                    <span className="value">No</span>
+                  </div>
+                  {sub.stripeSubscriptionId && (
+                    <div className="info-row">
+                      <span className="label">Stripe ID:</span>
+                      <span className="value stripe-id">{sub.stripeSubscriptionId}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="card-footer">
+                  {sub.status === 'ACTIVE' && (
+                    <button
+                      className="btn-danger-sm"
+                      onClick={() => cancelSubscription(sub.id)}
+                      disabled={loading}
+                    >
+                      Cancel Subscription
+                    </button>
+                  )}
+                  {sub.status === 'CANCELLED' && (
+                    <button 
+                      className="btn-danger-sm"
+                      onClick={() => deleteSubscription(sub.id)}
+                      disabled={loading}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

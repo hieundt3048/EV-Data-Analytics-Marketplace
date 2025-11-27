@@ -21,22 +21,22 @@ const Consumer = () => {
   const apiKeyRef = useRef(null);
   
   const [datasets, setDatasets] = useState([]);
-  const [filteredDatasets, setFilteredDatasets] = useState([]);
-  const [searchResults, setSearchResults] = useState(null); // For advanced search results
-  const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [purchaseHistory, setPurchaseHistory] = useState([]);
-  const [dashboardData, setDashboardData] = useState(null);
-  const [previewDataset, setPreviewDataset] = useState(null);
-  const [showReceipt, setShowReceipt] = useState(null);
-  const [confirmPurchase, setConfirmPurchase] = useState(null); // dataset pending confirmation
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [paymentError, setPaymentError] = useState(null);
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [selectedDatasetId, setSelectedDatasetId] = useState(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [filteredDatasets, setFilteredDatasets] = useState([]); // hiển thị ở lưới available datasets
+  const [searchResults, setSearchResults] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị kết quả tìm kiếm
+  const [loading, setLoading] = useState(false); // nằm ở trang Data Discovery có tác dụng hiển thị loading khi fetch datasets
+  const [categories, setCategories] = useState([]); // data categories nằm ở trang Data Discovery
+  const [purchaseHistory, setPurchaseHistory] = useState([]); // nằm ở trang Purchase History có tác dụng hiển thị lịch sử mua hàng
+  const [dashboardData, setDashboardData] = useState(null); // nằm ở trang Consumer Dashboard có tác dụng hiển thị dữ liệu dashboard
+  const [previewDataset, setPreviewDataset] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị modal preview dataset
+  const [showReceipt, setShowReceipt] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị modal receipt
+  const [confirmPurchase, setConfirmPurchase] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị modal confirm purchase
+  const [paymentProcessing, setPaymentProcessing] = useState(false); // nằm ở trang Data Discovery có tác dụng hiển thị trạng thái xử lý thanh toán
+  const [paymentError, setPaymentError] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị lỗi thanh toán
+  const [analyticsData, setAnalyticsData] = useState(null); // nằm ở trang Analytics Dashboard có tác dụng hiển thị dữ liệu phân tích
+  const [selectedDatasetId, setSelectedDatasetId] = useState(null); // nằm ở trang Analytics Dashboard có tác dụng chọn dataset để hiển thị phân tích
+  const [analyticsLoading, setAnalyticsLoading] = useState(false); // nằm ở trang Analytics Dashboard có tác dụng hiển thị loading khi fetch dữ liệu phân tích
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState({ // nằm ở trang Data Discovery có tác dụng lưu trữ các bộ lọc
     category: '',
     timeRange: '',
     region: '',
@@ -49,17 +49,17 @@ const Consumer = () => {
     searchQuery: ''
   });
 
-  const [categoriesError, setCategoriesError] = useState(null);
-  const [datasetsError, setDatasetsError] = useState(null);
-  const [purchaseError, setPurchaseError] = useState(null);
-  const [dashboardError, setDashboardError] = useState(null);
-  const [analyticsError, setAnalyticsError] = useState(null);
-  const [apiKeyError, setApiKeyError] = useState(null);
+  const [categoriesError, setCategoriesError] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị lỗi khi fetch categories
+  const [datasetsError, setDatasetsError] = useState(null); // nằm ở trang Data Discovery có tác dụng hiển thị lỗi khi fetch datasets
+  const [purchaseError, setPurchaseError] = useState(null); // nằm ở trang Purchase History có tác dụng hiển thị lỗi khi fetch purchase history
+  const [dashboardError, setDashboardError] = useState(null); // nằm ở trang Consumer Dashboard có tác dụng hiển thị lỗi khi fetch dashboard data
+  const [analyticsError, setAnalyticsError] = useState(null);// nằm ở trang Analytics Dashboard có tác dụng hiển thị lỗi khi fetch analytics data
+  const [apiKeyError, setApiKeyError] = useState(null); // nằm ở trang API Documentation có tác dụng hiển thị lỗi khi generate API key
 
-  // Business rule: A purchase is only considered SUCCESSFUL when status is APPROVED or PAYOUT_COMPLETED
+// có tác dụng định nghĩa các trạng thái thành công cho đơn hàng
   const SUCCESS_STATUSES = ['approved', 'payout_completed'];
 
-  // Simplified fetchWithAuth like Admin component
+  // Hàm fetch với xử lý authentication và token expiration
   const fetchWithAuth = useCallback(async (url, opts = {}) => {
     const token = localStorage.getItem('authToken');
     
@@ -107,7 +107,7 @@ const Consumer = () => {
     }
   }, [navigate]);
 
-  // Fetch data functions
+  // hàm này dùng để fetch categories cho bộ lọc ở trang Data Discovery
   const fetchCategories = useCallback(async () => {
     setCategoriesError(null);
     try {
@@ -124,6 +124,8 @@ const Consumer = () => {
     }
   }, [fetchWithAuth]);
 
+
+  // hàm này dùng để fetch dữ liệu phân tích cho trang Analytics Dashboard
   const fetchAnalyticsData = useCallback(async (datasetId) => {
     if (!datasetId) return;
     setAnalyticsError(null);
@@ -145,6 +147,7 @@ const Consumer = () => {
     }
   }, [fetchWithAuth]);
 
+  // hàm này dùng để fetch danh sách datasets được phê duyệt cho trang Data Discovery
   const fetchApprovedDatasets = useCallback(async () => {
     setDatasetsError(null);
     setLoading(true);
@@ -181,16 +184,19 @@ const Consumer = () => {
     }
   }, [fetchWithAuth]);
 
+
+  // hàm này dùng để fetch lịch sử mua hàng cho trang Purchase History
   const fetchPurchaseHistory = useCallback(async () => {
     setPurchaseError(null);
     try {
-      console.log('[fetchPurchaseHistory] Fetching from /api/orders/history...');
-      const data = await fetchWithAuth('/api/orders/history');
-      console.log('[fetchPurchaseHistory] Received data:', data);
-      if (Array.isArray(data)) {
+      console.log('[fetchPurchaseHistory] Fetching from /api/orders/history...'); 
+      const data = await fetchWithAuth('/api/orders/history'); // Gọi API để lấy lịch sử mua hàng
+      console.log('[fetchPurchaseHistory] Received data:', data); // Ghi log dữ liệu nhận được
+
+      if (Array.isArray(data)) { // Kiểm tra nếu dữ liệu là một mảng
         setPurchaseHistory(data);
         console.log('[fetchPurchaseHistory] Set purchaseHistory with', data.length, 'items');
-      } else {
+      } else { // Nếu dữ liệu không phải mảng, đặt lỗi và mảng rỗng
         setPurchaseHistory([]);
         setPurchaseError('No purchase history available.');
         console.warn('[fetchPurchaseHistory] Data is not an array:', data);
@@ -202,6 +208,8 @@ const Consumer = () => {
     }
   }, [fetchWithAuth]);
 
+
+  // hàm này dùng để fetch dữ liệu dashboard cho trang Consumer Dashboard
   const fetchDashboard = useCallback(async () => {
     setDashboardError(null);
     try {
@@ -218,7 +226,7 @@ const Consumer = () => {
     }
   }, [fetchWithAuth]);
 
-  // Filter functions
+  // hàm này dùng để xử lý thay đổi bộ lọc ở trang Data Discovery
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => ({ ...prev, [filterName]: value }));
   };
@@ -226,7 +234,7 @@ const Consumer = () => {
   const applyFilters = (currentFilters) => {
     let filtered = [...datasets];
 
-    // Filter by search query
+    // tìm kiếm theo từ khóa
     if (currentFilters.searchQuery) {
       const query = currentFilters.searchQuery.toLowerCase();
       filtered = filtered.filter(ds => 
@@ -235,7 +243,7 @@ const Consumer = () => {
       );
     }
 
-    // Filter by category
+    // tìm kiếm theo category
     if (currentFilters.category) {
       filtered = filtered.filter(ds => {
         const datasetCategory = (ds.category || '').toString().toLowerCase().trim();
@@ -244,7 +252,7 @@ const Consumer = () => {
       });
     }
 
-    // Filter by region
+    // tìm kiếm theo time range
     if (currentFilters.region) {
       filtered = filtered.filter(ds => {
         const datasetRegion = (ds.region || '').toString().toLowerCase().trim();
@@ -253,7 +261,7 @@ const Consumer = () => {
       });
     }
 
-    // Filter by vehicle type
+    // tìm kiếm theo vehicle type
     if (currentFilters.vehicleType) {
       filtered = filtered.filter(ds => {
         const datasetVehicleType = (ds.vehicleType || '').toString().toLowerCase().trim();
@@ -262,7 +270,7 @@ const Consumer = () => {
       });
     }
 
-    // Filter by battery type
+    // tìm kiếm theo battery type
     if (currentFilters.batteryType) {
       filtered = filtered.filter(ds => {
         const datasetBatteryType = (ds.batteryType || '').toString().toLowerCase().trim();
@@ -271,7 +279,7 @@ const Consumer = () => {
       });
     }
 
-    // Filter by data format
+    // tìm kiếm theo data format
     if (currentFilters.dataFormat) {
       filtered = filtered.filter(ds => {
         const datasetDataFormat = (ds.dataFormat || '').toString().toLowerCase().trim();
@@ -280,7 +288,7 @@ const Consumer = () => {
       });
     }
 
-    // Filter by pricing type
+    // tìm kiếm theo pricing type
     if (currentFilters.pricingType) {
       filtered = filtered.filter(ds => {
         const datasetPricingType = (ds.pricingType || '').toString().toLowerCase().trim();
@@ -289,7 +297,7 @@ const Consumer = () => {
       });
     }
 
-    // Filter by price range
+    // tìm  kiếm theo khoảng giá
     if (currentFilters.minPrice) {
       filtered = filtered.filter(ds => ds.price >= parseFloat(currentFilters.minPrice));
     }
@@ -304,7 +312,7 @@ const Consumer = () => {
     applyFilters(filters);
   };
 
-  const clearFilters = () => {
+  const clearFilters = () => { // hàm này dùng để xóa tất cả bộ lọc ở trang Data Discovery
     setFilters({
       category: '',
       timeRange: '',
@@ -320,7 +328,7 @@ const Consumer = () => {
     setFilteredDatasets(datasets);
   };
 
-  // API Key functions
+  // hàm này dùng để generate API key ở trang API Documentation
   const generateApiKey = async () => {
     setApiKeyError(null);
     try {
@@ -365,8 +373,8 @@ const Consumer = () => {
     }
   };
 
-  // Purchase functions
-  // Open the confirmation modal; actual checkout/POST remains unchanged
+
+  // hàm này dùng để xử lý mua dataset ở trang Data Discovery
   const purchaseDataset = async (dataset) => {
     if (!dataset?.id) {
       alert('Unable to identify dataset to purchase.');
@@ -378,7 +386,7 @@ const Consumer = () => {
     setConfirmPurchase(dataset);
   };
 
-  // Confirm and perform the checkout request
+  // hàm này dùng để xác nhận và xử lý thanh toán mua dataset ở trang Data Discovery
   const confirmAndProcessPurchase = async (dataset, paymentMethod = 'card') => {
     if (!dataset || !dataset.id) return;
     setPaymentProcessing(true);
@@ -388,14 +396,13 @@ const Consumer = () => {
         method: 'POST',
         body: JSON.stringify({ datasetId: dataset.id, paymentMethod })
       });
-      // Normalize response to a receipt object, even if backend only returns {status:'success'}
+      // dùng để xây dựng receipt tạm thời từ phản hồi
       let receipt = null;
       if (response) {
-        const hasOrderLikeFields = response.order || response.id || response.amount || response.datasetId;
-        const raw = response.order || response;
+        const hasOrderLikeFields = response.order || response.id || response.amount || response.datasetId; // Kiểm tra các trường liên quan đến đơn hàng
+        const raw = response.order || response;  // Lấy đối tượng order nếu có, nếu không thì lấy toàn bộ response
         if (hasOrderLikeFields) {
-          // Build receipt from available fields + dataset fallback, FORCE initial status to PENDING
-          const base = raw.order ? raw.order : raw;
+          const base = raw.order ? raw.order : raw; // Lấy đối tượng cơ sở từ order hoặc toàn bộ response
           receipt = {
             id: base.id || `temp-${Date.now()}`,
             datasetId: base.datasetId || dataset.id,
@@ -405,7 +412,7 @@ const Consumer = () => {
             status: 'PENDING',
             pricingType: base.pricingType || dataset.pricingType,
             paymentMethod,
-          };
+          }; // hiểu đơn giản hàm này dùng để tạo một biên nhận tạm thời từ phản hồi của server
         } else {
           // Minimal response, still create PENDING receipt
           receipt = {
@@ -437,6 +444,7 @@ const Consumer = () => {
     }
   };
 
+  // hàm này dùng để download dataset đã mua ở trang Purchase History
   const downloadDataset = async (id) => {
     if (!id) {
       alert('Dataset ID not found for download.');
@@ -444,8 +452,13 @@ const Consumer = () => {
     }
 
     try {
+<<<<<<< HEAD
       const token = localStorage.getItem('authToken');
       const response = await fetch(`http://localhost:8080/api/datasets/${id}/download`, {
+=======
+      const token = localStorage.getItem('authToken'); // Lấy token từ localStorage
+      const response = await fetch(`http://localhost:8080/api/datasets/${id}/download`, { // Gọi API để download dataset
+>>>>>>> c36786b63332fc1d6cd805a395c69c0c3e5b4810
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -456,7 +469,7 @@ const Consumer = () => {
         throw new Error(`Download failed: ${response.status}`);
       }
 
-      // Get filename from Content-Disposition header or use default
+      // lấy tên tệp từ header Content-Disposition nếu có
       const contentDisposition = response.headers.get('Content-Disposition');
       let filename = `dataset_${id}.zip`;
       if (contentDisposition) {
@@ -466,7 +479,7 @@ const Consumer = () => {
         }
       }
 
-      // Create blob and download
+      // dùng để tạo một liên kết tạm thời để tải xuống tệp
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -481,7 +494,7 @@ const Consumer = () => {
     } catch (e) {
       console.error('Download error:', e);
       
-      // Try to get more specific error message
+      // dùng để xử lý lỗi 404 riêng biệt
       if (e.message.includes('404')) {
         alert('Dataset not found. This dataset may have been removed from the system.');
       } else {
@@ -489,7 +502,9 @@ const Consumer = () => {
       }
     }
   };
+ 
 
+  // hàm này dùng để xóa giao dịch mua hàng ở trang Purchase History
   const deletePurchase = async (purchaseId) => {
     if (!purchaseId) {
       alert('Transaction ID not found for deletion.');
@@ -498,23 +513,23 @@ const Consumer = () => {
     if (!window.confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) return;
 
     try {
-      const res = await fetchWithAuth(`/api/orders/${purchaseId}`, { method: 'DELETE' });
-      // Some servers return null for 204, so treat as success if no exception was thrown
-      // Refresh local history
+      const res = await fetchWithAuth(`/api/orders/${purchaseId}`, { method: 'DELETE' }); // Gọi API để xóa giao dịch mua hàng
+      // dùng để làm mới lại lịch sử mua hàng sau khi xóa
       fetchPurchaseHistory();
-      alert('Transaction deleted successfully.');
+      alert('Transaction deleted successfully.'); 
     } catch (e) {
       console.error('Delete purchase error', e);
       alert('Unable to delete transaction: ' + (e.message || e));
     }
   };
 
-  // Utility functions
+  // dùng để định dạng tiền tệ
   const formatCurrency = (value) => new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD'
   }).format(value || 0);
 
+  // dùng để chuẩn hóa giá trị số
   const normalizeNumber = (value) => {
     if (typeof value === 'number') return value;
     if (typeof value === 'string' && value.trim() !== '') {
@@ -526,6 +541,7 @@ const Consumer = () => {
     return Number.isNaN(parsed) ? NaN : parsed;
   };
 
+  // dùng để định dạng giá trị số
   const formatNumberValue = (value) => {
     if (value === null || value === undefined) return '—';
     const numeric = normalizeNumber(value);
@@ -533,6 +549,7 @@ const Consumer = () => {
     return new Intl.NumberFormat().format(numeric);
   };
 
+  // dùng để định dạng giá trị phần trăm
   const formatPercentageValue = (value) => {
     if (value === null || value === undefined) return '—';
     const numeric = normalizeNumber(value);
@@ -540,6 +557,7 @@ const Consumer = () => {
     return `${numeric.toFixed(2)}%`;
   };
 
+  // dùng để định dạng số tiền mua hàng
   const formatPurchaseAmount = (value) => {
     if (value === null || value === undefined) return '—';
     const numeric = normalizeNumber(value);
@@ -547,11 +565,13 @@ const Consumer = () => {
     return formatCurrency(numeric);
   };
 
+  // dùng để định dạng nhãn hiển thị
   const formatLabel = (text) => {
     if (!text) return '—';
     return text.toString().replace(/_/g, ' ');
   };
 
+  // dùng để lấy lớp CSS tương ứng với trạng thái đơn hàng
   const getStatusClass = (status) => {
     const normalized = (status || '').toString().toLowerCase();
     if (SUCCESS_STATUSES.includes(normalized)) return 'completed';
@@ -562,6 +582,7 @@ const Consumer = () => {
     return 'info';
   };
 
+  // dùng để định dạng kích thước tệp
   const formatBytes = (bytes) => {
     const value = Number(bytes);
     if (!value || Number.isNaN(value)) return '0 B';
@@ -571,6 +592,7 @@ const Consumer = () => {
     return `${scaled.toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
   };
 
+  // dùng để định dạng ngày giờ
   const formatDateTime = (value) => {
     if (!value) return '—';
     const date = value instanceof Date ? value : new Date(value);
@@ -584,6 +606,7 @@ const Consumer = () => {
     }
   };
 
+  // dùng để hiển thị banner lỗi
   const renderErrorBanner = (message) => {
     if (!message) return null;
     return (
@@ -593,11 +616,13 @@ const Consumer = () => {
     );
   };
 
+  // Tính tổng chi tiêu từ lịch sử mua hàng
   const totalSpending = useMemo(() => purchaseHistory.reduce((total, order) => {
     const amount = normalizeNumber(order?.amount);
     return Number.isNaN(amount) ? total : total + amount;
   }, 0), [purchaseHistory]);
 
+  // Tính số đơn hàng thành công từ lịch sử mua hàng
   const successfulPurchases = useMemo(() => purchaseHistory.filter((order) => {
     const status = (order?.status || '').toString().toLowerCase();
     return SUCCESS_STATUSES.includes(status);
@@ -665,13 +690,13 @@ const Consumer = () => {
     { key: 'activeUsers', label: 'Active Users', formatter: formatNumberValue }
   ];
 
-  // Modal handlers
+  // dùng để mở và đóng các modal
   const openPreview = (dataset) => setPreviewDataset(dataset);
   const closePreview = () => setPreviewDataset(null);
   const openReceipt = (order) => setShowReceipt(order);
   const closeReceipt = () => setShowReceipt(null);
 
-  // Tab switching effect
+  // dùng để xử lý thay đổi tab
   useEffect(() => {
     document.querySelectorAll('.tab-content').forEach((el) => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
@@ -1533,7 +1558,7 @@ const Consumer = () => {
                 );
               })()}
               <div className="modal-footer">
-                <button className="consumer-btn" onClick={() => alert('Download invoice feature coming soon')}>Download Invoice</button>
+                <button className="consumer-btn" onClick={() => alert('Download features require administrator approval')}>Download Invoice</button>
                 <button className="consumer-btn consumer-btn-outline" onClick={closeReceipt}>Close</button>
               </div>
             </div>
