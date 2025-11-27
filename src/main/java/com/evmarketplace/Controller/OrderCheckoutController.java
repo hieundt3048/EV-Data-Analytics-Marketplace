@@ -17,9 +17,13 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller xử lý đặt hàng và checkout cho dataset.
+ * Cung cấp các API để tạo order, thanh toán, xem lịch sử mua hàng và xử lý webhook từ Stripe.
+ */
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173") // Cho phép CORS từ frontend
 public class OrderCheckoutController {
 
     private final OrderService orderService;
@@ -27,6 +31,7 @@ public class OrderCheckoutController {
     private final DatasetRepository datasetRepository;
     private final ProviderDatasetRepository providerDatasetRepository;
 
+    // Constructor injection: Spring tự động inject các dependencies
     public OrderCheckoutController(OrderService orderService, OrderRepository orderRepository, 
                                    DatasetRepository datasetRepository, ProviderDatasetRepository providerDatasetRepository) {
         this.orderService = orderService;
@@ -35,60 +40,73 @@ public class OrderCheckoutController {
         this.providerDatasetRepository = providerDatasetRepository;
     }
 
+    /**
+     * Tạo order và xử lý checkout (thanh toán).
+     * @param orderRequest OrderRequestDTO chứa datasetId, paymentMethod, amount, etc.
+     * @return CheckoutResponseDTO chứa orderId, checkoutUrl, status, message.
+     */
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponseDTO> checkout(@Valid @RequestBody OrderRequestDTO orderRequest) {
         try {
+            // Gọi service để tạo order và xử lý thanh toán qua Stripe
             CheckoutResponseDTO response = orderService.createOrderAndCheckout(orderRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            // Trả về error response nếu có lỗi
             return ResponseEntity.badRequest().body(
                 new CheckoutResponseDTO(null, null, "error", e.getMessage(), null)
             );
         }
     }
 
+    /**
+     * Lấy lịch sử mua hàng của user.
+     * Hiện tại trả về tất cả orders (TODO: filter theo user đang đăng nhập).
+     * @return List các OrderHistoryDTO chứa thông tin order và dataset.
+     */
     @GetMapping("/history")
     public ResponseEntity<List<OrderHistoryDTO>> getPurchaseHistory() {
         try {
-            // Get current authenticated user (có thể dùng để filter theo user sau này)
+            // TODO: Get current authenticated user để filter orders
             // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            // For now, return all orders (you can filter by user later)
+            // Hiện tại lấy tất cả orders (sẽ filter theo user sau)
             List<Order> orders = orderRepository.findAll();
 
-            // If no orders exist, return an empty list (removed sample/fake data)
+            // Nếu không có orders, trả về empty list
             if (orders.isEmpty()) {
                 return ResponseEntity.ok(new java.util.ArrayList<>());
             }
 
-            // Convert to DTO with dataset information
+            // Convert Order sang OrderHistoryDTO với thông tin dataset
             List<OrderHistoryDTO> orderHistory = orders.stream().map(order -> {
                 String datasetTitle = "Unknown Dataset";
                 String category = null;
                 String pricingType = null;
                 
                 try {
-                    // Thử lấy từ ProviderDataset trước (vì Order có thể trỏ đến ProviderDataset)
+                    // Thử lấy từ ProviderDataset trước (vì Order.datasetId có thể trỏ đến ProviderDataset)
                     ProviderDataset providerDataset = providerDatasetRepository.findById(order.getDatasetId()).orElse(null);
                     if (providerDataset != null) {
                         datasetTitle = providerDataset.getName();
                         category = providerDataset.getCategory();
                         pricingType = providerDataset.getPricingType();
                     } else {
-                        // Nếu không tìm thấy, thử lấy từ Dataset
+                        // Nếu không tìm thấy, thử lấy từ Dataset (bảng cũ)
                         Dataset dataset = datasetRepository.findById(order.getDatasetId()).orElse(null);
                         if (dataset != null) {
                             datasetTitle = dataset.getTitle();
-                            // Dataset có thể có category qua relationship
+                            // Dataset có category qua relationship
                             if (dataset.getCategory() != null) {
                                 category = dataset.getCategory().getName();
                             }
                         }
                     }
                 } catch (Exception e) {
-                    // Ignore and use default values
+                    // Ignore exception và sử dụng default values
                 }
 
+                // Tạo DTO với thông tin đầy đủ
                 return new OrderHistoryDTO(
                     order.getId(),
                     order.getDatasetId(),
@@ -108,16 +126,19 @@ public class OrderCheckoutController {
     }
 
     /**
-     * Delete an order by id. For simplicity this endpoint performs a delete by id.
-     * In a production system you should verify the authenticated user is the owner
-     * or an admin before allowing deletion.
+     * Xóa order theo ID.
+     * TODO: Verify user là owner hoặc admin trước khi cho phép xóa (security).
+     * @param id ID của order cần xóa.
+     * @return 204 No Content nếu xóa thành công, 404 nếu không tìm thấy.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrder(@PathVariable Long id) {
         try {
+            // Kiểm tra order có tồn tại không
             if (!orderRepository.existsById(id)) {
                 return ResponseEntity.notFound().build();
             }
+            // Xóa order khỏi database
             orderRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -125,12 +146,20 @@ public class OrderCheckoutController {
         }
     }
 
-    // NOTE: Removed demo/sample purchase generator. Server now returns an empty list when there are no orders.
+    // NOTE: Đã xóa demo/sample purchase generator. Server trả về empty list khi không có orders.
 
+    /**
+     * Xử lý webhook từ Stripe cho order events.
+     * Stripe gửi webhook khi có sự kiện: payment success, failed, refund, etc.
+     * @param payload JSON payload từ Stripe.
+     * @param sigHeader Stripe signature để verify tính hợp lệ của webhook.
+     * @return Message xác nhận xử lý webhook thành công.
+     */
     @PostMapping("/webhook/stripe")
     public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload,
                                                      @RequestHeader("Stripe-Signature") String sigHeader) {
         try {
+            // Verify signature và xử lý webhook event
             orderService.handleStripeWebhook(payload, sigHeader);
             return ResponseEntity.ok("Webhook processed successfully");
         } catch (Exception e) {

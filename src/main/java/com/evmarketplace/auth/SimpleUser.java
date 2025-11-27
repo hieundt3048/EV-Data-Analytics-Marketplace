@@ -1,7 +1,7 @@
 package com.evmarketplace.auth;
 
 /**
- * Minimal user info returned to client after login.
+ * Thông tin người dùng được trả về cho khách hàng sau khi đăng nhập.
  */
 public class SimpleUser {
     private String id;

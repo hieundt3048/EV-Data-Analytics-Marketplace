@@ -1,4 +1,6 @@
 target/
-/ev-frontend/public/
 uploads/
 diagram.puml
+ADMIN-WORKFLOW.md
+CONSUMER-WORKFLOW.md
+PROVIDER-WORKFLOW.md

@@ -9,34 +9,52 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * Controller quản lý Subscription (gói đăng ký định kỳ).
+ * Cung cấp các API để tạo, xem, hủy và xóa subscription, cũng như xử lý webhook từ Stripe.
+ */
 @RestController 
 @RequestMapping("/api/subscriptions")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173") // Cho phép CORS từ frontend
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
+    // Constructor injection: Spring tự động inject SubscriptionService
     public SubscriptionController(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
     }
 
+    /**
+     * Tạo subscription mới cho dataset.
+     * @param subscriptionRequest DTO chứa thông tin subscription (datasetId, duration, price, etc.).
+     * @param request HttpServletRequest để lấy thông tin user.
+     * @return CheckoutResponseDTO chứa subscription ID, payment URL, status, message.
+     */
     @PostMapping
     public ResponseEntity<CheckoutResponseDTO> createSubscription(
             @Valid @RequestBody SubscriptionRequestDTO subscriptionRequest,
             HttpServletRequest request) {
         try {
+            // Gọi service để tạo subscription và xử lý thanh toán
             CheckoutResponseDTO response = subscriptionService.createSubscription(subscriptionRequest, request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            // Trả về error response nếu có lỗi
             return ResponseEntity.badRequest().body(
                 new CheckoutResponseDTO(null, null, "error", e.getMessage(), null)
             );
         }
     }
 
+    /**
+     * Lấy danh sách tất cả subscriptions của user hiện tại.
+     * @return List các Subscription objects.
+     */
     @GetMapping
     public ResponseEntity<java.util.List<com.evmarketplace.Pojo.Subscription>> getUserSubscriptions() {
         try {
+            // Service tự động lấy user từ SecurityContext
             java.util.List<com.evmarketplace.Pojo.Subscription> subscriptions = subscriptionService.getUserSubscriptions();
             return ResponseEntity.ok(subscriptions);
         } catch (Exception e) {
@@ -44,6 +62,12 @@ public class SubscriptionController {
         }
     }
 
+    /**
+     * Hủy subscription (chuyển status sang CANCELLED).
+     * Subscription sẽ không tự động gia hạn nhưng vẫn còn hiệu lực đến endAt.
+     * @param subscriptionId ID của subscription cần hủy.
+     * @return Message xác nhận hủy thành công.
+     */
     @PostMapping("/{subscriptionId}/cancel")
     public ResponseEntity<String> cancelSubscription(@PathVariable Long subscriptionId) {
         try {
@@ -54,6 +78,12 @@ public class SubscriptionController {
         }
     }
 
+    /**
+     * Xóa subscription hoàn toàn khỏi database.
+     * Chỉ nên dùng cho subscriptions đã hết hạn hoặc cancelled.
+     * @param subscriptionId ID của subscription cần xóa.
+     * @return Message xác nhận xóa thành công.
+     */
     @DeleteMapping("/{subscriptionId}")
     public ResponseEntity<String> deleteSubscription(@PathVariable Long subscriptionId) {
         try {
@@ -64,6 +94,11 @@ public class SubscriptionController {
         }
     }
 
+    /**
+     * Tạo dữ liệu subscription mẫu cho testing/demo.
+     * Phương thức helper không được expose qua API.
+     * @return List các subscription mẫu với status ACTIVE.
+     */
     private java.util.List<com.evmarketplace.Pojo.Subscription> createSampleSubscriptions() {
         java.util.List<com.evmarketplace.Pojo.Subscription> subscriptions = new java.util.ArrayList<>();
 
@@ -99,10 +134,18 @@ public class SubscriptionController {
         return subscriptions;
     }
 
+    /**
+     * Xử lý webhook từ Stripe cho subscription events.
+     * Stripe gửi webhook khi có sự kiện: subscription created, updated, cancelled, payment failed, etc.
+     * @param payload JSON payload từ Stripe.
+     * @param sigHeader Stripe signature để verify tính hợp lệ của webhook.
+     * @return Message xác nhận xử lý webhook thành công.
+     */
     @PostMapping("/webhook/stripe")
     public ResponseEntity<String> handleStripeSubscriptionWebhook(@RequestBody String payload,
                                                                  @RequestHeader("Stripe-Signature") String sigHeader) {
         try {
+            // Verify signature và xử lý webhook event
             subscriptionService.handleStripeWebhook(payload, sigHeader);
             return ResponseEntity.ok("Subscription webhook processed successfully");
         } catch (Exception e) {

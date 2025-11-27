@@ -11,6 +11,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+// Class này dùng để tạo và xác thực JWT (JSON Web Token) cho authentication
+// Chức năng chính:
+// 1. generateToken(): Tạo JWT chứa thông tin user (email, name, roles) với thời gian hết hạn
+// 2. validateToken(): Xác thực JWT từ client, kiểm tra chữ ký và expiration
+// 3. Sử dụng HMAC-SHA256 để ký token với secret key từ application.properties
 @Component
 public class JwtUtil {
 

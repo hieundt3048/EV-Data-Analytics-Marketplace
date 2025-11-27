@@ -4,7 +4,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 /**
- * DTO for login request payload.
+ * DTO để tải trọng yêu cầu đăng nhập.
  */
 public class AuthRequest {
     @NotBlank

@@ -45,7 +45,7 @@ public class AdminAuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         try {
-            logger.info("Admin login attempt for: {}", request.getEmail()); // Ghi log về việc thử đăng nhập.
+            logger.info("Admin login attempt for: {}", request.getEmail());
             
             // Tìm người dùng bằng email. Nếu không tìm thấy, trả về null.
             com.evmarketplace.Pojo.User u = userService.findByEmail(request.getEmail()).orElse(null);
@@ -55,7 +55,6 @@ public class AdminAuthController {
 
             //Xác minh người dùng có vai trò "Admin" hay không.
             boolean isAdmin = userService.getRolesForUser(u).stream().anyMatch(r -> "Admin".equals(r.getName()));
-            // Nếu không phải Admin, trả về lỗi 403 Forbidden (Cấm truy cập).
             if (!isAdmin) return ResponseEntity.status(403).build();
 
             // Nếu xác thực thành công và đúng là Admin:
@@ -71,7 +70,6 @@ public class AdminAuthController {
         } catch (Exception ex) {
             // Ghi lại lỗi nếu có bất kỳ lỗi không mong muốn nào xảy ra.
             logger.error("Admin login error for {}: {}", request.getEmail(), ex.toString());
-            // Trả về lỗi 500 Internal Server Error.
             return ResponseEntity.status(500).body(null);
         }
     }

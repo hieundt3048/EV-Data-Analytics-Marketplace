@@ -18,6 +18,7 @@ const Admin = () => {
   const [apiKeys, setApiKeys] = useState([]);
   const [paymentStats, setPaymentStats] = useState(null);
   const [providerPayouts, setProviderPayouts] = useState([]);
+  const [marketStats, setMarketStats] = useState(null);
   const [loading, setLoading] = useState(true); // Start as true to prevent premature rendering
   const [error, setError] = useState(null);
   const [initialized, setInitialized] = useState(false); // Track initialization
@@ -62,7 +63,7 @@ const Admin = () => {
     try {
       setLoading(true);
       setError(null);
-      const [analyticsRes, usersRes, pendingRes, transactionsRes, revenueRes, apiKeyRes, paymentStatsRes, payoutsRes] = await Promise.all([
+      const [analyticsRes, usersRes, pendingRes, transactionsRes, revenueRes, apiKeyRes, paymentStatsRes, payoutsRes, marketStatsRes] = await Promise.all([
         fetchWithAuth('/api/admin/analytics/overview').catch((e) => { console.error('Analytics error:', e); return null; }),
         fetchWithAuth('/api/admin/users').catch((e) => { console.error('Users error:', e); return []; }),
         fetchWithAuth('/api/admin/provider-datasets/pending').catch((e) => { console.error('Pending datasets error:', e); return []; }),
@@ -70,8 +71,11 @@ const Admin = () => {
         fetchWithAuth('/api/admin/payments/revenue-share').catch((e) => { console.error('Revenue share error:', e); return {}; }),
         fetchWithAuth('/api/admin/security/apikeys').catch((e) => { console.error('API keys error:', e); return { keys: [] }; }),
         fetchWithAuth('/api/admin/payments/revenue-stats').catch((e) => { console.error('Payment stats error:', e); return null; }),
-        fetchWithAuth('/api/admin/payments/provider-payouts').catch((e) => { console.error('Payouts error:', e); return []; })
+        fetchWithAuth('/api/admin/payments/provider-payouts').catch((e) => { console.error('Payouts error:', e); return []; }),
+        fetchWithAuth('/api/admin/analytics/market-statistics').catch((e) => { console.error('Market stats error:', e); return null; })
       ]);
+      console.log('Analytics response:', analyticsRes);
+      console.log('Market stats response:', marketStatsRes);
       setAnalytics(analyticsRes);
       setUsers(Array.isArray(usersRes) ? usersRes : []);
       setPendingDatasets(Array.isArray(pendingRes) ? pendingRes : []);
@@ -81,6 +85,7 @@ const Admin = () => {
       setApiKeys(Array.isArray(apiKeyRes?.keys) ? apiKeyRes.keys : (Array.isArray(apiKeyRes) ? apiKeyRes : []));
       setPaymentStats(paymentStatsRes);
       setProviderPayouts(Array.isArray(payoutsRes) ? payoutsRes : []);
+      setMarketStats(marketStatsRes);
       setInitialized(true); // Mark as initialized after first successful load
     } catch (err) {
       console.error('RefreshAll error:', err);
@@ -264,9 +269,49 @@ const Admin = () => {
   // simple handlers to replace inline scripts from the template
   const openAddUserModal = () => setShowAddUserModal(true);
   const closeAddUserModal = () => setShowAddUserModal(false);
-  const addNewUser = () => {
-    alert('User added (demo)');
-    closeAddUserModal();
+  
+  const addNewUser = async () => {
+    try {
+      const form = document.getElementById('addUserForm');
+      const name = document.getElementById('userName').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
+      const password = document.getElementById('userPassword').value.trim();
+      const organization = document.getElementById('userOrganization')?.value?.trim() || '';
+      const roleSelect = document.getElementById('userRole').value;
+
+      if (!name || !email || !password) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Map role value to role name
+      const roleMapping = {
+        'consumer': 'Consumer',
+        'provider': 'Provider',
+        'partner': 'Partner',
+        'admin': 'Admin'
+      };
+
+      const payload = {
+        name,
+        email,
+        password,
+        organization,
+        roles: roleSelect ? [roleMapping[roleSelect]] : ['Consumer'] // Default to Consumer
+      };
+
+      await fetchWithAuth('/api/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      alert('User created successfully!');
+      closeAddUserModal();
+      form.reset();
+      await refreshAll(); // Refresh user list
+    } catch (err) {
+      alert('Failed to create user: ' + err.message);
+    }
   };
 
   const openAPIKeyModal = () => setShowAPIKeyModal(true);
@@ -771,6 +816,9 @@ const Admin = () => {
                                   <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                                 </button>
                               )}
+                              <button className="btn-icon primary" title="Edit" onClick={() => openEditUserModal(user)}>
+                                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                              </button>
                               <button className="btn-icon danger" title="Delete" onClick={() => deleteUser(user)}>
                                 <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                               </button>
@@ -1185,19 +1233,19 @@ const Admin = () => {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>
-                <div className="stat-content"><h3>1,247</h3><p>Active Users</p><span className="stat-change positive">+15.3%</span></div>
+                <div className="stat-content"><h3>{analytics?.totalUsers?.toLocaleString() || 0}</h3><p>Active Users</p><span className="stat-change positive">+15.3%</span></div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg></div>
-                <div className="stat-content"><h3>568</h3><p>Datasets Available</p><span className="stat-change positive">+8.7%</span></div>
+                <div className="stat-content"><h3>{analytics?.publishedProducts?.toLocaleString() || 0}</h3><p>Datasets Available</p><span className="stat-change positive">+8.7%</span></div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
-                <div className="stat-content"><h3>$42,850</h3><p>Monthly Revenue</p><span className="stat-change positive">+12.5%</span></div>
+                <div className="stat-content"><h3>${analytics?.totalRevenue?.toLocaleString() || 0}</h3><p>Monthly Revenue</p><span className="stat-change positive">+12.5%</span></div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
-                <div className="stat-content"><h3>3,842</h3><p>API Requests</p><span className="stat-change positive">+22.1%</span></div>
+                <div className="stat-content"><h3>{analytics?.totalApiRequests?.toLocaleString() || 0}</h3><p>API Requests</p><span className="stat-change positive">+22.1%</span></div>
               </div>
             </div>
 
@@ -1229,20 +1277,83 @@ const Admin = () => {
               <div className="chart-card">
                 <div className="chart-header"><h4>Dataset Categories</h4></div>
                 <div className="chart-placeholder">
-                  <div className="pie-chart">
-                    <div className="pie-segment" style={{ ['--percentage']: 35, ['--color']: '#64FFDA' }} />
-                    <div className="pie-segment" style={{ ['--percentage']: 25, ['--color']: '#3B82F6' }} />
-                    <div className="pie-segment" style={{ ['--percentage']: 20, ['--color']: '#10B981' }} />
-                    <div className="pie-segment" style={{ ['--percentage']: 15, ['--color']: '#F59E0B' }} />
-                    <div className="pie-segment" style={{ ['--percentage']: 5, ['--color']: '#EF4444' }} />
-                  </div>
-                  <div className="pie-legend">
-                    <div className="legend-item"><div className="legend-color" style={{background: '#64FFDA'}} /> <span>Battery Data (35%)</span></div>
-                    <div className="legend-item"><div className="legend-color" style={{background: '#3B82F6'}} /> <span>Charging (25%)</span></div>
-                    <div className="legend-item"><div className="legend-color" style={{background: '#10B981'}} /> <span>Driving (20%)</span></div>
-                  </div>
+                  {marketStats?.categoryDistribution && marketStats.categoryDistribution.length > 0 ? (
+                    <>
+                      <div className="pie-chart">
+                        {marketStats.categoryDistribution.slice(0, 5).map((cat, idx) => {
+                          const colors = ['#64FFDA', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+                          return (
+                            <div 
+                              key={idx} 
+                              className="pie-segment" 
+                              style={{ ['--percentage']: cat.percentage, ['--color']: colors[idx] }} 
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="pie-legend">
+                        {marketStats.categoryDistribution.slice(0, 5).map((cat, idx) => {
+                          const colors = ['#64FFDA', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+                          return (
+                            <div key={idx} className="legend-item">
+                              <div className="legend-color" style={{background: colors[idx]}} /> 
+                              <span>{cat.category} ({cat.percentage}%)</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="pie-chart">
+                      <div className="pie-segment" style={{ ['--percentage']: 100, ['--color']: '#64FFDA' }} />
+                      <div className="pie-legend">
+                        <div className="legend-item"><div className="legend-color" style={{background: '#64FFDA'}} /> <span>No data available</span></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
+          </section>
+
+          <section className="admin-section">
+            <h2>Top Datasets - Most Popular</h2>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Dataset Name</th>
+                    <th>Category</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {marketStats?.topDatasets && marketStats.topDatasets.length > 0 ? (
+                    marketStats.topDatasets.map((dataset, idx) => {
+                      const categoryText = (dataset.category || 'Other').replace(/_/g, ' ');
+                      console.log('Dataset category:', dataset.datasetId, dataset.category, 'Display:', categoryText);
+                      return (
+                      <tr key={dataset.datasetId}>
+                        <td>#{idx + 1}</td>
+                        <td>{dataset.datasetName}</td>
+                        <td style={{color: '#3730A3', fontWeight: '600', textTransform: 'capitalize'}}>
+                          {categoryText}
+                        </td>
+                        <td>{dataset.orderCount}</td>
+                        <td>${dataset.revenue.toFixed(2)}</td>
+                      </tr>
+                    );})
+                  ) : (
+                    <tr>
+                      <td colSpan="5" style={{textAlign: 'center', padding: '2rem', color: '#999'}}>
+                        Chưa có dữ liệu thống kê. Cần có orders để hiển thị top datasets.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </section>
 
@@ -1314,10 +1425,11 @@ const Admin = () => {
             <div className="modal-header"><h3>Add New User</h3><button className="modal-close" onClick={closeAddUserModal}>&times;</button></div>
             <div className="modal-body">
               <form className="user-form" id="addUserForm">
-                <div className="form-group"><label htmlFor="userName">Full Name</label><input type="text" id="userName" required/></div>
-                <div className="form-group"><label htmlFor="userEmail">Email</label><input type="email" id="userEmail" required/></div>
-                <div className="form-group"><label htmlFor="userRole">Role</label><select id="userRole" required><option value="">Select Role</option><option value="consumer">Data Consumer</option><option value="provider">Data Provider</option><option value="partner">Partner</option><option value="admin">Admin</option></select></div>
-                <div className="form-group"><label>Permissions</label><div className="permissions-grid"><label className="permission-checkbox"><input type="checkbox" name="permissions" value="data_view"/>View Data</label><label className="permission-checkbox"><input type="checkbox" name="permissions" value="data_upload"/>Upload Data</label><label className="permission-checkbox"><input type="checkbox" name="permissions" value="data_download"/>Download Data</label><label className="permission-checkbox"><input type="checkbox" name="permissions" value="api_access"/>API Access</label></div></div>
+                <div className="form-group"><label htmlFor="userName">Full Name *</label><input type="text" id="userName" required/></div>
+                <div className="form-group"><label htmlFor="userEmail">Email *</label><input type="email" id="userEmail" required/></div>
+                <div className="form-group"><label htmlFor="userPassword">Password *</label><input type="password" id="userPassword" required minLength="6"/></div>
+                <div className="form-group"><label htmlFor="userOrganization">Organization</label><input type="text" id="userOrganization"/></div>
+                <div className="form-group"><label htmlFor="userRole">Role *</label><select id="userRole" required><option value="">Select Role</option><option value="consumer">Consumer</option><option value="provider">Provider</option><option value="partner">Partner</option><option value="admin">Admin</option></select></div>
               </form>
             </div>
             <div className="modal-footer"><button className="admin-btn admin-btn-outline" onClick={closeAddUserModal}>Cancel</button><button className="admin-btn admin-btn-primary" onClick={addNewUser}>Create User</button></div>

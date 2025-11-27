@@ -1,6 +1,5 @@
-// Khai báo package cho các lớp liên quan đến xác thực.
-package com.evmarketplace.auth;
 
+package com.evmarketplace.auth;
 // Nhập lớp Claims từ thư viện JWT.
 import io.jsonwebtoken.Claims;
 
