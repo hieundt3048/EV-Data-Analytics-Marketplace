@@ -1,3 +1,4 @@
+
 package com.evmarketplace.Service;
 
 import org.slf4j.Logger;
@@ -7,10 +8,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Service for audit logging
- * Logs security-related actions for compliance
- */
+
+// Service này dùng để ghi log audit các hành động liên quan đến bảo mật, truy cập dữ liệu
+
 @Service
 public class AuditLogService {
 
@@ -18,7 +18,8 @@ public class AuditLogService {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
-     * Log dataset access
+     * Ghi log khi user truy cập dataset (dashboard, download...)
+     * - Lưu lại ai truy cập, dataset nào, thời điểm, hành động gì
      */
     public void logDatasetAccess(Long datasetId, String datasetName, Long userId, String action) {
         String timestamp = LocalDateTime.now().format(formatter);
@@ -30,7 +31,8 @@ public class AuditLogService {
     }
 
     /**
-     * Log security settings change
+     * Ghi log khi provider thay đổi cấu hình bảo mật dataset
+     * - Lưu lại phương pháp ẩn danh hóa, access control, audit enable...
      */
     public void logSecurityChange(Long datasetId, String datasetName, Long providerId, 
                                   String anonymizationMethod, String accessControl, 
@@ -46,7 +48,8 @@ public class AuditLogService {
     }
 
     /**
-     * Log dataset erasure (GDPR)
+     * Ghi log khi xóa dataset vĩnh viễn (theo yêu cầu GDPR hoặc provider xóa)
+     * - Lưu lại lý do xóa, cảnh báo ở mức WARN
      */
     public void logDatasetErasure(Long datasetId, String datasetName, Long providerId, String reason) {
         String timestamp = LocalDateTime.now().format(formatter);
@@ -58,7 +61,8 @@ public class AuditLogService {
     }
 
     /**
-     * Log PII anonymization
+     * Ghi log khi thực hiện ẩn danh hóa dữ liệu (PII anonymization)
+     * - Lưu lại trạng thái (bắt đầu, thành công, thất bại)
      */
     public void logAnonymization(Long datasetId, String datasetName, String status) {
         String timestamp = LocalDateTime.now().format(formatter);
@@ -70,7 +74,8 @@ public class AuditLogService {
     }
 
     /**
-     * Log failed access attempt
+     * Ghi log khi user bị từ chối truy cập dataset (không đủ quyền, hết hạn...)
+     * - Lưu lại lý do, cảnh báo ở mức WARN
      */
     public void logAccessDenied(Long datasetId, String datasetName, Long userId, String reason) {
         String timestamp = LocalDateTime.now().format(formatter);

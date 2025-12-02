@@ -67,7 +67,6 @@ public class OrderCheckoutController {
     @GetMapping("/history")
     public ResponseEntity<List<OrderHistoryDTO>> getPurchaseHistory() {
         try {
-            // TODO: Get current authenticated user để filter orders
             // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             // Hiện tại lấy tất cả orders (sẽ filter theo user sau)

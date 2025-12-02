@@ -105,7 +105,6 @@ public class ProviderRevenueController {
         
         // If using UserDetails or custom principal, extract ID accordingly
         // For now, return a placeholder
-        // TODO: Implement proper provider ID extraction based on your auth setup
         return 1L; // Placeholder
     }
 }

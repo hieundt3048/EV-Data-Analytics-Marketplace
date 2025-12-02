@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.validation.Valid;
 import java.util.UUID;
+/**
+ * Đây là controller xử lý các endpoint liên quan đến xác thực người dùng (Authentication),
+ * bao gồm đăng nhập (login) và đăng ký (register).
+ */
 
 // Đánh dấu đây là một Rest Controller, xử lý các request HTTP và trả về JSON.
 @RestController

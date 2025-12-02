@@ -9,8 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.regex.Pattern;
 
+//xử lý ẩn danh hóa dữ liệu (anonymization) cho dataset của provider
 @Service
 public class AnonymizationService {
+
+    // Service thao tác với bảng provider_datasets
 
     private final ProviderDatasetService datasetService;
 
@@ -18,9 +21,18 @@ public class AnonymizationService {
         this.datasetService = datasetService;
     }
 
+    // Regex tìm email và số điện thoại trong file
     private static final Pattern EMAIL_RE = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+");
     private static final Pattern PHONE_RE = Pattern.compile("(?:\\+?\\d{1,3}[-.\\s]?)?(?:\\(?\\d{2,4}\\)?[-.\\s]?)?\\d{3,4}[-.\\s]?\\d{3,4}");
 
+
+    /**
+     * Ẩn danh hóa file dữ liệu (chạy async):
+     * - Đọc file gốc, tìm và che dấu email/số điện thoại
+     * - Ghi ra file mới .anonymized
+     * - Cập nhật trạng thái dataset
+     * - Nếu lỗi thì set status ANONYMIZATION_FAILED
+     */
     @Async("anonExecutor")
     public void anonymizeFileAsync(Long datasetId, String localFilePath) {
         ProviderDataset ds = datasetService.findById(datasetId);
@@ -51,7 +63,10 @@ public class AnonymizationService {
         }
     }
 
-    // GDPR erase helper
+    /**
+     * Xóa file dữ liệu gốc và file đã ẩn danh hóa (theo yêu cầu GDPR)
+     * - Dùng cho chức năng "right to erasure" hoặc khi provider xóa dataset
+     */
     public void eraseLocalFiles(String localPath) {
         try {
             if (localPath == null) return;

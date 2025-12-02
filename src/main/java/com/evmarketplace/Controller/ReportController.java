@@ -8,7 +8,6 @@ import java.util.Map;
 /**
  * Controller xử lý các API liên quan đến báo cáo (reports).
  * Hiện tại là placeholder trả về mock data để tránh 403 Forbidden error.
- * TODO: Implement logic lấy báo cáo thực từ database.
  */
 @RestController
 @RequestMapping("/api/report")
@@ -23,7 +22,6 @@ public class ReportController {
      */
     @GetMapping("/provider/id={providerId}")
     public ResponseEntity<Map<String, Object>> getProviderReport(@PathVariable Long providerId) {
-        // TODO: Implement logic lấy báo cáo thực từ database
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Provider report endpoint - under construction");
@@ -40,7 +38,6 @@ public class ReportController {
      */
     @GetMapping("/provider")
     public ResponseEntity<Map<String, Object>> getProviderReportAlt(@RequestParam Long id) {
-        // TODO: Implement logic lấy báo cáo thực từ database
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Provider report endpoint - under construction");

@@ -1,3 +1,4 @@
+
 package com.evmarketplace.Controller;
 
 import com.evmarketplace.Pojo.APIKey;
@@ -20,11 +21,14 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// cung cấp các API để quản lý API Key cho người dùng (Consumer)
 @RestController
-@RequestMapping("/api/apikeys")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
+@RequestMapping("/api/apikeys") // Base path cho các endpoint quản lý API key
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"}) // Cho phép frontend local truy cập
 public class APIKeyController {
 
+
+    // Inject các repository và service cần thiết
     private final APIKeyRepository apiKeyRepository;
     private final UserRepository userRepository;
     private final ApiAccessService apiAccessService;
@@ -41,7 +45,10 @@ public class APIKeyController {
     }
 
     /**
-     * Generate a new API key for authenticated user
+     * Tạo API key mới cho user hiện tại
+     * - Sinh key ngẫu nhiên, gán cho user
+     * - Có thể set rate limit, scope, expiry
+     * - Trả về key cho user lưu trữ
      */
     @PostMapping("/generate")
     public ResponseEntity<?> generateApiKey(@Valid @RequestBody APIKeyRequestDTO request) {
@@ -97,7 +104,10 @@ public class APIKeyController {
     }
     
     /**
-     * List all API keys for current user
+     * Liệt kê tất cả API key của user hiện tại
+     * - Chỉ trả về key thuộc về user
+     * - Ẩn giá trị key thực, chỉ show prefix
+     * - Kèm usage stats 30 ngày gần nhất
      */
     @GetMapping("/list")
     public ResponseEntity<?> listApiKeys() {
@@ -142,7 +152,9 @@ public class APIKeyController {
     }
     
     /**
-     * Get usage statistics for a specific API key
+     * Xem thống kê sử dụng của 1 API key
+     * - Chỉ cho phép user sở hữu key xem
+     * - Trả về số request, rate limit còn lại, v.v.
      */
     @GetMapping("/{keyId}/stats")
     public ResponseEntity<?> getApiKeyStats(
@@ -193,7 +205,9 @@ public class APIKeyController {
     }
     
     /**
-     * Revoke/delete an API key
+     * Thu hồi/xóa 1 API key
+     * - Chỉ user sở hữu key mới xóa được
+     * - Xóa khỏi database, không dùng được nữa
      */
     @DeleteMapping("/{keyId}")
     public ResponseEntity<?> revokeApiKey(@PathVariable String keyId) {
@@ -234,7 +248,9 @@ public class APIKeyController {
     }
     
     /**
-     * Update API key settings (rate limit, scopes, expiry)
+     * Cập nhật thông tin API key (rate limit, scope, expiry)
+     * - Chỉ user sở hữu key mới update được
+     * - Cho phép đổi rate limit, scope, thời hạn
      */
     @PatchMapping("/{keyId}")
     public ResponseEntity<?> updateApiKey(
@@ -294,14 +310,15 @@ public class APIKeyController {
         }
     }
     
-    // Legacy endpoint for backward compatibility
+    // Legacy endpoint cho tương thích cũ (giữ lại cho client cũ)
     @PostMapping
     public ResponseEntity<?> generateApiKeyLegacy(@Valid @RequestBody APIKeyRequestDTO request) {
         return generateApiKey(request);
     }
     
     /**
-     * Helper method to get current authenticated user
+     * Hàm tiện ích lấy user hiện tại từ context xác thực
+     * - Dùng email từ authentication để tìm user
      */
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
